@@ -21,8 +21,8 @@ Serviço backend para o Portal Budokan construído com Express.js, TypeScript e 
 
 1. Clone o repositório:
 ```bash
-git clone https://github.com/yourusername/portal-budokan-be.git
-cd portal-budokan-be
+git clone https://github.com/Projeto-Ifal-Budokan/budokan-be.git
+cd budokan-be
 ```
 
 2. Instale as dependências:
