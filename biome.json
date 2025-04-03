@@ -7,7 +7,8 @@
 	},
 	"files": {
 		"ignoreUnknown": false,
-		"ignore": ["node_modules/", "dist/", "drizzle/"]
+		"ignore": ["node_modules/", "dist/", "drizzle/"],
+		"include": ["src/"]
 	},
 	"formatter": {
 		"enabled": true,
