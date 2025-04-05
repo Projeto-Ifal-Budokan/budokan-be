@@ -44,18 +44,41 @@ O projeto utiliza Drizzle ORM para gerenciamento do banco de dados. O esquema do
 
 Para aplicar suas alterações novas no banco (Gerar e aplicar migrations automaticamente):
 ```bash
-npx drizzle-kit push
+pnpm drizzle-kit push
 ```
 
 Para apenas gerar migrations:
 ```bash
-npx drizzle-kit generate
+pnpm drizzle-kit generate
 ```
 
 Para apenas aplicar migrations:
 ```bash
-npx drizzle-kit migrate
+pnpm drizzle-kit migrate
 ```
+
+### Drizzle Studio para visualização e manipulação rápida do banco
+
+```bash
+pnpm drizzle-kit studio
+```
+
+### Diagrama do banco: Gerando e visualizando o diagrama do schema do Drizzle
+
+Por enquanto, para gerar o diagrama do schema do banco é necessário ter o schema inteiro do banco em um único arquivo. Estamos usando o arquivo `./src/db/unifiedSchema.ts`.
+
+Você precisará atualizar este schema unificado manualmente com o código mais recente do schema de cada entidade.
+
+Para gerar o arquivo .dbml contendo o diagrama do schema do banco, basta rodar:
+
+```bash
+pnpm dbml
+```
+O arquivo `unified-schema.dbml` será gerado ou atualizado na raíz do projeto.
+
+Para visualizar o arquivo em formato de diagrama, instale a seguinte extensão no seu VSCode: https://marketplace.visualstudio.com/items?itemName=bocovo.dbml-erd-visualizer
+
+Ou utilize qualquer outro visualizador de arquivos `.dbml` de sua preferência
 
 ## 🏃‍♂️ Executando a Aplicação
 

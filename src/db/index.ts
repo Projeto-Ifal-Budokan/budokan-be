@@ -8,9 +8,12 @@ const db = drizzle(process.env.DATABASE_URL!);
 
 async function main() {
 	const user: typeof usersTable.$inferInsert = {
+		id: 1,
 		name: "John",
 		age: 30,
 		email: "john@example.com",
+		passwordHash: "asdasd",
+		role: "student",
 	};
 
 	await db.insert(usersTable).values(user);
