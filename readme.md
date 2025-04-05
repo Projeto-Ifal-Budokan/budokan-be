@@ -42,17 +42,17 @@ O projeto utiliza Drizzle ORM para gerenciamento do banco de dados. O esquema do
 
 ### Migrações do Banco de Dados
 
-Para aplicar alterações no banco (Gerar e aplicar migrations automaticamente):
+Para aplicar suas alterações novas no banco (Gerar e aplicar migrations automaticamente):
 ```bash
 npx drizzle-kit push
 ```
 
-Para gerar migrações:
+Para apenas gerar migrations:
 ```bash
 npx drizzle-kit generate
 ```
 
-Para aplicar migrações:
+Para apenas aplicar migrations:
 ```bash
 npx drizzle-kit migrate
 ```
