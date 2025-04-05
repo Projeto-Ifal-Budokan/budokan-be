@@ -7,6 +7,7 @@
 		"dev": "tsx watch src/index.ts",
 		"start": "tsx src/index.ts",
 		"test": "echo \"Error: no test specified\" && exit 1",
+		"dbml": "tsx ./src/db/dbml.mts",
 		"format": "biome format --write .",
 		"lint": "biome lint .",
 		"lint-write": "biome lint --write .",
@@ -26,6 +27,7 @@
 	"devDependencies": {
 		"@biomejs/biome": "1.9.4",
 		"@types/express": "^5.0.1",
+		"drizzle-dbml-generator": "^0.10.0",
 		"drizzle-kit": "^0.30.6",
 		"ts-node": "^10.9.2",
 		"tsx": "^4.19.3",

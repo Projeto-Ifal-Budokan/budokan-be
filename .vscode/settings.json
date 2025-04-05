@@ -10,4 +10,5 @@
     "editor.defaultFormatter": "biomejs.biome"
   },
   "editor.formatOnSave": true,
+  "dbmlERDPreviewer.preferredTheme": "dark",
 }
