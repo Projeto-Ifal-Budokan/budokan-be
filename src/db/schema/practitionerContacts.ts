@@ -6,12 +6,12 @@ import {
     serial,
     varchar,
 } from "drizzle-orm/mysql-core";
-import { usersTable } from "./users-table";
+import { practitionersTable } from "./practitioners.ts";
 
-export const userContactsTable = mysqlTable("user_contacts", {
+export const practitionerContactsTable = mysqlTable("user_contacts", {
     id: serial("id").primaryKey(),
-    userId: bigint("id_user", { mode: "number", unsigned: true }).references(
-        () => usersTable.id,
+    userId: bigint("id_practitioner", { mode: "number", unsigned: true }).references(
+        () => practitionersTable.id,
     ),
     phone: varchar("phone", {length: 20}),
     relationship: varchar("relationship", { length: 100 }).notNull(),
@@ -20,10 +20,10 @@ export const userContactsTable = mysqlTable("user_contacts", {
     updatedAt: datetime("updated_at").$onUpdate(() => new Date()),
 });
 
-export const userContactsRelations = relations(userContactsTable, ({ one }) => ({
-        user: one(usersTable, {
-            fields: [userContactsTable.userId],
-            references: [usersTable.id],
+export const userContactsRelations = relations(practitionerContactsTable, ({ one }) => ({
+        user: one(practitionersTable, {
+            fields: [practitionerContactsTable.userId],
+            references: [practitionersTable.id],
         }),
     })
 );

@@ -7,6 +7,7 @@ import {
     varchar,
 } from "drizzle-orm/mysql-core";
 import { usersTable } from "./users.ts";
+import { practitionerContactsTable } from "./practitionerContacts.ts";
 // TODO: O ID do rank deve estar na matricula ja q um estudante pode ter rank no kendo e no karate
 // import { ranksTable } from "./ranks.ts";
 
@@ -23,9 +24,10 @@ export const practitionersTable = mysqlTable("practitioners", {
     updatedAt: datetime("updated_at").$onUpdate(() => new Date()),
 });
 
-export const practitionersRelations = relations(practitionersTable, ({ one }) => ({
+export const practitionersRelations = relations(practitionersTable, ({ one, many }) => ({
     user: one(usersTable, {
         fields: [practitionersTable.userId],
         references: [usersTable.id],
-    })
+    }),
+    practitionerContacts: many(practitionerContactsTable),
 }));

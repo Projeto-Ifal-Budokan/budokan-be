@@ -1,11 +1,10 @@
-import { sql, relations } from "drizzle-orm";
+import { sql } from "drizzle-orm";
 import {
     datetime,
     mysqlTable,
     serial,
     varchar,
 } from "drizzle-orm/mysql-core";
-import { userContactsTable } from "./userContacts";
 
 export const usersTable = mysqlTable("users", {
     id: serial("id").primaryKey(),
@@ -21,6 +20,3 @@ export const usersTable = mysqlTable("users", {
     updatedAt: datetime("updated_at").$onUpdate(() => new Date()),
 });
 
-export const usersRelations = relations(usersTable, ({ many }) => ({
-    userContacts: many(userContactsTable),
-}));

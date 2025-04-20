@@ -7,7 +7,8 @@ import {
 	varchar,
 	datetime
 } from "drizzle-orm/mysql-core";
-import { practitionersTable } from "./practitioners";
+import { practitionersTable } from "./practitioners.ts";
+import { pixKeysTable } from "./pixKeys.ts";
 
 export const instructorsTable = mysqlTable("instructors", {
 	id: serial("id").primaryKey(),
@@ -21,9 +22,10 @@ export const instructorsTable = mysqlTable("instructors", {
 	updatedAt: datetime("updated_at").$onUpdate(() => new Date()),
 });
 
-export const instructorsRelations = relations(instructorsTable, ({ one }) => ({
+export const instructorsRelations = relations(instructorsTable, ({ one, many }) => ({
 	user: one(practitionersTable, {
 		fields: [instructorsTable.practitionerId],
 		references: [practitionersTable.id],
 	}),
+	pixKeys: many(pixKeysTable),
 }));

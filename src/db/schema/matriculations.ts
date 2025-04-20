@@ -21,6 +21,7 @@ export const matriculationsTable = mysqlTable("matriculations", {
         () => usersTable.id).default(sql`null`),
     inactivatedBy: bigint("inactivated_by", { mode: "number", unsigned: true }).references(
         () => usersTable.id).default(sql`null`),
+    isPaymentExempt: varchar("is_payment_exempt", {length : 1}).notNull().default(sql`N`), // Y = yes, N = no
     createdAt: datetime("created_at").default(sql`CURRENT_TIMESTAMP`),
     updatedAt: datetime("updated_at").$onUpdate(() => new Date()),
 });
