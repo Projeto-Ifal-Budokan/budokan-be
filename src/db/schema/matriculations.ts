@@ -16,7 +16,7 @@ export const matriculationsTable = mysqlTable("matriculations", {
         () => studentsTable.id),
     disciplineId: bigint("discipline_id", { mode: "number", unsigned: true }).references(
         () => disciplinesTable.id),
-    status: varchar("status").notNull().default("active"), // 'active' or 'inactive'
+    status: varchar("status", { length: 100 }).notNull().default("active"), // 'active' or 'inactive'
     activatedBy: bigint("activated_by", { mode: "number", unsigned: true }).references(
         () => usersTable.id).default(sql`null`),
     inactivatedBy: bigint("inactivated_by", { mode: "number", unsigned: true }).references(
