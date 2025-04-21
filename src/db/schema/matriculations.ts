@@ -2,8 +2,8 @@ import { relations, sql } from "drizzle-orm";
 import {
 	bigint,
 	datetime,
+	mysqlEnum,
 	mysqlTable,
-	serial,
 	varchar,
 } from "drizzle-orm/mysql-core";
 import { usersTable } from "../unifiedSchema.ts";
@@ -20,7 +20,9 @@ export const matriculationsTable = mysqlTable("matriculations", {
 		mode: "number",
 		unsigned: true,
 	}).references(() => disciplinesTable.id),
-	status: varchar("status", { length: 100 }).notNull().default("active"), // 'active' or 'inactive'
+	status: mysqlEnum("status", ["active", "inactive", "suspended"])
+		.notNull()
+		.default("active"),
 	activatedBy: bigint("activated_by", { mode: "number", unsigned: true })
 		.references(() => usersTable.id)
 		.default(sql`null`),

@@ -16,9 +16,6 @@ export const studentsTable = mysqlTable("students", {
 		mode: "number",
 		unsigned: true,
 	}).references(() => practitionersTable.id),
-	// TODO: belt será por consulta em exams e emergencyContacts tem tabela de relacionamento com users
-	// belt: varchar("belt", { length: 20 }).default("white"), // faixa atual do aluno
-	// emergencyContact: varchar("emergency_contact", { length: 100 }),
 	createdAt: datetime("created_at").default(sql`CURRENT_TIMESTAMP`),
 	updatedAt: datetime("updated_at").$onUpdate(() => new Date()),
 });

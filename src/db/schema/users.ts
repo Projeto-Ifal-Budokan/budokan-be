@@ -1,6 +1,11 @@
 import { sql } from "drizzle-orm";
 import { bigint } from "drizzle-orm/mysql-core";
-import { datetime, mysqlTable, serial, varchar } from "drizzle-orm/mysql-core";
+import {
+	datetime,
+	mysqlEnum,
+	mysqlTable,
+	varchar,
+} from "drizzle-orm/mysql-core";
 
 export const usersTable = mysqlTable("users", {
 	id: bigint("id", { mode: "number", unsigned: true }).primaryKey(),
@@ -11,7 +16,9 @@ export const usersTable = mysqlTable("users", {
 	email: varchar("email", { length: 150 }).notNull().unique(),
 	passwordHash: varchar("password_hash", { length: 255 }).notNull(),
 	role: varchar("role", { length: 20 }).notNull(), // 'student', 'instructor', 'admin'
-	status: varchar("status", { length: 20 }).default("inactive"), // 'active' or 'inactive'
+	status: mysqlEnum("status", ["active", "inactive", "suspended"])
+		.notNull()
+		.default("inactive"),
 	createdAt: datetime("created_at").default(sql`CURRENT_TIMESTAMP`),
 	updatedAt: datetime("updated_at").$onUpdate(() => new Date()),
 });
