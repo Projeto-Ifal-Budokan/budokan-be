@@ -40,6 +40,29 @@ Em seguida, edite o arquivo `.env` com suas credenciais do banco de dados.
 
 O projeto utiliza Drizzle ORM para gerenciamento do banco de dados. O esquema do banco está localizado em `src/db/schema.ts`.
 
+### Docker
+
+Para subir o container do banco:
+
+```bash
+docker compose up -d
+```
+
+Para verificar os containeres rodando:
+```bash
+docker ps
+```
+
+Para derrubar o container:
+```bash
+docker compose down
+```
+
+Para derrubar o container e limpar o banco:
+```bash
+docker compose down -v
+```
+
 ### Migrações do Banco de Dados
 
 Para aplicar suas alterações novas no banco (Gerar e aplicar migrations automaticamente):
