@@ -2,17 +2,12 @@ import { relations, sql } from "drizzle-orm";
 import { bigint, mysqlTable, timestamp, varchar } from "drizzle-orm/mysql-core";
 import { practitionerContactsTable } from "./practitionerContacts.ts";
 import { usersTable } from "./users.ts";
-// TODO: O ID do rank deve estar na matricula ja q um estudante pode ter rank no kendo e no karate
-// import { ranksTable } from "./ranks.ts";
 
 export const practitionersTable = mysqlTable("tb_practitioners", {
 	id: bigint("id", { mode: "number", unsigned: true }).primaryKey(),
 	idUser: bigint("id_user", { mode: "number", unsigned: true })
 		.notNull()
 		.references(() => usersTable.id),
-	// rankId: bigint("id_rank", { mode: "number", unsigned: true }).references(
-	//     () => ranksTable.id,
-	// ),
 	healthObservations: varchar("health_observations", { length: 255 }),
 	createdAt: timestamp("created_at").notNull().defaultNow(),
 	updatedAt: timestamp("updated_at").$onUpdate(() => new Date()),
