@@ -7,7 +7,9 @@ export const ranksTable = mysqlTable("tb_ranks", {
 	idDiscipline: bigint("id_discipline", {
 		mode: "number",
 		unsigned: true,
-	}).references(() => disciplinesTable.id),
+	})
+		.notNull()
+		.references(() => disciplinesTable.id),
 	name: varchar("name", { length: 100 }).notNull(),
 	description: varchar("description", { length: 100 }).notNull(),
 	createdAt: timestamp("created_at").notNull().defaultNow(),

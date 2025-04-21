@@ -16,11 +16,15 @@ export const instructorDisciplinesTable = mysqlTable(
 		idInstructor: bigint("id_instructor", {
 			mode: "number",
 			unsigned: true,
-		}).references(() => instructorsTable.id),
+		})
+			.notNull()
+			.references(() => instructorsTable.id),
 		idDiscipline: bigint("id_discipline", {
 			mode: "number",
 			unsigned: true,
-		}).references(() => disciplinesTable.id),
+		})
+			.notNull()
+			.references(() => disciplinesTable.id),
 		status: mysqlEnum("status", ["active", "inactive", "suspended"])
 			.notNull()
 			.default("active"),
