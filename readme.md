@@ -38,7 +38,7 @@ Em seguida, edite o arquivo `.env` com suas credenciais do banco de dados.
 
 ## ⚙️ Configuração
 
-O projeto utiliza Drizzle ORM para gerenciamento do banco de dados. O esquema do banco está localizado em `src/db/schema.ts`.
+O projeto utiliza Drizzle ORM para gerenciamento do banco de dados. O esquema do banco está localizado em `src/db/schema/*.ts`.
 
 ### Docker
 
