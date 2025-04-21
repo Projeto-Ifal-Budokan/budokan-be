@@ -1,7 +1,7 @@
 import "dotenv/config";
 import { eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { usersTable } from "./schema/users-table";
+import { usersTable } from "./schema/users";
 
 // biome-ignore lint/style/noNonNullAssertion: <explanation>
 const db = drizzle(process.env.DATABASE_URL!);
@@ -9,8 +9,9 @@ const db = drizzle(process.env.DATABASE_URL!);
 async function main() {
 	const user: typeof usersTable.$inferInsert = {
 		id: 1,
-		name: "John",
-		age: 30,
+		firstName: "John",
+		surname: "Mathew",
+		birthDate: new Date("02/05/2003"),
 		email: "john@example.com",
 		passwordHash: "asdasd",
 		role: "student",
@@ -33,7 +34,7 @@ async function main() {
 	await db
 		.update(usersTable)
 		.set({
-			age: 31,
+			birthDate: new Date("02/05/2001"),
 		})
 		.where(eq(usersTable.email, user.email));
 	console.log("User info updated!");

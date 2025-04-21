@@ -1,25 +1,24 @@
-import { relations } from "drizzle-orm";
-import {
-	bigint,
-	mysqlTable,
-	serial,
-	text,
-	varchar,
-} from "drizzle-orm/mysql-core";
-import { usersTable } from "./users-table";
+import { relations, sql } from "drizzle-orm";
+import { bigint, mysqlTable, text, timestamp } from "drizzle-orm/mysql-core";
+import { pixKeysTable } from "./pixKeys.ts";
+import { practitionersTable } from "./practitioners.ts";
 
-export const instructorsTable = mysqlTable("instructors", {
-	id: serial("id").primaryKey(),
-	userId: bigint("user_id", { mode: "number", unsigned: true })
+export const instructorsTable = mysqlTable("tb_instructors", {
+	id: bigint("id", { mode: "number", unsigned: true }).primaryKey(),
+	idPractitioner: bigint("id_practitioner", { mode: "number", unsigned: true })
 		.notNull()
-		.references(() => usersTable.id),
-	bio: text("bio"), // breve descrição do sensei
-	rank: varchar("rank", { length: 50 }), // graduação, como faixa preta 2º dan
+		.references(() => practitionersTable.id),
+	createdAt: timestamp("created_at").notNull().defaultNow(),
+	updatedAt: timestamp("updated_at").$onUpdate(() => new Date()),
 });
 
-export const instructorsRelations = relations(instructorsTable, ({ one }) => ({
-	user: one(usersTable, {
-		fields: [instructorsTable.userId],
-		references: [usersTable.id],
+export const instructorsRelations = relations(
+	instructorsTable,
+	({ one, many }) => ({
+		user: one(practitionersTable, {
+			fields: [instructorsTable.idPractitioner],
+			references: [practitionersTable.id],
+		}),
+		pixKeys: many(pixKeysTable),
 	}),
-}));
+);
