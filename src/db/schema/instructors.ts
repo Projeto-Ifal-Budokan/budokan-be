@@ -3,7 +3,7 @@ import { bigint, mysqlTable, text, timestamp } from "drizzle-orm/mysql-core";
 import { pixKeysTable } from "./pixKeys.ts";
 import { practitionersTable } from "./practitioners.ts";
 
-export const instructorsTable = mysqlTable("instructors", {
+export const instructorsTable = mysqlTable("tb_instructors", {
 	id: bigint("id", { mode: "number", unsigned: true }).primaryKey(),
 	practitionerId: bigint("practitioner_id", { mode: "number", unsigned: true })
 		.notNull()

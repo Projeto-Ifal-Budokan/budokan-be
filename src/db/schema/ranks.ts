@@ -1,7 +1,7 @@
 import { bigint, mysqlTable, timestamp, varchar } from "drizzle-orm/mysql-core";
 import { disciplinesTable } from "./disciplines.ts";
 
-export const ranksTable = mysqlTable("ranks", {
+export const ranksTable = mysqlTable("tb_ranks", {
 	id: bigint("id", { mode: "number", unsigned: true }).primaryKey(),
 	idDiscipline: bigint("id_discipline", {
 		mode: "number",

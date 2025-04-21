@@ -10,7 +10,7 @@ import { usersTable } from "../unifiedSchema.ts";
 import { disciplinesTable } from "./disciplines.ts";
 import { studentsTable } from "./students.ts";
 
-export const matriculationsTable = mysqlTable("matriculations", {
+export const matriculationsTable = mysqlTable("tb_matriculations", {
 	id: bigint("id", { mode: "number", unsigned: true }).primaryKey(),
 	studentId: bigint("student_id", {
 		mode: "number",

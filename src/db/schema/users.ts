@@ -6,7 +6,7 @@ import {
 	varchar,
 } from "drizzle-orm/mysql-core";
 
-export const usersTable = mysqlTable("users", {
+export const usersTable = mysqlTable("tb_users", {
 	id: bigint("id", { mode: "number", unsigned: true }).primaryKey(),
 	firstName: varchar("first_name", { length: 100 }).notNull(),
 	surname: varchar("surname", { length: 100 }).notNull(),

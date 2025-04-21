@@ -8,7 +8,7 @@ import {
 } from "drizzle-orm/mysql-core";
 import { instructorsTable } from "./instructors.ts";
 
-export const pixKeysTable = mysqlTable("instructors", {
+export const pixKeysTable = mysqlTable("tb_pix_keys", {
 	id: bigint("id", { mode: "number", unsigned: true }).primaryKey(),
 	instructorId: bigint("instructor_id", { mode: "number", unsigned: true })
 		.notNull()
