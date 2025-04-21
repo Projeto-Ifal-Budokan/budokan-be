@@ -8,6 +8,8 @@ import {
 import { usersTable } from "../unifiedSchema.ts";
 import { disciplinesTable } from "./disciplines.ts";
 import { instructorsTable } from "./instructors.ts";
+import { ranksTable } from "./ranks.ts";
+import { sessionsTable } from "./sessions.ts";
 
 export const instructorDisciplinesTable = mysqlTable(
 	"tb_instructor_disciplines",
@@ -25,6 +27,11 @@ export const instructorDisciplinesTable = mysqlTable(
 		})
 			.notNull()
 			.references(() => disciplinesTable.id),
+        idRank: bigint("id_rank", {
+            mode: "number",
+            unsigned: true,
+        })
+            .references(() => ranksTable.id),
 		status: mysqlEnum("status", ["active", "inactive", "suspended"])
 			.notNull()
 			.default("active"),
@@ -41,7 +48,7 @@ export const instructorDisciplinesTable = mysqlTable(
 
 export const instructorDisciplinesRelations = relations(
 	instructorDisciplinesTable,
-	({ one }) => ({
+	({ one, many }) => ({
 		instructor: one(instructorsTable, {
 			fields: [instructorDisciplinesTable.idInstructor],
 			references: [instructorsTable.id],
@@ -50,6 +57,10 @@ export const instructorDisciplinesRelations = relations(
 			fields: [instructorDisciplinesTable.idDiscipline],
 			references: [disciplinesTable.id],
 		}),
+        rank: one(ranksTable, {
+            fields: [instructorDisciplinesTable.idRank],
+            references: [ranksTable.id],
+        }),
 		activatedByUser: one(usersTable, {
 			fields: [instructorDisciplinesTable.activatedBy],
 			references: [usersTable.id],
@@ -58,5 +69,6 @@ export const instructorDisciplinesRelations = relations(
 			fields: [instructorDisciplinesTable.inactivatedBy],
 			references: [usersTable.id],
 		}),
+        sessions: many(sessionsTable),
 	}),
 );
