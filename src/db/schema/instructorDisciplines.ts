@@ -1,9 +1,9 @@
 import { relations, sql } from "drizzle-orm";
 import {
 	bigint,
-	datetime,
 	mysqlEnum,
 	mysqlTable,
+	timestamp,
 } from "drizzle-orm/mysql-core";
 import { usersTable } from "../unifiedSchema.ts";
 import { disciplinesTable } from "./disciplines.ts";
@@ -28,8 +28,8 @@ export const instructorDisciplinesTable = mysqlTable("instructor_disciplines", {
 	inactivatedBy: bigint("inactivated_by", { mode: "number", unsigned: true })
 		.references(() => usersTable.id)
 		.default(sql`null`),
-	createdAt: datetime("created_at").default(sql`CURRENT_TIMESTAMP`),
-	updatedAt: datetime("updated_at").$onUpdate(() => new Date()),
+	createdAt: timestamp("created_at").notNull().defaultNow(),
+	updatedAt: timestamp("updated_at").$onUpdate(() => new Date()),
 });
 
 export const instructorDisciplinesRelations = relations(

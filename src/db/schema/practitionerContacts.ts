@@ -1,11 +1,5 @@
 import { relations, sql } from "drizzle-orm";
-import {
-	bigint,
-	datetime,
-	mysqlEnum,
-	mysqlTable,
-	varchar,
-} from "drizzle-orm/mysql-core";
+import { bigint, mysqlTable, timestamp, varchar } from "drizzle-orm/mysql-core";
 import { practitionersTable } from "./practitioners.ts";
 
 export const practitionerContactsTable = mysqlTable("user_contacts", {
@@ -16,8 +10,8 @@ export const practitionerContactsTable = mysqlTable("user_contacts", {
 	}).references(() => practitionersTable.id),
 	phone: varchar("phone", { length: 20 }),
 	relationship: varchar("relationship", { length: 100 }).notNull(),
-	createdAt: datetime("created_at").default(sql`CURRENT_TIMESTAMP`),
-	updatedAt: datetime("updated_at").$onUpdate(() => new Date()),
+	createdAt: timestamp("created_at").notNull().defaultNow(),
+	updatedAt: timestamp("updated_at").$onUpdate(() => new Date()),
 });
 
 export const userContactsRelations = relations(

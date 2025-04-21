@@ -1,5 +1,4 @@
-import { sql } from "drizzle-orm";
-import { bigint } from "drizzle-orm/mysql-core";
+import { bigint, timestamp } from "drizzle-orm/mysql-core";
 import {
 	datetime,
 	mysqlEnum,
@@ -19,6 +18,6 @@ export const usersTable = mysqlTable("users", {
 	status: mysqlEnum("status", ["active", "inactive", "suspended"])
 		.notNull()
 		.default("inactive"),
-	createdAt: datetime("created_at").default(sql`CURRENT_TIMESTAMP`),
-	updatedAt: datetime("updated_at").$onUpdate(() => new Date()),
+	createdAt: timestamp("created_at").notNull().defaultNow(),
+	updatedAt: timestamp("updated_at").$onUpdate(() => new Date()),
 });

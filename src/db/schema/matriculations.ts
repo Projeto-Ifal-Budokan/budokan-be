@@ -1,9 +1,9 @@
 import { relations, sql } from "drizzle-orm";
 import {
 	bigint,
-	datetime,
 	mysqlEnum,
 	mysqlTable,
+	timestamp,
 	varchar,
 } from "drizzle-orm/mysql-core";
 import { usersTable } from "../unifiedSchema.ts";
@@ -32,8 +32,8 @@ export const matriculationsTable = mysqlTable("matriculations", {
 	isPaymentExempt: varchar("is_payment_exempt", { length: 1 })
 		.notNull()
 		.default(sql`N`), // Y = yes, N = no
-	createdAt: datetime("created_at").default(sql`CURRENT_TIMESTAMP`),
-	updatedAt: datetime("updated_at").$onUpdate(() => new Date()),
+	createdAt: timestamp("created_at").notNull().defaultNow(),
+	updatedAt: timestamp("updated_at").$onUpdate(() => new Date()),
 });
 
 export const matriculationsRelations = relations(

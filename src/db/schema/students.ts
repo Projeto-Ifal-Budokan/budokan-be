@@ -1,12 +1,5 @@
-import { relations, sql } from "drizzle-orm";
-import {
-	bigint,
-	date,
-	datetime,
-	mysqlTable,
-	serial,
-	varchar,
-} from "drizzle-orm/mysql-core";
+import { relations } from "drizzle-orm";
+import { bigint, mysqlTable, timestamp } from "drizzle-orm/mysql-core";
 import { matriculationsTable } from "./matriculations.ts";
 import { practitionersTable } from "./practitioners.ts";
 
@@ -16,8 +9,8 @@ export const studentsTable = mysqlTable("students", {
 		mode: "number",
 		unsigned: true,
 	}).references(() => practitionersTable.id),
-	createdAt: datetime("created_at").default(sql`CURRENT_TIMESTAMP`),
-	updatedAt: datetime("updated_at").$onUpdate(() => new Date()),
+	createdAt: timestamp("created_at").notNull().defaultNow(),
+	updatedAt: timestamp("updated_at").$onUpdate(() => new Date()),
 });
 
 export const studentsRelations = relations(studentsTable, ({ one, many }) => ({
