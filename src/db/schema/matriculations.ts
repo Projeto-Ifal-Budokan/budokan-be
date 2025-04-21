@@ -5,7 +5,7 @@ import {
 	mysqlTable,
 	timestamp,
 } from "drizzle-orm/mysql-core";
-import { usersTable } from "../unifiedSchema.ts";
+import { usersTable } from "./users.ts";
 import { attendancesTable } from "./attendances.ts";
 import { disciplinesTable } from "./disciplines.ts";
 import { ranksTable } from "./ranks.ts";
