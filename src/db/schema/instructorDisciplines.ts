@@ -13,11 +13,11 @@ export const instructorDisciplinesTable = mysqlTable(
 	"tb_instructor_disciplines",
 	{
 		id: bigint("id", { mode: "number", unsigned: true }).primaryKey(),
-		instructorId: bigint("instructor_id", {
+		idInstructor: bigint("id_instructor", {
 			mode: "number",
 			unsigned: true,
 		}).references(() => instructorsTable.id),
-		disciplineId: bigint("discipline_id", {
+		idDiscipline: bigint("id_discipline", {
 			mode: "number",
 			unsigned: true,
 		}).references(() => disciplinesTable.id),
@@ -39,11 +39,11 @@ export const instructorDisciplinesRelations = relations(
 	instructorDisciplinesTable,
 	({ one }) => ({
 		instructor: one(instructorsTable, {
-			fields: [instructorDisciplinesTable.instructorId],
+			fields: [instructorDisciplinesTable.idInstructor],
 			references: [instructorsTable.id],
 		}),
 		discipline: one(disciplinesTable, {
-			fields: [instructorDisciplinesTable.disciplineId],
+			fields: [instructorDisciplinesTable.idDiscipline],
 			references: [disciplinesTable.id],
 		}),
 		activatedByUser: one(usersTable, {

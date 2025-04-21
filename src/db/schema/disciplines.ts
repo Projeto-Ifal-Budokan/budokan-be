@@ -11,7 +11,7 @@ export const disciplinesTable = mysqlTable("tb_disciplines", {
 	updatedAt: timestamp("updated_at").$onUpdate(() => new Date()),
 });
 
-export const usersRelations = relations(disciplinesTable, ({ many }) => ({
+export const disciplinesRelations = relations(disciplinesTable, ({ many }) => ({
 	instructors: many(instructorDisciplinesTable),
 	matriculations: many(matriculationsTable),
 }));

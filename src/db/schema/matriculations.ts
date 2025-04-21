@@ -12,11 +12,11 @@ import { studentsTable } from "./students.ts";
 
 export const matriculationsTable = mysqlTable("tb_matriculations", {
 	id: bigint("id", { mode: "number", unsigned: true }).primaryKey(),
-	studentId: bigint("student_id", {
+	idStudent: bigint("id_student", {
 		mode: "number",
 		unsigned: true,
 	}).references(() => studentsTable.id),
-	disciplineId: bigint("discipline_id", {
+	idDiscipline: bigint("id_discipline", {
 		mode: "number",
 		unsigned: true,
 	}).references(() => disciplinesTable.id),
@@ -40,11 +40,11 @@ export const matriculationsRelations = relations(
 	matriculationsTable,
 	({ one }) => ({
 		student: one(studentsTable, {
-			fields: [matriculationsTable.studentId],
+			fields: [matriculationsTable.idStudent],
 			references: [studentsTable.id],
 		}),
 		discipline: one(disciplinesTable, {
-			fields: [matriculationsTable.disciplineId],
+			fields: [matriculationsTable.idDiscipline],
 			references: [disciplinesTable.id],
 		}),
 		activatedByUser: one(usersTable, {

@@ -7,7 +7,7 @@ import { usersTable } from "./users.ts";
 
 export const practitionersTable = mysqlTable("tb_practitioners", {
 	id: bigint("id", { mode: "number", unsigned: true }).primaryKey(),
-	userId: bigint("id_user", { mode: "number", unsigned: true }).references(
+	idUser: bigint("id_user", { mode: "number", unsigned: true }).references(
 		() => usersTable.id,
 	),
 	// rankId: bigint("id_rank", { mode: "number", unsigned: true }).references(
@@ -22,7 +22,7 @@ export const practitionersRelations = relations(
 	practitionersTable,
 	({ one, many }) => ({
 		user: one(usersTable, {
-			fields: [practitionersTable.userId],
+			fields: [practitionersTable.idUser],
 			references: [usersTable.id],
 		}),
 		practitionerContacts: many(practitionerContactsTable),

@@ -10,7 +10,7 @@ import { instructorsTable } from "./instructors.ts";
 
 export const pixKeysTable = mysqlTable("tb_pix_keys", {
 	id: bigint("id", { mode: "number", unsigned: true }).primaryKey(),
-	instructorId: bigint("instructor_id", { mode: "number", unsigned: true })
+	idInstructor: bigint("id_instructor", { mode: "number", unsigned: true })
 		.notNull()
 		.references(() => instructorsTable.id),
 	type: mysqlEnum("type", ["email", "cpf", "phone", "randomKey"]).notNull(),
@@ -19,9 +19,9 @@ export const pixKeysTable = mysqlTable("tb_pix_keys", {
 	updatedAt: timestamp("updated_at").$onUpdate(() => new Date()),
 });
 
-export const instructorsRelations = relations(instructorsTable, ({ one }) => ({
+export const pixKeysRelations = relations(pixKeysTable, ({ one }) => ({
 	user: one(instructorsTable, {
-		fields: [instructorsTable.practitionerId],
+		fields: [pixKeysTable.idInstructor],
 		references: [instructorsTable.id],
 	}),
 }));

@@ -17,7 +17,7 @@ export const practitionerContactsTable = mysqlTable(
 	},
 );
 
-export const userContactsRelations = relations(
+export const practitionerContactsRelations = relations(
 	practitionerContactsTable,
 	({ one }) => ({
 		user: one(practitionersTable, {
