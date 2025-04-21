@@ -1,4 +1,4 @@
-import { relations, sql } from "drizzle-orm";
+import { relations } from "drizzle-orm";
 import { bigint, mysqlTable, timestamp, varchar } from "drizzle-orm/mysql-core";
 import { practitionerContactsTable } from "./practitionerContacts.ts";
 import { usersTable } from "./users.ts";

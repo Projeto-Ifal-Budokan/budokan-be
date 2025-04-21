@@ -27,15 +27,17 @@ export const matriculationsTable = mysqlTable("tb_matriculations", {
 	status: mysqlEnum("status", ["active", "inactive", "suspended"])
 		.notNull()
 		.default("active"),
-	activatedBy: bigint("activated_by", { mode: "number", unsigned: true })
-		.references(() => usersTable.id)
-		.default(sql`null`),
-	inactivatedBy: bigint("inactivated_by", { mode: "number", unsigned: true })
-		.references(() => usersTable.id)
-		.default(sql`null`),
-	isPaymentExempt: varchar("is_payment_exempt", { length: 1 })
+	activatedBy: bigint("activated_by", {
+		mode: "number",
+		unsigned: true,
+	}).references(() => usersTable.id), // Esse campo pode ser nulo, serve apenas de log
+	inactivatedBy: bigint("inactivated_by", {
+		mode: "number",
+		unsigned: true,
+	}).references(() => usersTable.id), // Esse campo pode ser nulo, serve apenas de log
+	isPaymentExempt: mysqlEnum("is_payment_exempt", ["Y", "N"])
 		.notNull()
-		.default(sql`N`), // Y = yes, N = no
+		.default("N"), // Y = yes, N = no
 	createdAt: timestamp("created_at").notNull().defaultNow(),
 	updatedAt: timestamp("updated_at").$onUpdate(() => new Date()),
 });

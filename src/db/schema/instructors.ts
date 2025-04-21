@@ -1,5 +1,5 @@
-import { relations, sql } from "drizzle-orm";
-import { bigint, mysqlTable, text, timestamp } from "drizzle-orm/mysql-core";
+import { relations } from "drizzle-orm";
+import { bigint, mysqlTable, timestamp } from "drizzle-orm/mysql-core";
 import { pixKeysTable } from "./pixKeys.ts";
 import { practitionersTable } from "./practitioners.ts";
 
