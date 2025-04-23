@@ -16,7 +16,7 @@ export const attendancesTable = mysqlTable("tb_attendances", {
     updatedAt: timestamp("updated_at").$onUpdate(() => new Date()),
 });
 
-export const sessionsRelations = relations(
+export const attendancesRelations = relations(
     attendancesTable,
     ({ one }) => ({
         matriculation: one(matriculationsTable, {

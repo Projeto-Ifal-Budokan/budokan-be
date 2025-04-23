@@ -16,7 +16,7 @@ export const achievmentsTable = mysqlTable("tb_achievments", {
     updatedAt: timestamp("updated_at").$onUpdate(() => new Date()),
 });
 
-export const disciplinesRelations = relations(achievmentsTable, ({ one }) => ({
+export const achievmentsRelations = relations(achievmentsTable, ({ one }) => ({
     practitioner: one(practitionersTable, {
         fields: [achievmentsTable.idPractitioner],
         references: [practitionersTable.id],

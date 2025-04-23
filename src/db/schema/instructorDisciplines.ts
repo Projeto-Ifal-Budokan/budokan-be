@@ -27,11 +27,11 @@ export const instructorDisciplinesTable = mysqlTable(
 		})
 			.notNull()
 			.references(() => disciplinesTable.id),
-        idRank: bigint("id_rank", {
-            mode: "number",
-            unsigned: true,
-        })
-            .references(() => ranksTable.id),
+		idRank: bigint("id_rank", {
+				mode: "number",
+				unsigned: true,
+		})
+				.references(() => ranksTable.id),
 		status: mysqlEnum("status", ["active", "inactive", "suspended"])
 			.notNull()
 			.default("active"),
@@ -57,10 +57,10 @@ export const instructorDisciplinesRelations = relations(
 			fields: [instructorDisciplinesTable.idDiscipline],
 			references: [disciplinesTable.id],
 		}),
-        rank: one(ranksTable, {
-            fields: [instructorDisciplinesTable.idRank],
-            references: [ranksTable.id],
-        }),
+		rank: one(ranksTable, {
+				fields: [instructorDisciplinesTable.idRank],
+				references: [ranksTable.id],
+		}),
 		activatedByUser: one(usersTable, {
 			fields: [instructorDisciplinesTable.activatedBy],
 			references: [usersTable.id],
@@ -69,6 +69,6 @@ export const instructorDisciplinesRelations = relations(
 			fields: [instructorDisciplinesTable.inactivatedBy],
 			references: [usersTable.id],
 		}),
-        sessions: many(sessionsTable),
+		sessions: many(sessionsTable),
 	}),
 );

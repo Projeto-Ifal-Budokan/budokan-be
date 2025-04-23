@@ -25,11 +25,11 @@ export const matriculationsTable = mysqlTable("tb_matriculations", {
 	})
 		.notNull()
 		.references(() => disciplinesTable.id),
-    idRank: bigint("id_rank", {
-        mode: "number",
-        unsigned: true,
-    })
-        .references(() => ranksTable.id),
+	idRank: bigint("id_rank", {
+			mode: "number",
+			unsigned: true,
+	})
+			.references(() => ranksTable.id),
 	status: mysqlEnum("status", ["active", "inactive", "suspended"])
 		.notNull()
 		.default("active"),
@@ -59,10 +59,10 @@ export const matriculationsRelations = relations(
 			fields: [matriculationsTable.idDiscipline],
 			references: [disciplinesTable.id],
 		}),
-        rank: one(ranksTable, {
-            fields: [matriculationsTable.idRank],
-            references: [ranksTable.id],
-        }),
+		rank: one(ranksTable, {
+				fields: [matriculationsTable.idRank],
+				references: [ranksTable.id],
+		}),
 		activatedByUser: one(usersTable, {
 			fields: [matriculationsTable.activatedBy],
 			references: [usersTable.id],
@@ -71,6 +71,6 @@ export const matriculationsRelations = relations(
 			fields: [matriculationsTable.inactivatedBy],
 			references: [usersTable.id],
 		}),
-        attendances: many(attendancesTable),
+		attendances: many(attendancesTable),
 	}),
 );

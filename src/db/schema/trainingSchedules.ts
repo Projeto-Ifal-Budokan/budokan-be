@@ -16,7 +16,7 @@ export const trainingSchedulesTable = mysqlTable("tb_training_schedules", {
     updatedAt: timestamp("updated_at").$onUpdate(() => new Date()),
 });
 
-export const usersRelations = relations(
+export const trainingSchedulesRelations = relations(
     trainingSchedulesTable,
     ({ one }) => ({
         disciplines: one(disciplinesTable, {
