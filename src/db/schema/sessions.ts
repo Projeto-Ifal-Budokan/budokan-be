@@ -3,12 +3,12 @@ import { bigint, date, mysqlTable, time, timestamp } from "drizzle-orm/mysql-cor
 import { attendancesTable } from "./attendances.ts";
 import { disciplinesTable } from "./disciplines.ts";
 import { instructorDisciplinesTable } from "./instructorDisciplines.ts";
+import { foreignKey } from "drizzle-orm/mysql-core";
 
 export const sessionsTable = mysqlTable("tb_sessions", {
     id: bigint("id", { mode: "number", unsigned: true }).primaryKey(),
     idInstructorDiscipline: bigint("id_instructor_discipline", { mode: "number", unsigned: true })
-        .notNull()
-        .references(() => instructorDisciplinesTable.id),
+        .notNull(),
     idDiscipline: bigint("id_discipline", { mode: "number", unsigned: true })
     .notNull()
     .references(() => disciplinesTable.id),
@@ -17,7 +17,13 @@ export const sessionsTable = mysqlTable("tb_sessions", {
     endingTime: time("ending_time").notNull(),
     createdAt: timestamp("created_at").notNull().defaultNow(),
     updatedAt: timestamp("updated_at").$onUpdate(() => new Date()),
-});
+}, (table) => [
+    foreignKey({
+      columns: [table.idInstructorDiscipline],
+      foreignColumns: [instructorDisciplinesTable.id],
+      name: "fk_tb_sessions_id_intructor_discipline"
+    }),
+  ]);
 
 export const sessionsRelations = relations(
     sessionsTable,
