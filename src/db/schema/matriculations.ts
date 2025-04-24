@@ -1,13 +1,14 @@
-import { relations, sql } from "drizzle-orm";
+import { relations } from "drizzle-orm";
 import {
 	bigint,
 	mysqlEnum,
 	mysqlTable,
 	timestamp,
-	varchar,
 } from "drizzle-orm/mysql-core";
-import { usersTable } from "../unifiedSchema.ts";
+import { usersTable } from "./users.ts";
+import { attendancesTable } from "./attendances.ts";
 import { disciplinesTable } from "./disciplines.ts";
+import { ranksTable } from "./ranks.ts";
 import { studentsTable } from "./students.ts";
 
 export const matriculationsTable = mysqlTable("tb_matriculations", {
@@ -24,6 +25,11 @@ export const matriculationsTable = mysqlTable("tb_matriculations", {
 	})
 		.notNull()
 		.references(() => disciplinesTable.id),
+	idRank: bigint("id_rank", {
+			mode: "number",
+			unsigned: true,
+	})
+			.references(() => ranksTable.id),
 	status: mysqlEnum("status", ["active", "inactive", "suspended"])
 		.notNull()
 		.default("active"),
@@ -44,7 +50,7 @@ export const matriculationsTable = mysqlTable("tb_matriculations", {
 
 export const matriculationsRelations = relations(
 	matriculationsTable,
-	({ one }) => ({
+	({ one, many }) => ({
 		student: one(studentsTable, {
 			fields: [matriculationsTable.idStudent],
 			references: [studentsTable.id],
@@ -52,6 +58,10 @@ export const matriculationsRelations = relations(
 		discipline: one(disciplinesTable, {
 			fields: [matriculationsTable.idDiscipline],
 			references: [disciplinesTable.id],
+		}),
+		rank: one(ranksTable, {
+				fields: [matriculationsTable.idRank],
+				references: [ranksTable.id],
 		}),
 		activatedByUser: one(usersTable, {
 			fields: [matriculationsTable.activatedBy],
@@ -61,5 +71,6 @@ export const matriculationsRelations = relations(
 			fields: [matriculationsTable.inactivatedBy],
 			references: [usersTable.id],
 		}),
+		attendances: many(attendancesTable),
 	}),
 );
