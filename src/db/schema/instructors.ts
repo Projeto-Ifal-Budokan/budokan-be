@@ -4,10 +4,10 @@ import { pixKeysTable } from "./pixKeys.ts";
 import { practitionersTable } from "./practitioners.ts";
 
 export const instructorsTable = mysqlTable("tb_instructors", {
-	id: bigint("id", { mode: "number", unsigned: true }).primaryKey(),
+	// id: bigint("id", { mode: "number", unsigned: true }).primaryKey(),
 	idPractitioner: bigint("id_practitioner", { mode: "number", unsigned: true })
 		.notNull()
-		.references(() => practitionersTable.id),
+		.references(() => practitionersTable.id).primaryKey(),
 	createdAt: timestamp("created_at").notNull().defaultNow(),
 	updatedAt: timestamp("updated_at").$onUpdate(() => new Date()),
 });

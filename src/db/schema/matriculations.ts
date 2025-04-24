@@ -18,7 +18,7 @@ export const matriculationsTable = mysqlTable("tb_matriculations", {
 		unsigned: true,
 	})
 		.notNull()
-		.references(() => studentsTable.id),
+		.references(() => studentsTable.idPractitioner),
 	idDiscipline: bigint("id_discipline", {
 		mode: "number",
 		unsigned: true,
@@ -53,7 +53,7 @@ export const matriculationsRelations = relations(
 	({ one, many }) => ({
 		student: one(studentsTable, {
 			fields: [matriculationsTable.idStudent],
-			references: [studentsTable.id],
+			references: [studentsTable.idPractitioner],
 		}),
 		discipline: one(disciplinesTable, {
 			fields: [matriculationsTable.idDiscipline],

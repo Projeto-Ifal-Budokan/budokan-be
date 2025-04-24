@@ -12,13 +12,13 @@ export const examsTable = mysqlTable("tb_exams", {
         unsigned: true,
     })
         .notNull()
-        .references(() => instructorsTable.id),
+        .references(() => instructorsTable.idPractitioner),
     idStudent: bigint("id_student", {
         mode: "number",
         unsigned: true,
     })
         .notNull()
-        .references(() => studentsTable.id),
+        .references(() => studentsTable.idPractitioner),
     idPreviousRank: bigint("id_previous_rank", { mode: "number", unsigned: true })
         .references(() => ranksTable.id),
     idNextRank: bigint("id_next_rank", { mode: "number", unsigned: true })
@@ -41,11 +41,11 @@ export const examsRelations = relations(
     ({ one }) => ({
         instructor: one(instructorsTable, {
             fields: [examsTable.idInstructor],
-            references: [instructorsTable.id],
+            references: [instructorsTable.idPractitioner],
         }),
         student: one(studentsTable, {
             fields: [examsTable.idStudent],
-            references: [studentsTable.id],
+            references: [studentsTable.idPractitioner],
         }),
         previousRank: one(ranksTable, {
             fields: [examsTable.idPreviousRank],
