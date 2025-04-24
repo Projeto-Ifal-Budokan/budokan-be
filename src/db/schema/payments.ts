@@ -35,7 +35,7 @@ export const paymentsTable = mysqlTable("tb_payments", {
 export const paymentsRelations = relations(
     paymentsTable,
     ({ one }) => ({
-        billingCycles: one(billingCyclesTable, {
+        billingCycle: one(billingCyclesTable, {
             fields: [paymentsTable.idBillingCycle],
             references: [billingCyclesTable.id],
         }),

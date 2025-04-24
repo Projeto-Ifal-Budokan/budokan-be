@@ -11,6 +11,7 @@ import {
 import { disciplinesTable } from "./disciplines.ts";
 import { instructorsTable } from "./instructors.ts";
 import { paymentsTable } from "./payments.ts";
+import { foreignKey } from "drizzle-orm/mysql-core";
 
 export const billingCyclesTable = mysqlTable("tb_billing_cycles", {
     id: bigint("id", { mode: "number", unsigned: true }).primaryKey(),
@@ -18,14 +19,12 @@ export const billingCyclesTable = mysqlTable("tb_billing_cycles", {
         mode: "number",
         unsigned: true,
     })
-        .notNull()
-        .references(() => instructorsTable.idPractitioner),
+        .notNull(),
     idDiscipline: bigint("id_discipline", {
         mode: "number",
         unsigned: true,
     })
-        .notNull()
-        .references(() => disciplinesTable.id),
+        .notNull(),
     month: int("month").notNull().$type<1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12>(),
     year: int("year").notNull(),
     dueDate: date("due_date").notNull(),
@@ -33,7 +32,19 @@ export const billingCyclesTable = mysqlTable("tb_billing_cycles", {
     description: varchar("description", {length: 255}),
     createdAt: timestamp("created_at").notNull().defaultNow(),
     updatedAt: timestamp("updated_at").$onUpdate(() => new Date()),
-});
+}, (table) => [
+        foreignKey({
+            columns: [table.idInstructor],
+            foreignColumns: [instructorsTable.idPractitioner],
+            name: "fk_tb_billing_cycles_id_practitioner"
+        }),
+        foreignKey({
+            columns: [table.idDiscipline],
+            foreignColumns: [disciplinesTable.id],
+            name: "fk_tb_billing_cycles_id_discipline"
+        }),
+    ]
+);
 
 export const billingCyclesRelations = relations(
     billingCyclesTable,
