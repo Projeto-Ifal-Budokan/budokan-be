@@ -1,9 +1,9 @@
 import { relations } from "drizzle-orm";
 import { bigint, date, mysqlEnum, mysqlTable, timestamp, varchar } from "drizzle-orm/mysql-core";
 import { disciplinesTable } from "./disciplines.ts";
-import { instructorsTable } from "./instructors.ts";
-import { studentsTable } from "./students.ts";
 import { ranksTable } from "./ranks.ts";
+import { studentsTable } from "../practitioner_schemas/students.ts";
+import { instructorsTable } from "../practitioner_schemas/instructors.ts";
 
 export const examsTable = mysqlTable("tb_exams", {
     id: bigint("id", { mode: "number", unsigned: true }).primaryKey(),

@@ -5,12 +5,12 @@ import {
 	mysqlTable,
 	timestamp,
 } from "drizzle-orm/mysql-core";
-import { usersTable } from "./users.ts";
-import { disciplinesTable } from "./disciplines.ts";
+import { usersTable } from "../user_schemas/users.ts";
+import { disciplinesTable } from "../discipline_schemas/disciplines.ts";
 import { instructorsTable } from "./instructors.ts";
-import { ranksTable } from "./ranks.ts";
-import { sessionsTable } from "./sessions.ts";
+import { ranksTable } from "../discipline_schemas/ranks.ts";
 import { foreignKey } from "drizzle-orm/mysql-core";
+import { sessionsTable } from "../attendance_schemas/sessions.ts";
 
 export const instructorDisciplinesTable = mysqlTable(
 	"tb_instructor_disciplines",

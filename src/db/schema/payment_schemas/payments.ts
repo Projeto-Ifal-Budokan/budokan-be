@@ -7,7 +7,7 @@ import {
     timestamp,
 } from "drizzle-orm/mysql-core";
 import { billingCyclesTable } from "./billingCycles.ts";
-import { matriculationsTable } from "./matriculations.ts";
+import { matriculationsTable } from "../practitioner_schemas/matriculations.ts";
 
 export const paymentsTable = mysqlTable("tb_payments", {
     id: bigint("id", { mode: "number", unsigned: true }).primaryKey(),

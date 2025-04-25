@@ -1,7 +1,7 @@
 import { relations } from "drizzle-orm";
 import { bigint, mysqlEnum, mysqlTable, timestamp } from "drizzle-orm/mysql-core";
-import { matriculationsTable } from "./matriculations.ts";
-import { sessionsTable } from "./sessions.ts";
+import { sessionsTable } from "./sessions";
+import { matriculationsTable } from "../practitioner_schemas/matriculations";
 
 export const attendancesTable = mysqlTable("tb_attendances", {
     id: bigint("id", { mode: "number", unsigned: true }).primaryKey(),

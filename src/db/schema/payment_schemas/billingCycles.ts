@@ -8,10 +8,10 @@ import {
     timestamp,
     varchar,
 } from "drizzle-orm/mysql-core";
-import { disciplinesTable } from "./disciplines.ts";
-import { instructorsTable } from "./instructors.ts";
-import { paymentsTable } from "./payments.ts";
 import { foreignKey } from "drizzle-orm/mysql-core";
+import { paymentsTable } from "./payments";
+import { instructorsTable } from "../practitioner_schemas/instructors";
+import { disciplinesTable } from "../discipline_schemas/disciplines";
 
 export const billingCyclesTable = mysqlTable("tb_billing_cycles", {
     id: bigint("id", { mode: "number", unsigned: true }).primaryKey(),

@@ -1,10 +1,10 @@
 import { relations, sql } from "drizzle-orm";
 import { bigint, mysqlTable, timestamp, varchar } from "drizzle-orm/mysql-core";
 import { examsTable } from "./exams";
-import { instructorDisciplinesTable } from "./instructorDisciplines";
-import { matriculationsTable } from "./matriculations";
+import { instructorDisciplinesTable } from "../practitioner_schemas/instructorDisciplines";
+import { matriculationsTable } from "../practitioner_schemas/matriculations";
 import { ranksTable } from "./ranks";
-import { sessionsTable } from "./sessions";
+import { sessionsTable } from "../attendance_schemas/sessions";
 import { trainingSchedulesTable } from "./trainingSchedules";
 
 export const disciplinesTable = mysqlTable("tb_disciplines", {

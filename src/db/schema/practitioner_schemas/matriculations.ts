@@ -5,11 +5,11 @@ import {
 	mysqlTable,
 	timestamp,
 } from "drizzle-orm/mysql-core";
-import { usersTable } from "./users.ts";
-import { attendancesTable } from "./attendances.ts";
-import { disciplinesTable } from "./disciplines.ts";
-import { ranksTable } from "./ranks.ts";
 import { studentsTable } from "./students.ts";
+import { disciplinesTable } from "../discipline_schemas/disciplines.ts";
+import { ranksTable } from "../discipline_schemas/ranks.ts";
+import { usersTable } from "../user_schemas/users.ts";
+import { attendancesTable } from "../attendance_schemas/attendances.ts";
 
 export const matriculationsTable = mysqlTable("tb_matriculations", {
 	id: bigint("id", { mode: "number", unsigned: true }).primaryKey(),
