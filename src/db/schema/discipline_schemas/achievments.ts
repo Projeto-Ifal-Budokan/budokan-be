@@ -8,7 +8,7 @@ export const achievmentsTable = mysqlTable("tb_achievments", {
         mode: "number",
         unsigned: true 
     })
-        .references(() => practitionersTable.id),
+        .references(() => practitionersTable.idUser),
     title: varchar("title", {length: 100}).notNull(),
     description: varchar("description", { length: 255 }).notNull(),
     achievementDate: date("achievement_date").notNull(),
@@ -19,6 +19,6 @@ export const achievmentsTable = mysqlTable("tb_achievments", {
 export const achievmentsRelations = relations(achievmentsTable, ({ one }) => ({
     practitioner: one(practitionersTable, {
         fields: [achievmentsTable.idPractitioner],
-        references: [practitionersTable.id],
+        references: [practitionersTable.idUser],
     })
 }));

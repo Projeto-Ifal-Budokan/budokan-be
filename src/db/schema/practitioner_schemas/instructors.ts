@@ -7,7 +7,7 @@ export const instructorsTable = mysqlTable("tb_instructors", {
 	// id: bigint("id", { mode: "number", unsigned: true }).primaryKey(),
 	idPractitioner: bigint("id_practitioner", { mode: "number", unsigned: true })
 		.notNull()
-		.references(() => practitionersTable.id).primaryKey(),
+		.references(() => practitionersTable.idUser).primaryKey(),
 	createdAt: timestamp("created_at").notNull().defaultNow(),
 	updatedAt: timestamp("updated_at").$onUpdate(() => new Date()),
 });
@@ -17,7 +17,7 @@ export const instructorsRelations = relations(
 	({ one, many }) => ({
 		user: one(practitionersTable, {
 			fields: [instructorsTable.idPractitioner],
-			references: [practitionersTable.id],
+			references: [practitionersTable.idUser],
 		}),
 		pixKeys: many(pixKeysTable),
 	}),
