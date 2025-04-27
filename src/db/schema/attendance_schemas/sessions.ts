@@ -1,9 +1,9 @@
 import { relations } from "drizzle-orm";
 import { bigint, date, mysqlTable, time, timestamp } from "drizzle-orm/mysql-core";
 import { attendancesTable } from "./attendances.ts";
-import { disciplinesTable } from "./disciplines.ts";
-import { instructorDisciplinesTable } from "./instructorDisciplines.ts";
 import { foreignKey } from "drizzle-orm/mysql-core";
+import { disciplinesTable } from "../discipline_schemas/disciplines.ts";
+import { instructorDisciplinesTable } from "../practitioner_schemas/instructorDisciplines.ts";
 
 export const sessionsTable = mysqlTable("tb_sessions", {
     id: bigint("id", { mode: "number", unsigned: true }).primaryKey(),

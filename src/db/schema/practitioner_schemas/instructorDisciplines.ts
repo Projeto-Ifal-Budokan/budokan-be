@@ -5,11 +5,12 @@ import {
 	mysqlTable,
 	timestamp,
 } from "drizzle-orm/mysql-core";
-import { usersTable } from "../unifiedSchema.ts";
-import { disciplinesTable } from "./disciplines.ts";
+import { usersTable } from "../user_schemas/users.ts";
+import { disciplinesTable } from "../discipline_schemas/disciplines.ts";
 import { instructorsTable } from "./instructors.ts";
-import { ranksTable } from "./ranks.ts";
-import { sessionsTable } from "./sessions.ts";
+import { ranksTable } from "../discipline_schemas/ranks.ts";
+import { foreignKey } from "drizzle-orm/mysql-core";
+import { sessionsTable } from "../attendance_schemas/sessions.ts";
 
 export const instructorDisciplinesTable = mysqlTable(
 	"tb_instructor_disciplines",
@@ -19,19 +20,16 @@ export const instructorDisciplinesTable = mysqlTable(
 			mode: "number",
 			unsigned: true,
 		})
-			.notNull()
-			.references(() => instructorsTable.id),
+			.notNull(),
 		idDiscipline: bigint("id_discipline", {
 			mode: "number",
 			unsigned: true,
 		})
-			.notNull()
-			.references(() => disciplinesTable.id),
+			.notNull(),
 		idRank: bigint("id_rank", {
 				mode: "number",
 				unsigned: true,
-		})
-				.references(() => ranksTable.id),
+		}),
 		status: mysqlEnum("status", ["active", "inactive", "suspended"])
 			.notNull()
 			.default("active"),
@@ -43,15 +41,32 @@ export const instructorDisciplinesTable = mysqlTable(
 			.default(sql`null`),
 		createdAt: timestamp("created_at").notNull().defaultNow(),
 		updatedAt: timestamp("updated_at").$onUpdate(() => new Date()),
-	},
+	}, (table) => [
+		foreignKey({
+			columns: [table.idInstructor],
+			foreignColumns: [instructorsTable.idPractitioner],
+			name: "fk_tb_instructor_disciplines_id_practitioner"
+		}),
+		foreignKey({
+			columns: [table.idDiscipline],
+			foreignColumns: [disciplinesTable.id],
+			name: "fk_tb_instructor_disciplines_id_discipline"
+		}),
+		foreignKey({
+			columns: [table.idRank],
+			foreignColumns: [ranksTable.id],
+			name: "fk_tb_instructor_disciplines_id_rank"
+		}),
+	]
 );
+
 
 export const instructorDisciplinesRelations = relations(
 	instructorDisciplinesTable,
 	({ one, many }) => ({
 		instructor: one(instructorsTable, {
 			fields: [instructorDisciplinesTable.idInstructor],
-			references: [instructorsTable.id],
+			references: [instructorsTable.idPractitioner],
 		}),
 		discipline: one(disciplinesTable, {
 			fields: [instructorDisciplinesTable.idDiscipline],

@@ -13,8 +13,7 @@ export const usersTable = mysqlTable("tb_users", {
 	phone: varchar("phone", { length: 20 }),
 	birthDate: datetime("birth_date"),
 	email: varchar("email", { length: 150 }).notNull().unique(),
-	passwordHash: varchar("password_hash", { length: 255 }).notNull(),
-	role: varchar("role", { length: 20 }).notNull(), // 'student', 'instructor', 'admin'
+	password: varchar("password", { length: 255 }).notNull(),
 	status: mysqlEnum("status", ["active", "inactive", "suspended"])
 		.notNull()
 		.default("inactive"),

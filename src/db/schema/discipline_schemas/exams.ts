@@ -1,9 +1,9 @@
 import { relations } from "drizzle-orm";
 import { bigint, date, mysqlEnum, mysqlTable, timestamp, varchar } from "drizzle-orm/mysql-core";
 import { disciplinesTable } from "./disciplines.ts";
-import { instructorsTable } from "./instructors.ts";
-import { studentsTable } from "./students.ts";
 import { ranksTable } from "./ranks.ts";
+import { studentsTable } from "../practitioner_schemas/students.ts";
+import { instructorsTable } from "../practitioner_schemas/instructors.ts";
 
 export const examsTable = mysqlTable("tb_exams", {
     id: bigint("id", { mode: "number", unsigned: true }).primaryKey(),
@@ -12,13 +12,13 @@ export const examsTable = mysqlTable("tb_exams", {
         unsigned: true,
     })
         .notNull()
-        .references(() => instructorsTable.id),
+        .references(() => instructorsTable.idPractitioner),
     idStudent: bigint("id_student", {
         mode: "number",
         unsigned: true,
     })
         .notNull()
-        .references(() => studentsTable.id),
+        .references(() => studentsTable.idPractitioner),
     idPreviousRank: bigint("id_previous_rank", { mode: "number", unsigned: true })
         .references(() => ranksTable.id),
     idNextRank: bigint("id_next_rank", { mode: "number", unsigned: true })
@@ -41,11 +41,11 @@ export const examsRelations = relations(
     ({ one }) => ({
         instructor: one(instructorsTable, {
             fields: [examsTable.idInstructor],
-            references: [instructorsTable.id],
+            references: [instructorsTable.idPractitioner],
         }),
         student: one(studentsTable, {
             fields: [examsTable.idStudent],
-            references: [studentsTable.id],
+            references: [studentsTable.idPractitioner],
         }),
         previousRank: one(ranksTable, {
             fields: [examsTable.idPreviousRank],

@@ -12,7 +12,7 @@ export const pixKeysTable = mysqlTable("tb_pix_keys", {
 	id: bigint("id", { mode: "number", unsigned: true }).primaryKey(),
 	idInstructor: bigint("id_instructor", { mode: "number", unsigned: true })
 		.notNull()
-		.references(() => instructorsTable.id),
+		.references(() => instructorsTable.idPractitioner),
 	type: mysqlEnum("type", ["email", "cpf", "phone", "randomKey"]).notNull(),
 	description: varchar("description", { length: 100 }),
 	createdAt: timestamp("created_at").notNull().defaultNow(),
@@ -22,6 +22,6 @@ export const pixKeysTable = mysqlTable("tb_pix_keys", {
 export const pixKeysRelations = relations(pixKeysTable, ({ one }) => ({
 	user: one(instructorsTable, {
 		fields: [pixKeysTable.idInstructor],
-		references: [instructorsTable.id],
+		references: [instructorsTable.idPractitioner],
 	}),
 }));
