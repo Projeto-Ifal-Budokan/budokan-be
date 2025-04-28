@@ -19,14 +19,23 @@
 	"license": "ISC",
 	"packageManager": "pnpm@9.15.4+sha512.b2dc20e2fc72b3e18848459b37359a32064663e5627a51e4c74b2c29dd8e8e0491483c3abb40789cfd578bf362fb6ba8261b05f0387d76792ed6e23ea3b1b6a0",
 	"dependencies": {
+		"bcrypt": "^5.1.1",
 		"dotenv": "^16.4.7",
 		"drizzle-orm": "^0.41.0",
 		"express": "^5.1.0",
-		"mysql2": "^3.14.0"
+		"jsonwebtoken": "^9.0.2",
+		"mysql2": "^3.14.0",
+		"passport": "^0.7.0",
+		"passport-jwt": "^4.0.1",
+		"zod": "^3.24.3"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "1.9.4",
+		"@types/bcrypt": "^5.0.2",
 		"@types/express": "^5.0.1",
+		"@types/jsonwebtoken": "^9.0.9",
+		"@types/passport": "^1.0.17",
+		"@types/passport-jwt": "^4.0.1",
 		"drizzle-dbml-generator": "^0.10.0",
 		"drizzle-kit": "^0.30.6",
 		"ts-node": "^10.9.2",
