@@ -9,8 +9,10 @@ export function error(
 ) {
 	try {
 		const msg = JSON.parse(err.message);
-		res.status(err.statusCode).json({ msg });
+		const status = err.statusCode || 500;
+		res.status(status).json({ msg });
 	} catch (error) {
-		res.status(err.statusCode).json({ msg: err.message });
+		const status = err.statusCode || 500;
+		res.status(status).json({ msg: err.message });
 	}
 }

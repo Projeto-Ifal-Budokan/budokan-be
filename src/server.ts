@@ -1,5 +1,5 @@
 import express, { urlencoded, json } from "express";
-import passport from "passport";
+import passport from "../passport.ts";
 import { error } from "./middlewares/error.ts";
 import { notFound } from "./middlewares/not-found.ts";
 
@@ -27,7 +27,9 @@ app.get(
 	"/protected",
 	passport.authenticate("jwt", { session: false }),
 	(req, res) => {
-		res.json({ message: "Você acessou uma rota protegida!", user: req.user });
+		res
+			.status(200)
+			.json({ message: "Você acessou uma rota protegida!", user: req.user });
 	},
 );
 
