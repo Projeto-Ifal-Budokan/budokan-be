@@ -11,20 +11,28 @@ app.use(json());
 
 app.use(passport.initialize());
 
-// ... other middlewares and routes ...
+// Default route
+app.get("/", (req, res) => {
+	res.json({
+		message: "Bem-vindo à API do Portal Budokan",
+		status: "online",
+		version: "1.0.0",
+	});
+});
 
-app.use(notFound);
-app.use(error);
-
-app.use("/api/auth", authRoutes);
+app.use("/auth", authRoutes);
 
 // Exemplo de rota protegida:
 app.get(
-	"/api/protected",
+	"/protected",
 	passport.authenticate("jwt", { session: false }),
 	(req, res) => {
 		res.json({ message: "Você acessou uma rota protegida!", user: req.user });
 	},
 );
+
+// Error handlers should be last
+app.use(notFound);
+app.use(error);
 
 export default app;
