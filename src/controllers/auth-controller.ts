@@ -79,6 +79,11 @@ export const login: RequestHandler = async (req, res) => {
 			return;
 		}
 
+		if (user.status !== "active") {
+			res.status(403).json({ message: "Usuário inativo ou suspenso." });
+			return;
+		}
+
 		const token = jwt.sign(
 			{
 				id: user.id,
