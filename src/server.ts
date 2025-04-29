@@ -5,6 +5,7 @@ import { error } from "./middlewares/error.ts";
 import { notFound } from "./middlewares/not-found.ts";
 
 import authRoutes from "./routes/auth-routes.ts";
+import userRoutes from "./routes/user-routes.ts";
 
 import cors from "cors";
 
@@ -21,6 +22,7 @@ const allowedOrigins = [
 	"http://localhost:3000",
 ];
 
+// Cors
 app.use(
 	cors({
 		origin: (origin, callback) => {
@@ -34,6 +36,8 @@ app.use(
 	}),
 );
 
+/* ROUTES */
+
 // Default route
 app.get("/", (req, res) => {
 	res.json({
@@ -44,6 +48,7 @@ app.get("/", (req, res) => {
 });
 
 app.use("/auth", authRoutes);
+app.use("/users", passport.authenticate("jwt", { session: false }), userRoutes);
 
 // Exemplo de rota protegida:
 app.get(

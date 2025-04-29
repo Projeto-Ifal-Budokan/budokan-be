@@ -33,8 +33,8 @@ export const register: RequestHandler = async (req, res) => {
 			surname,
 			email,
 			password: hashedPassword,
-			phone: phone || null,
-			birthDate: birthDate ? new Date(birthDate) : null,
+			phone: phone,
+			birthDate: new Date(birthDate),
 			status: "inactive" as const,
 		};
 
