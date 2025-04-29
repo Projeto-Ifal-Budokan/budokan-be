@@ -1,3 +1,4 @@
+import cookieParser from "cookie-parser";
 import express, { urlencoded, json } from "express";
 import passport from "../passport.ts";
 import { error } from "./middlewares/error.ts";
@@ -5,11 +6,33 @@ import { notFound } from "./middlewares/not-found.ts";
 
 import authRoutes from "./routes/auth-routes.ts";
 
+import cors from "cors";
+
 const app = express();
 app.use(urlencoded({ extended: true }));
 app.use(json());
 
+app.use(cookieParser());
+
 app.use(passport.initialize());
+
+const allowedOrigins = [
+	"https://budokanryu.netlify.app",
+	"http://localhost:3000",
+];
+
+app.use(
+	cors({
+		origin: (origin, callback) => {
+			if (!origin || allowedOrigins.includes(origin)) {
+				callback(null, true);
+			} else {
+				callback(new Error("Não permitido por CORS"));
+			}
+		},
+		credentials: true,
+	}),
+);
 
 // Default route
 app.get("/", (req, res) => {

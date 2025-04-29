@@ -3,11 +3,15 @@ import { Strategy as JwtStrategy, ExtractJwt } from 'passport-jwt';
 import { eq } from 'drizzle-orm';
 import { usersTable } from './src/db/schema/user_schemas/users';
 import { db } from './src/db';
+import { Request } from 'express';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'seuSegredoAqui';
 
 const options = {
-  jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+  jwtFromRequest: (req: Request) => {
+    const token = req.cookies?.access_token;
+    return token || null;
+  },
   secretOrKey: JWT_SECRET,
 };
 

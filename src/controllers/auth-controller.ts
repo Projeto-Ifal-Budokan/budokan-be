@@ -91,7 +91,15 @@ export const login: RequestHandler = async (req, res) => {
 			},
 		);
 
-		res.json({ token });
+		res
+			.cookie("access_token", token, {
+				httpOnly: true, // Impede acesso via JS (mitiga XSS)
+				secure: process.env.NODE_ENV === "production", // Apenas HTTPS em prod
+				sameSite: "strict", // Evita envio do cookie em requests de outros sites (mitiga CSRF)
+				maxAge: 24 * 60 * 60 * 1000, // 1 dia
+			})
+			.json({ message: "Login bem-sucedido" });
+
 		return;
 	} catch (error) {
 		if (error instanceof ZodError) {
