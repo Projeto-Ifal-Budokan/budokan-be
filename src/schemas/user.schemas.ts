@@ -8,3 +8,5 @@ export const updateUserSchema = z.object({
 	birthDate: z.string(),
 	status: z.enum(["active", "inactive", "suspended"]).optional(),
 });
+
+export type UpdateUserInput = z.infer<typeof updateUserSchema>;
