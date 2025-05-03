@@ -17,10 +17,7 @@ app.use(cookieParser());
 
 app.use(passport.initialize());
 
-const allowedOrigins = [
-	"https://budokanryu.netlify.app",
-	"http://localhost:3000",
-];
+const allowedOrigins = ["https://budokanryu.com.br", "http://localhost:3000"];
 
 // Cors
 app.use(
