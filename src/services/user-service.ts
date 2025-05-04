@@ -1,7 +1,7 @@
 import { eq } from "drizzle-orm";
 import { ZodError } from "zod";
 import { db } from "../db";
-import { usersTable } from "../db/schema/user_schemas/users";
+import { usersTable } from "../db/schema/user-schemas/users";
 import type { UpdateUserInput } from "../schemas/user.schemas";
 
 export class UserService {

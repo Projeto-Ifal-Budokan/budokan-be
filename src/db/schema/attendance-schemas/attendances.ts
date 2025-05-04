@@ -1,10 +1,10 @@
 import { relations } from "drizzle-orm";
 import { bigint, mysqlEnum, mysqlTable, timestamp } from "drizzle-orm/mysql-core";
 import { sessionsTable } from "./sessions";
-import { matriculationsTable } from "../practitioner_schemas/matriculations";
+import { matriculationsTable } from "../practitioner-schemas/matriculations";
 
 export const attendancesTable = mysqlTable("tb_attendances", {
-    id: bigint("id", { mode: "number", unsigned: true }).primaryKey(),
+    id: bigint("id", { mode: "number", unsigned: true }).autoincrement().primaryKey(),
     idMatriculation: bigint("id_matriculation", { mode: "number", unsigned: true })
         .notNull()
         .references(() => matriculationsTable.id),

@@ -5,17 +5,17 @@ import {
 	mysqlTable,
 	timestamp,
 } from "drizzle-orm/mysql-core";
-import { usersTable } from "../user_schemas/users.ts";
-import { disciplinesTable } from "../discipline_schemas/disciplines.ts";
+import { usersTable } from "../user-schemas/users.ts";
+import { disciplinesTable } from "../discipline-schemas/disciplines.ts";
 import { instructorsTable } from "./instructors.ts";
-import { ranksTable } from "../discipline_schemas/ranks.ts";
+import { ranksTable } from "../discipline-schemas/ranks.ts";
 import { foreignKey } from "drizzle-orm/mysql-core";
-import { sessionsTable } from "../attendance_schemas/sessions.ts";
+import { sessionsTable } from "../attendance-schemas/sessions.ts";
 
 export const instructorDisciplinesTable = mysqlTable(
 	"tb_instructor_disciplines",
 	{
-		id: bigint("id", { mode: "number", unsigned: true }).primaryKey(),
+		id: bigint("id", { mode: "number", unsigned: true }).autoincrement().primaryKey(),
 		idInstructor: bigint("id_instructor", {
 			mode: "number",
 			unsigned: true,

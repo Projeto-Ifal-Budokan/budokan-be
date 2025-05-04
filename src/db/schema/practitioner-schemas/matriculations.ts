@@ -6,13 +6,13 @@ import {
 	timestamp,
 } from "drizzle-orm/mysql-core";
 import { studentsTable } from "./students.ts";
-import { disciplinesTable } from "../discipline_schemas/disciplines.ts";
-import { ranksTable } from "../discipline_schemas/ranks.ts";
-import { usersTable } from "../user_schemas/users.ts";
-import { attendancesTable } from "../attendance_schemas/attendances.ts";
+import { disciplinesTable } from "../discipline-schemas/disciplines.ts";
+import { ranksTable } from "../discipline-schemas/ranks.ts";
+import { usersTable } from "../user-schemas/users.ts";
+import { attendancesTable } from "../attendance-schemas/attendances.ts";
 
 export const matriculationsTable = mysqlTable("tb_matriculations", {
-	id: bigint("id", { mode: "number", unsigned: true }).primaryKey(),
+	id: bigint("id", { mode: "number", unsigned: true }).autoincrement().primaryKey(),
 	idStudent: bigint("id_student", {
 		mode: "number",
 		unsigned: true,

@@ -7,7 +7,7 @@ import {
 } from "drizzle-orm/mysql-core";
 
 export const usersTable = mysqlTable("tb_users", {
-	id: bigint("id", { mode: "number", unsigned: true }).primaryKey(),
+	id: bigint("id", { mode: "number", unsigned: true }).autoincrement().primaryKey(),
 	firstName: varchar("first_name", { length: 100 }).notNull(),
 	surname: varchar("surname", { length: 100 }).notNull(),
 	phone: varchar("phone", { length: 20 }).notNull(),

@@ -10,11 +10,11 @@ import {
 } from "drizzle-orm/mysql-core";
 import { foreignKey } from "drizzle-orm/mysql-core";
 import { paymentsTable } from "./payments";
-import { instructorsTable } from "../practitioner_schemas/instructors";
-import { disciplinesTable } from "../discipline_schemas/disciplines";
+import { instructorsTable } from "../practitioner-schemas/instructors";
+import { disciplinesTable } from "../discipline-schemas/disciplines";
 
 export const billingCyclesTable = mysqlTable("tb_billing_cycles", {
-    id: bigint("id", { mode: "number", unsigned: true }).primaryKey(),
+    id: bigint("id", { mode: "number", unsigned: true }).autoincrement().primaryKey(),
     idInstructor: bigint("id_instructor", {
         mode: "number",
         unsigned: true,

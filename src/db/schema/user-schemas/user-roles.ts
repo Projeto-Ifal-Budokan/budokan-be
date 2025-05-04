@@ -8,7 +8,7 @@ import { usersTable } from "./users.ts";
 import { rolesTable } from "./roles.ts";
 
 export const userRolesTable = mysqlTable("tb_user_roles", {
-    id: bigint("id", { mode: "number", unsigned: true }).primaryKey(),
+    id: bigint("id", { mode: "number", unsigned: true }).autoincrement().primaryKey(),
     idRole: bigint("id_role", {
         mode: "number",
         unsigned: true,

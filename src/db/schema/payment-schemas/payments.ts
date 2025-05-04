@@ -6,11 +6,11 @@ import {
     mysqlTable,
     timestamp,
 } from "drizzle-orm/mysql-core";
-import { billingCyclesTable } from "./billingCycles.ts";
-import { matriculationsTable } from "../practitioner_schemas/matriculations.ts";
+import { billingCyclesTable } from "./billing-cycles.ts";
+import { matriculationsTable } from "../practitioner-schemas/matriculations.ts";
 
 export const paymentsTable = mysqlTable("tb_payments", {
-    id: bigint("id", { mode: "number", unsigned: true }).primaryKey(),
+    id: bigint("id", { mode: "number", unsigned: true }).autoincrement().primaryKey(),
     idBillingCycle: bigint("id_billing_cycle", {
         mode: "number",
         unsigned: true,

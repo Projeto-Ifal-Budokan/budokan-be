@@ -3,7 +3,7 @@ import { bigint, mysqlEnum, mysqlTable, time, timestamp } from "drizzle-orm/mysq
 import { disciplinesTable } from "./disciplines";
 
 export const trainingSchedulesTable = mysqlTable("tb_training_schedules", {
-    id: bigint("id", { mode: "number", unsigned: true }).primaryKey(),
+    id: bigint("id", { mode: "number", unsigned: true }).autoincrement().primaryKey(),
     idDiscipline: bigint("id_discipline", {
         mode: "number",
         unsigned: true,

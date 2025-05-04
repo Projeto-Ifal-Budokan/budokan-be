@@ -4,10 +4,10 @@ import { matriculationsTable } from "./matriculations.ts";
 import { practitionersTable } from "./practitioners.ts";
 
 export const studentsTable = mysqlTable("tb_students", {
-	// id: bigint("id", { mode: "number", unsigned: true }).primaryKey(),
+	// id: bigint("id", { mode: "number", unsigned: true }).autoincrement().primaryKey(),
 	idPractitioner: bigint("id_practitioner", { mode: "number", unsigned: true })
 		.notNull()
-		.references(() => practitionersTable.idUser).primaryKey(),
+		.references(() => practitionersTable.idUser).autoincrement().primaryKey(),
 	createdAt: timestamp("created_at").notNull().defaultNow(),
 	updatedAt: timestamp("updated_at").$onUpdate(() => new Date()),
 });

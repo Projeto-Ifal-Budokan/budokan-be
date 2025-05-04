@@ -7,13 +7,13 @@ import {
 	timestamp,
 	varchar,
 } from "drizzle-orm/mysql-core";
-import { instructorsTable } from "../practitioner_schemas/instructors.ts";
-import { studentsTable } from "../practitioner_schemas/students.ts";
+import { instructorsTable } from "../practitioner-schemas/instructors.ts";
+import { studentsTable } from "../practitioner-schemas/students.ts";
 import { disciplinesTable } from "./disciplines.ts";
 import { ranksTable } from "./ranks.ts";
 
 export const examsTable = mysqlTable("tb_exams", {
-	id: bigint("id", { mode: "number", unsigned: true }).primaryKey(),
+	id: bigint("id", { mode: "number", unsigned: true }).autoincrement().primaryKey(),
 	idInstructor: bigint("id_instructor", {
 		mode: "number",
 		unsigned: true,

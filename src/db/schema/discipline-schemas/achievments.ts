@@ -1,9 +1,9 @@
 import { relations } from "drizzle-orm";
 import { bigint, date, mysqlTable, timestamp, varchar } from "drizzle-orm/mysql-core";
-import { practitionersTable } from "../practitioner_schemas/practitioners";
+import { practitionersTable } from "../practitioner-schemas/practitioners";
 
 export const achievmentsTable = mysqlTable("tb_achievments", {
-    id: bigint("id", { mode: "number", unsigned: true }).primaryKey(),
+    id: bigint("id", { mode: "number", unsigned: true }).autoincrement().primaryKey(),
     idPractitioner: bigint("id_practitioner", {
         mode: "number",
         unsigned: true 

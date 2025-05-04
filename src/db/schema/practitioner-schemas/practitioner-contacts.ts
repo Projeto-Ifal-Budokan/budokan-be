@@ -6,7 +6,7 @@ import { foreignKey } from "drizzle-orm/mysql-core";
 export const practitionerContactsTable = mysqlTable(
 	"tb_practitioner_contacts",
 	{
-		id: bigint("id", { mode: "number", unsigned: true }).primaryKey(),
+		id: bigint("id", { mode: "number", unsigned: true }).autoincrement().primaryKey(),
 		idPractitioner: bigint("id_practitioner", {
 			mode: "number",
 			unsigned: true,

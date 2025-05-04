@@ -2,11 +2,11 @@ import { relations } from "drizzle-orm";
 import { bigint, date, mysqlTable, time, timestamp } from "drizzle-orm/mysql-core";
 import { attendancesTable } from "./attendances.ts";
 import { foreignKey } from "drizzle-orm/mysql-core";
-import { disciplinesTable } from "../discipline_schemas/disciplines.ts";
-import { instructorDisciplinesTable } from "../practitioner_schemas/instructorDisciplines.ts";
+import { disciplinesTable } from "../discipline-schemas/disciplines.ts";
+import { instructorDisciplinesTable } from "../practitioner-schemas/instructor-disciplines.ts";
 
 export const sessionsTable = mysqlTable("tb_sessions", {
-    id: bigint("id", { mode: "number", unsigned: true }).primaryKey(),
+    id: bigint("id", { mode: "number", unsigned: true }).autoincrement().primaryKey(),
     idInstructorDiscipline: bigint("id_instructor_discipline", { mode: "number", unsigned: true })
         .notNull(),
     idDiscipline: bigint("id_discipline", { mode: "number", unsigned: true })

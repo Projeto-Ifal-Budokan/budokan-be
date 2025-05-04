@@ -3,7 +3,7 @@ import { eq } from "drizzle-orm";
 import jwt from "jsonwebtoken";
 import nodemailer from "nodemailer";
 import { db } from "../db";
-import { usersTable } from "../db/schema/user_schemas/users";
+import { usersTable } from "../db/schema/user-schemas/users";
 import type {
 	ForgotPasswordInput,
 	LoginInput,
@@ -39,7 +39,6 @@ export class AuthService {
 		const hashedPassword = await bcrypt.hash(password, 10);
 
 		const newUser = {
-			id: Math.floor(Math.random() * 1000000), // Temporary solution for testing
 			firstName,
 			surname,
 			email,

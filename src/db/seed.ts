@@ -1,7 +1,7 @@
 import bcrypt from "bcrypt";
 import { eq } from "drizzle-orm";
 import { db } from "./index";
-import { usersTable } from "./schema/user_schemas/users";
+import { usersTable } from "./schema/user-schemas/users";
 
 async function seedAdminUser() {
 	try {

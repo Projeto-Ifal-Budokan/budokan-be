@@ -9,7 +9,7 @@ import {
 import { instructorsTable } from "./instructors.ts";
 
 export const pixKeysTable = mysqlTable("tb_pix_keys", {
-	id: bigint("id", { mode: "number", unsigned: true }).primaryKey(),
+	id: bigint("id", { mode: "number", unsigned: true }).autoincrement().primaryKey(),
 	idInstructor: bigint("id_instructor", { mode: "number", unsigned: true })
 		.notNull()
 		.references(() => instructorsTable.idPractitioner),

@@ -1,7 +1,7 @@
 import passport from 'passport';
 import { Strategy as JwtStrategy, ExtractJwt } from 'passport-jwt';
 import { eq } from 'drizzle-orm';
-import { usersTable } from './src/db/schema/user_schemas/users';
+import { usersTable } from './src/db/schema/user-schemas/users';
 import { db } from './src/db';
 import { Request } from 'express';
 

@@ -1,12 +1,12 @@
 import { relations } from "drizzle-orm";
 import { bigint, mysqlTable, timestamp, varchar } from "drizzle-orm/mysql-core";
-import { instructorDisciplinesTable } from "../practitioner_schemas/instructorDisciplines.ts";
-import { matriculationsTable } from "../practitioner_schemas/matriculations.ts";
+import { instructorDisciplinesTable } from "../practitioner-schemas/instructor-disciplines.ts";
+import { matriculationsTable } from "../practitioner-schemas/matriculations.ts";
 import { disciplinesTable } from "./disciplines.ts";
 import { examsTable } from "./exams.ts";
 
 export const ranksTable = mysqlTable("tb_ranks", {
-	id: bigint("id", { mode: "number", unsigned: true }).primaryKey(),
+	id: bigint("id", { mode: "number", unsigned: true }).autoincrement().primaryKey(),
 	idDiscipline: bigint("id_discipline", {
 		mode: "number",
 		unsigned: true,
