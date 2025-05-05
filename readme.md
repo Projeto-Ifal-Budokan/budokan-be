@@ -110,6 +110,21 @@ Modo de desenvolvimento:
 pnpm dev
 ```
 
+### Seeds
+
+O projeto possui um seed para criar um usuário admin já com status ativo para logar no sistema:
+```bash
+pnpm seed
+```
+
+eis os dados do usuário para login:
+```json
+{
+  "email": "admin@budokan.com",
+  "password": "admin123"
+}
+```
+
 ## 📁 Estrutura do Projeto
 
 ```

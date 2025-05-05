@@ -1,5 +1,5 @@
 import type { NextFunction, Request, Response } from "express";
-import type { CustomError } from "../lib/custom-error.ts";
+import type { CustomError } from "../utils/custom-error.ts";
 
 export function error(
 	err: CustomError,
@@ -9,8 +9,10 @@ export function error(
 ) {
 	try {
 		const msg = JSON.parse(err.message);
-		res.status(err.statusCode).json({ msg });
+		const status = err.statusCode || 500;
+		res.status(status).json({ msg });
 	} catch (error) {
-		res.status(err.statusCode).json({ msg: err.message });
+		const status = err.statusCode || 500;
+		res.status(status).json({ msg: err.message });
 	}
 }
