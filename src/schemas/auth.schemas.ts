@@ -7,6 +7,8 @@ export const registerSchema = z.object({
 	birthDate: z.string(), // Will be converted to Date in the controller
 	email: z.string().email("Email inválido"),
 	password: z.string().min(6, "Senha deve ter no mínimo 6 caracteres"),
+	isPractitioner: z.boolean(),
+	healthObservations: z.string().optional(),
 });
 
 export const loginSchema = z.object({

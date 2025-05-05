@@ -3,6 +3,7 @@ import { eq } from "drizzle-orm";
 import jwt from "jsonwebtoken";
 import nodemailer from "nodemailer";
 import { db } from "../db";
+import { practitionersTable } from "../db/schema/practitioner-schemas/practitioners";
 import { usersTable } from "../db/schema/user-schemas/users";
 import type {
 	ForgotPasswordInput,
@@ -25,7 +26,16 @@ const transporter = nodemailer.createTransport({
 
 export class AuthService {
 	async register(data: RegisterInput) {
-		const { firstName, surname, email, password, phone, birthDate } = data;
+		const {
+			firstName,
+			surname,
+			email,
+			password,
+			phone,
+			birthDate,
+			isPractitioner,
+			healthObservations,
+		} = data;
 
 		const existingUser = await db
 			.select()
@@ -48,7 +58,26 @@ export class AuthService {
 			status: "inactive" as const,
 		};
 
-		await db.insert(usersTable).values(newUser);
+		// Using a transaction to ensure data consistency
+		await db.transaction(async (tx) => {
+			// Insert the user
+			await tx.insert(usersTable).values(newUser);
+
+			// Get the user ID using the unique email
+			const [user] = await tx
+				.select({ id: usersTable.id })
+				.from(usersTable)
+				.where(eq(usersTable.email, email));
+
+			// If user is a practitioner, create practitioner record
+			if (isPractitioner) {
+				await tx.insert(practitionersTable).values({
+					idUser: user.id,
+					healthObservations: healthObservations || null,
+				});
+			}
+		});
+
 		return { message: "Usuário cadastrado com sucesso." };
 	}
 

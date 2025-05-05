@@ -1,13 +1,14 @@
 import { relations } from "drizzle-orm";
 import { bigint, mysqlTable, timestamp, varchar } from "drizzle-orm/mysql-core";
-import { practitionerContactsTable } from "./practitioner-contacts.ts";
 import { usersTable } from "../user-schemas/users.ts";
+import { practitionerContactsTable } from "./practitioner-contacts.ts";
 
 export const practitionersTable = mysqlTable("tb_practitioners", {
-	// id: bigint("id", { mode: "number", unsigned: true }).autoincrement().primaryKey(),
 	idUser: bigint("id_user", { mode: "number", unsigned: true })
 		.notNull()
-		.references(() => usersTable.id).autoincrement().primaryKey(),
+		.references(() => usersTable.id)
+		.autoincrement()
+		.primaryKey(),
 	healthObservations: varchar("health_observations", { length: 255 }),
 	createdAt: timestamp("created_at").notNull().defaultNow(),
 	updatedAt: timestamp("updated_at").$onUpdate(() => new Date()),
