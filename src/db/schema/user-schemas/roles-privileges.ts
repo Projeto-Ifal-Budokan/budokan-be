@@ -4,7 +4,9 @@ import { privilegesTable } from "./privileges.ts";
 import { rolesTable } from "./roles.ts";
 
 export const rolesPrivilegesTable = mysqlTable("tb_roles_privileges", {
-	id: bigint("id", { mode: "number", unsigned: true }).autoincrement().primaryKey(),
+	id: bigint("id", { mode: "number", unsigned: true })
+		.autoincrement()
+		.primaryKey(),
 	idRole: bigint("id_role", {
 		mode: "number",
 		unsigned: true,
@@ -32,7 +34,7 @@ export const rolesPrivilegesRelations = relations(
 		privilege: one(privilegesTable, {
 			fields: [rolesPrivilegesTable.idPrivilege],
 			references: [privilegesTable.id],
-			relationName: "privilleges",
+			relationName: "privileges",
 		}),
 	}),
 );
