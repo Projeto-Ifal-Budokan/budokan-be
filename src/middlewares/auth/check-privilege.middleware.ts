@@ -1,7 +1,6 @@
 import { eq } from "drizzle-orm";
 import type { NextFunction, Request, Response } from "express";
 import { db } from "../../db";
-import { rolesPrivilegesTable } from "../../db/schema/user-schemas/roles-privileges";
 import { userRolesTable } from "../../db/schema/user-schemas/user-roles";
 import type { User } from "../../types/auth.types";
 

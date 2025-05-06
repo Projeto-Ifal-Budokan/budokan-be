@@ -2,8 +2,8 @@ import bcrypt from "bcrypt";
 import { eq } from "drizzle-orm";
 import { db } from "./index";
 import { privilegesTable } from "./schema/user-schemas/privileges";
+import { rolePrivilegesTable } from "./schema/user-schemas/role-privileges";
 import { rolesTable } from "./schema/user-schemas/roles";
-import { rolesPrivilegesTable } from "./schema/user-schemas/roles-privileges";
 import { userRolesTable } from "./schema/user-schemas/user-roles";
 import { usersTable } from "./schema/user-schemas/users";
 
@@ -144,8 +144,8 @@ async function seedRolePrivileges() {
 			// Get existing privileges for this role
 			const existingPrivileges = await db
 				.select()
-				.from(rolesPrivilegesTable)
-				.where(eq(rolesPrivilegesTable.idRole, role.id));
+				.from(rolePrivilegesTable)
+				.where(eq(rolePrivilegesTable.idRole, role.id));
 
 			// Find privileges to add
 			const privilegesToAdd = allPrivileges
@@ -159,7 +159,7 @@ async function seedRolePrivileges() {
 				}));
 
 			if (privilegesToAdd.length > 0) {
-				await db.insert(rolesPrivilegesTable).values(privilegesToAdd);
+				await db.insert(rolePrivilegesTable).values(privilegesToAdd);
 				console.log(
 					`${privilegesToAdd.length} novos privilégios atribuídos ao papel ${role.name}`,
 				);

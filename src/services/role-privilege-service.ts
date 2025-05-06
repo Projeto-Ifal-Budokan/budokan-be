@@ -1,8 +1,8 @@
 import { and, eq } from "drizzle-orm";
 import { db } from "../db";
 import { privilegesTable } from "../db/schema/user-schemas/privileges";
+import { rolePrivilegesTable } from "../db/schema/user-schemas/role-privileges";
 import { rolesTable } from "../db/schema/user-schemas/roles";
-import { rolesPrivilegesTable } from "../db/schema/user-schemas/roles-privileges";
 import type {
 	AssignRolePrivilegeInput,
 	RemoveRolePrivilegeInput,
@@ -33,11 +33,11 @@ export class RolePrivilegeService {
 		// Check if role already has this privilege
 		const existingRolePrivilege = await db
 			.select()
-			.from(rolesPrivilegesTable)
+			.from(rolePrivilegesTable)
 			.where(
 				and(
-					eq(rolesPrivilegesTable.idRole, idRole),
-					eq(rolesPrivilegesTable.idPrivilege, idPrivilege),
+					eq(rolePrivilegesTable.idRole, idRole),
+					eq(rolePrivilegesTable.idPrivilege, idPrivilege),
 				),
 			);
 
@@ -46,7 +46,7 @@ export class RolePrivilegeService {
 		}
 
 		// Assign privilege to role
-		await db.insert(rolesPrivilegesTable).values({
+		await db.insert(rolePrivilegesTable).values({
 			idRole,
 			idPrivilege,
 		});
@@ -58,11 +58,11 @@ export class RolePrivilegeService {
 		// Check if role-privilege relationship exists
 		const existingRolePrivilege = await db
 			.select()
-			.from(rolesPrivilegesTable)
+			.from(rolePrivilegesTable)
 			.where(
 				and(
-					eq(rolesPrivilegesTable.idRole, idRole),
-					eq(rolesPrivilegesTable.idPrivilege, idPrivilege),
+					eq(rolePrivilegesTable.idRole, idRole),
+					eq(rolePrivilegesTable.idPrivilege, idPrivilege),
 				),
 			);
 
@@ -72,11 +72,11 @@ export class RolePrivilegeService {
 
 		// Remove privilege from role
 		await db
-			.delete(rolesPrivilegesTable)
+			.delete(rolePrivilegesTable)
 			.where(
 				and(
-					eq(rolesPrivilegesTable.idRole, idRole),
-					eq(rolesPrivilegesTable.idPrivilege, idPrivilege),
+					eq(rolePrivilegesTable.idRole, idRole),
+					eq(rolePrivilegesTable.idPrivilege, idPrivilege),
 				),
 			);
 
@@ -101,12 +101,12 @@ export class RolePrivilegeService {
 				name: privilegesTable.name,
 				description: privilegesTable.description,
 			})
-			.from(rolesPrivilegesTable)
+			.from(rolePrivilegesTable)
 			.innerJoin(
 				privilegesTable,
-				eq(rolesPrivilegesTable.idPrivilege, privilegesTable.id),
+				eq(rolePrivilegesTable.idPrivilege, privilegesTable.id),
 			)
-			.where(eq(rolesPrivilegesTable.idRole, roleId));
+			.where(eq(rolePrivilegesTable.idRole, roleId));
 
 		return rolePrivileges;
 	}

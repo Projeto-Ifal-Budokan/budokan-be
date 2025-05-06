@@ -1,6 +1,6 @@
 import { relations } from "drizzle-orm";
 import { bigint, mysqlTable, timestamp, varchar } from "drizzle-orm/mysql-core";
-import { rolesPrivilegesTable } from "./roles-privileges.ts";
+import { rolePrivilegesTable } from "./role-privileges.ts";
 
 export const privilegesTable = mysqlTable("tb_privileges", {
 	id: bigint("id", { mode: "number", unsigned: true })
@@ -13,7 +13,7 @@ export const privilegesTable = mysqlTable("tb_privileges", {
 });
 
 export const privilegesRelations = relations(privilegesTable, ({ many }) => ({
-	rolePrivileges: many(rolesPrivilegesTable, {
+	rolePrivileges: many(rolePrivilegesTable, {
 		relationName: "privileges",
 	}),
 }));
