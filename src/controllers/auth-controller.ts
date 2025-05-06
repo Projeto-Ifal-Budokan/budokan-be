@@ -1,5 +1,4 @@
 import type { RequestHandler } from "express";
-import nodemailer from "nodemailer";
 import { ZodError } from "zod";
 import { AuthService } from "../services/auth-service";
 
@@ -9,18 +8,6 @@ import {
 	registerSchema,
 	resetPasswordSchema,
 } from "../schemas/auth.schemas";
-
-const JWT_SECRET = process.env.JWT_SECRET || "seuSegredoAqui";
-
-// Transporter para ambiente de desenvolvimento (Ethereal)
-const transporter = nodemailer.createTransport({
-	host: "smtp.ethereal.email",
-	port: 587,
-	auth: {
-		user: process.env.ETHEREAL_USER,
-		pass: process.env.ETHEREAL_PASS,
-	},
-});
 
 const authService = new AuthService();
 
