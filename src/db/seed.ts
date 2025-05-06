@@ -9,14 +9,10 @@ import { usersTable } from "./schema/user-schemas/users";
 
 async function seedPrivileges() {
 	try {
-		// Check if privileges already exist
+		// Get existing privileges
 		const existingPrivileges = await db.select().from(privilegesTable);
-		if (existingPrivileges.length > 0) {
-			console.log("Privilégios já existem");
-			return;
-		}
 
-		// Define all privileges
+		// Define all privileges that should exist
 		const privileges = [
 			// User privileges
 			{ name: "list_users", description: "Listar todos os usuários" },
@@ -40,11 +36,48 @@ async function seedPrivileges() {
 			{ name: "create_privilege", description: "Criar novo privilégio" },
 			{ name: "update_privilege", description: "Atualizar privilégio" },
 			{ name: "delete_privilege", description: "Excluir privilégio" },
+
+			// User Roles management
+			{
+				name: "update_user_roles",
+				description: "Atualizer papéis de um usuário",
+			},
+			{
+				name: "view_user_roles",
+				description: "Visualizar papéis de um usuário",
+			},
+
+			// Role privileges management
+			{
+				name: "update_role_privileges",
+				description: "Atualizer privilégios de um papel",
+			},
+			{
+				name: "view_role_privileges",
+				description: "Visualizar privilégios de um papel",
+			},
 		];
 
-		await db.insert(privilegesTable).values(privileges);
-		console.log("Privilégios criados com sucesso");
-		return privileges;
+		// Find privileges that don't exist yet
+		const existingPrivilegeNames = existingPrivileges.map((p) => p.name);
+		const newPrivileges = privileges.filter(
+			(p) => !existingPrivilegeNames.includes(p.name),
+		);
+
+		if (newPrivileges.length === 0) {
+			console.log("Nenhum novo privilégio para adicionar");
+			return existingPrivileges;
+		}
+
+		// Add only new privileges
+		await db.insert(privilegesTable).values(newPrivileges);
+		console.log(
+			`${newPrivileges.length} novos privilégios criados com sucesso`,
+		);
+
+		// Return all privileges (existing + new)
+		const allPrivileges = await db.select().from(privilegesTable);
+		return allPrivileges;
 	} catch (error) {
 		console.error("Erro ao criar privilégios:", error);
 		throw error;
@@ -53,14 +86,10 @@ async function seedPrivileges() {
 
 async function seedRoles() {
 	try {
-		// Check if roles already exist
+		// Get existing roles
 		const existingRoles = await db.select().from(rolesTable);
-		if (existingRoles.length > 0) {
-			console.log("Papéis já existem");
-			return;
-		}
 
-		// Create admin and instructor roles
+		// Define all roles that should exist
 		const roles = [
 			{
 				name: "admin",
@@ -72,42 +101,76 @@ async function seedRoles() {
 			},
 		];
 
-		await db.insert(rolesTable).values(roles);
-		console.log("Papéis criados com sucesso");
+		// Find roles that don't exist yet
+		const existingRoleNames = existingRoles.map((r) => r.name);
+		const newRoles = roles.filter((r) => !existingRoleNames.includes(r.name));
 
-		// Get all privileges and roles for mapping
-		const allPrivileges = await db.select().from(privilegesTable);
-		const createdRoles = await db.select().from(rolesTable);
-
-		const adminRole = createdRoles.find((role) => role.name === "admin");
-		const instructorRole = createdRoles.find(
-			(role) => role.name === "instructor",
-		);
-
-		if (adminRole) {
-			// Give admin all privileges
-			const adminPrivileges = allPrivileges.map((privilege) => ({
-				idRole: adminRole.id,
-				idPrivilege: privilege.id,
-			}));
-			await db.insert(rolesPrivilegesTable).values(adminPrivileges);
+		if (newRoles.length === 0) {
+			console.log("Nenhum novo papel para adicionar");
+			return existingRoles;
 		}
 
-		if (instructorRole) {
-			// Give instructor only user-related privileges
-			const instructorPrivilegeNames = ["list_users", "view_user"];
-			const instructorPrivileges = allPrivileges
-				.filter((p) => instructorPrivilegeNames.includes(p.name))
-				.map((privilege) => ({
-					idRole: instructorRole.id,
-					idPrivilege: privilege.id,
-				}));
-			await db.insert(rolesPrivilegesTable).values(instructorPrivileges);
-		}
+		// Add only new roles
+		await db.insert(rolesTable).values(newRoles);
+		console.log(`${newRoles.length} novos papéis criados com sucesso`);
 
-		console.log("Privilégios dos papéis mapeados com sucesso");
+		// Return all roles (existing + new)
+		const allRoles = await db.select().from(rolesTable);
+		return allRoles;
 	} catch (error) {
 		console.error("Erro ao criar papéis:", error);
+		throw error;
+	}
+}
+
+async function seedRolePrivileges() {
+	try {
+		// Get all privileges and roles
+		const allPrivileges = await db.select().from(privilegesTable);
+		const allRoles = await db.select().from(rolesTable);
+
+		// Define role-privilege mappings
+		const rolePrivilegeMappings = {
+			admin: allPrivileges.map((p) => p.name), // Admin gets all privileges
+			instructor: ["list_users", "view_user"], // Instructor gets limited privileges
+		};
+
+		// Process each role
+		for (const role of allRoles) {
+			const privilegeNames =
+				rolePrivilegeMappings[role.name as keyof typeof rolePrivilegeMappings];
+			if (!privilegeNames) continue;
+
+			// Get existing privileges for this role
+			const existingPrivileges = await db
+				.select()
+				.from(rolesPrivilegesTable)
+				.where(eq(rolesPrivilegesTable.idRole, role.id));
+
+			// Find privileges to add
+			const privilegesToAdd = allPrivileges
+				.filter((p) => privilegeNames.includes(p.name))
+				.filter(
+					(p) => !existingPrivileges.some((ep) => ep.idPrivilege === p.id),
+				)
+				.map((p) => ({
+					idRole: role.id,
+					idPrivilege: p.id,
+				}));
+
+			if (privilegesToAdd.length > 0) {
+				await db.insert(rolesPrivilegesTable).values(privilegesToAdd);
+				console.log(
+					`${privilegesToAdd.length} novos privilégios atribuídos ao papel ${role.name}`,
+				);
+			} else {
+				console.log(
+					`Nenhum novo privilégio para atribuir ao papel ${role.name}`,
+				);
+			}
+		}
+	} catch (error) {
+		console.error("Erro ao mapear privilégios dos papéis:", error);
 		throw error;
 	}
 }
@@ -200,6 +263,7 @@ export const seed = async () => {
 	try {
 		await seedPrivileges();
 		await seedRoles();
+		await seedRolePrivileges();
 		const adminUser = await seedAdminUser();
 		if (adminUser) {
 			await assignAdminRole(adminUser);
