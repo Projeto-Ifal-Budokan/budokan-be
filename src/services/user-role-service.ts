@@ -97,11 +97,9 @@ export class UserRoleService {
 		// Get user roles with role details
 		const userRoles = await db
 			.select({
-				role: {
-					id: rolesTable.id,
-					name: rolesTable.name,
-					description: rolesTable.description,
-				},
+				id: rolesTable.id,
+				name: rolesTable.name,
+				description: rolesTable.description,
 			})
 			.from(userRolesTable)
 			.innerJoin(rolesTable, eq(userRolesTable.idRole, rolesTable.id))
