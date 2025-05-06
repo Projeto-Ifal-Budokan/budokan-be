@@ -1,19 +1,21 @@
 import { eq } from "drizzle-orm";
-import type { NextFunction, Response } from "express";
+import type { NextFunction, Request, Response } from "express";
 import { db } from "../../db";
 import { userRolesTable } from "../../db/schema/user-schemas/user-roles";
-import type { AuthenticatedRequest } from "../../types/auth.types";
+import type { User } from "../../types/auth.types";
 
 export const hasRole = (requiredRole: string) => {
 	return async (
-		req: AuthenticatedRequest,
+		req: Request,
 		res: Response,
 		next: NextFunction,
-	) => {
-		const userId = req.user?.id;
+	): Promise<void> => {
+		const user = req.user as User | undefined;
+		const userId = user?.id;
 
 		if (!userId) {
-			return res.status(401).json({ message: "Não autenticado" });
+			res.status(401).json({ message: "Não autenticado" });
+			return;
 		}
 
 		try {
@@ -29,15 +31,17 @@ export const hasRole = (requiredRole: string) => {
 			);
 
 			if (!hasRequiredRole) {
-				return res.status(403).json({
+				res.status(403).json({
 					message: "Você não tem permissão para acessar este recurso",
 				});
+				return;
 			}
 
 			next();
 		} catch (error) {
 			console.error("Erro ao verificar roles:", error);
-			return res.status(500).json({ message: "Erro interno do servidor" });
+			res.status(500).json({ message: "Erro interno do servidor" });
+			return;
 		}
 	};
 };
