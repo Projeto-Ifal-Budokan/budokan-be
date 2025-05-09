@@ -1,4 +1,4 @@
-import express from "express";
+import { Router } from "express";
 import {
 	assignRole,
 	listUserRoles,
@@ -6,11 +6,278 @@ import {
 } from "../controllers/user-role-controller";
 import { hasPrivilege } from "../middlewares/auth/check-privilege.middleware";
 
-const router = express.Router();
+const router = Router();
 
-// Protected routes with privilege checks
+/**
+ * @openapi
+ * /user-roles/assign:
+ *   post:
+ *     tags:
+ *       - Papéis de Usuário
+ *     summary: Atribui um papel a um usuário
+ *     description: Atribui um papel específico a um usuário do sistema
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - userId
+ *               - roleId
+ *             properties:
+ *               userId:
+ *                 type: string
+ *                 example: "user_id"
+ *               roleId:
+ *                 type: string
+ *                 example: "role_id"
+ *     responses:
+ *       200:
+ *         description: Papel atribuído com sucesso
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Papel atribuído com sucesso"
+ *                 userRole:
+ *                   type: object
+ *                   properties:
+ *                     userId:
+ *                       type: string
+ *                       example: "user_id"
+ *                     roleId:
+ *                       type: string
+ *                       example: "role_id"
+ *                     createdAt:
+ *                       type: string
+ *                       format: date-time
+ *                       example: "2024-03-20T10:00:00Z"
+ *       400:
+ *         description: Dados inválidos
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Usuário e papel são obrigatórios"
+ *       401:
+ *         description: Não autenticado
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Token não fornecido ou inválido"
+ *       403:
+ *         description: Sem permissão
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Acesso negado"
+ *       404:
+ *         description: Usuário ou papel não encontrado
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Usuário ou papel não encontrado"
+ *       409:
+ *         description: Papel já atribuído
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Usuário já possui este papel"
+ */
 router.post("/assign", hasPrivilege("update_user_roles"), assignRole);
+
+/**
+ * @openapi
+ * /user-roles/remove:
+ *   post:
+ *     tags:
+ *       - Papéis de Usuário
+ *     summary: Remove um papel de um usuário
+ *     description: Remove um papel específico de um usuário do sistema
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - userId
+ *               - roleId
+ *             properties:
+ *               userId:
+ *                 type: string
+ *                 example: "user_id"
+ *               roleId:
+ *                 type: string
+ *                 example: "role_id"
+ *     responses:
+ *       200:
+ *         description: Papel removido com sucesso
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Papel removido com sucesso"
+ *                 removedRole:
+ *                   type: object
+ *                   properties:
+ *                     userId:
+ *                       type: string
+ *                       example: "user_id"
+ *                     roleId:
+ *                       type: string
+ *                       example: "role_id"
+ *                     removedAt:
+ *                       type: string
+ *                       format: date-time
+ *                       example: "2024-03-20T10:00:00Z"
+ *       400:
+ *         description: Dados inválidos
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Usuário e papel são obrigatórios"
+ *       401:
+ *         description: Não autenticado
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Token não fornecido ou inválido"
+ *       403:
+ *         description: Sem permissão
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Acesso negado"
+ *       404:
+ *         description: Usuário ou papel não encontrado
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Usuário ou papel não encontrado"
+ */
 router.post("/remove", hasPrivilege("update_user_roles"), removeRole);
+
+/**
+ * @openapi
+ * /user-roles/{id}:
+ *   get:
+ *     tags:
+ *       - Papéis de Usuário
+ *     summary: Lista os papéis de um usuário
+ *     description: Retorna todos os papéis atribuídos a um usuário específico
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID do usuário
+ *     responses:
+ *       200:
+ *         description: Lista de papéis retornada com sucesso
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 roles:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: string
+ *                         example: "role_id"
+ *                       name:
+ *                         type: string
+ *                         example: "admin"
+ *                       description:
+ *                         type: string
+ *                         example: "Administrador do sistema"
+ *                       assignedAt:
+ *                         type: string
+ *                         format: date-time
+ *                         example: "2024-03-20T10:00:00Z"
+ *       401:
+ *         description: Não autenticado
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Token não fornecido ou inválido"
+ *       403:
+ *         description: Sem permissão
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Acesso negado"
+ *       404:
+ *         description: Usuário não encontrado
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Usuário não encontrado"
+ */
 router.get("/:id", hasPrivilege("view_user_roles"), listUserRoles);
 
 export default router;

@@ -1,4 +1,4 @@
-import express from "express";
+import { Router } from "express";
 import {
 	createPrivilege,
 	deletePrivilege,
@@ -8,13 +8,383 @@ import {
 } from "../controllers/privilege-controller";
 import { hasPrivilege } from "../middlewares/auth/check-privilege.middleware";
 
-const router = express.Router();
+const router = Router();
 
-// Protected routes with privilege checks
+/**
+ * @openapi
+ * /privileges:
+ *   get:
+ *     tags:
+ *       - Privilégios
+ *     summary: Lista todos os privilégios
+ *     description: Retorna uma lista de todos os privilégios cadastrados no sistema
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Lista de privilégios retornada com sucesso
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 privileges:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: string
+ *                         example: "privilege_id"
+ *                       name:
+ *                         type: string
+ *                         example: "create_user"
+ *                       description:
+ *                         type: string
+ *                         example: "Permite criar usuários"
+ *                       createdAt:
+ *                         type: string
+ *                         format: date-time
+ *                         example: "2024-03-20T10:00:00Z"
+ *       401:
+ *         description: Não autenticado
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Token não fornecido ou inválido"
+ *       403:
+ *         description: Sem permissão
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Acesso negado"
+ */
 router.get("/", hasPrivilege("list_privileges"), listPrivileges);
+
+/**
+ * @openapi
+ * /privileges/{id}:
+ *   get:
+ *     tags:
+ *       - Privilégios
+ *     summary: Busca um privilégio por ID
+ *     description: Retorna os detalhes de um privilégio específico
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID do privilégio
+ *     responses:
+ *       200:
+ *         description: Privilégio encontrado com sucesso
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 id:
+ *                   type: string
+ *                   example: "privilege_id"
+ *                 name:
+ *                   type: string
+ *                   example: "create_user"
+ *                 description:
+ *                   type: string
+ *                   example: "Permite criar usuários"
+ *                 createdAt:
+ *                   type: string
+ *                   format: date-time
+ *                   example: "2024-03-20T10:00:00Z"
+ *       401:
+ *         description: Não autenticado
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Token não fornecido ou inválido"
+ *       403:
+ *         description: Sem permissão
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Acesso negado"
+ *       404:
+ *         description: Privilégio não encontrado
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Privilégio não encontrado"
+ */
 router.get("/:id", hasPrivilege("view_privilege"), getPrivilegeById);
+
+/**
+ * @openapi
+ * /privileges:
+ *   post:
+ *     tags:
+ *       - Privilégios
+ *     summary: Cria um novo privilégio
+ *     description: Cria um novo privilégio no sistema
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - name
+ *               - description
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 example: "create_user"
+ *               description:
+ *                 type: string
+ *                 example: "Permite criar usuários"
+ *     responses:
+ *       201:
+ *         description: Privilégio criado com sucesso
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Privilégio criado com sucesso"
+ *                 privilege:
+ *                   type: object
+ *                   properties:
+ *                     id:
+ *                       type: string
+ *                       example: "privilege_id"
+ *                     name:
+ *                       type: string
+ *                       example: "create_user"
+ *                     description:
+ *                       type: string
+ *                       example: "Permite criar usuários"
+ *                     createdAt:
+ *                       type: string
+ *                       format: date-time
+ *                       example: "2024-03-20T10:00:00Z"
+ *       400:
+ *         description: Dados inválidos
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Nome e descrição são obrigatórios"
+ *       401:
+ *         description: Não autenticado
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Token não fornecido ou inválido"
+ *       403:
+ *         description: Sem permissão
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Acesso negado"
+ */
 router.post("/", hasPrivilege("create_privilege"), createPrivilege);
+
+/**
+ * @openapi
+ * /privileges/{id}:
+ *   put:
+ *     tags:
+ *       - Privilégios
+ *     summary: Atualiza um privilégio
+ *     description: Atualiza os dados de um privilégio existente
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID do privilégio
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 example: "create_user"
+ *               description:
+ *                 type: string
+ *                 example: "Permite criar usuários"
+ *     responses:
+ *       200:
+ *         description: Privilégio atualizado com sucesso
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Privilégio atualizado com sucesso"
+ *                 privilege:
+ *                   type: object
+ *                   properties:
+ *                     id:
+ *                       type: string
+ *                       example: "privilege_id"
+ *                     name:
+ *                       type: string
+ *                       example: "create_user"
+ *                     description:
+ *                       type: string
+ *                       example: "Permite criar usuários"
+ *                     updatedAt:
+ *                       type: string
+ *                       format: date-time
+ *                       example: "2024-03-20T10:00:00Z"
+ *       400:
+ *         description: Dados inválidos
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Dados inválidos para atualização"
+ *       401:
+ *         description: Não autenticado
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Token não fornecido ou inválido"
+ *       403:
+ *         description: Sem permissão
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Acesso negado"
+ *       404:
+ *         description: Privilégio não encontrado
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Privilégio não encontrado"
+ */
 router.put("/:id", hasPrivilege("update_privilege"), updatePrivilege);
+
+/**
+ * @openapi
+ * /privileges/{id}:
+ *   delete:
+ *     tags:
+ *       - Privilégios
+ *     summary: Remove um privilégio
+ *     description: Remove um privilégio existente do sistema
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID do privilégio
+ *     responses:
+ *       200:
+ *         description: Privilégio removido com sucesso
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Privilégio removido com sucesso"
+ *       401:
+ *         description: Não autenticado
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Token não fornecido ou inválido"
+ *       403:
+ *         description: Sem permissão
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Acesso negado"
+ *       404:
+ *         description: Privilégio não encontrado
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Privilégio não encontrado"
+ */
 router.delete("/:id", hasPrivilege("delete_privilege"), deletePrivilege);
 
 export default router;
