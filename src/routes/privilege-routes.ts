@@ -34,18 +34,15 @@ const router = Router();
  *                     type: object
  *                     properties:
  *                       id:
- *                         type: string
- *                         example: "privilege_id"
+ *                         type: integer
+ *                         format: int64
  *                       name:
  *                         type: string
- *                         example: "create_user"
  *                       description:
  *                         type: string
- *                         example: "Permite criar usuários"
  *                       createdAt:
  *                         type: string
  *                         format: date-time
- *                         example: "2024-03-20T10:00:00Z"
  *       401:
  *         description: Não autenticado
  *         content:
@@ -84,7 +81,8 @@ router.get("/", hasPrivilege("list_privileges"), listPrivileges);
  *         name: id
  *         required: true
  *         schema:
- *           type: string
+ *           type: integer
+ *           format: int64
  *         description: ID do privilégio
  *     responses:
  *       200:
@@ -95,18 +93,15 @@ router.get("/", hasPrivilege("list_privileges"), listPrivileges);
  *               type: object
  *               properties:
  *                 id:
- *                   type: string
- *                   example: "privilege_id"
+ *                   type: integer
+ *                   format: int64
  *                 name:
  *                   type: string
- *                   example: "create_user"
  *                 description:
  *                   type: string
- *                   example: "Permite criar usuários"
  *                 createdAt:
  *                   type: string
  *                   format: date-time
- *                   example: "2024-03-20T10:00:00Z"
  *       401:
  *         description: Não autenticado
  *         content:
@@ -155,17 +150,7 @@ router.get("/:id", hasPrivilege("view_privilege"), getPrivilegeById);
  *       content:
  *         application/json:
  *           schema:
- *             type: object
- *             required:
- *               - name
- *               - description
- *             properties:
- *               name:
- *                 type: string
- *                 example: "create_user"
- *               description:
- *                 type: string
- *                 example: "Permite criar usuários"
+ *             $ref: '#/components/schemas/CreatePrivilegeInput'
  *     responses:
  *       201:
  *         description: Privilégio criado com sucesso
@@ -181,18 +166,15 @@ router.get("/:id", hasPrivilege("view_privilege"), getPrivilegeById);
  *                   type: object
  *                   properties:
  *                     id:
- *                       type: string
- *                       example: "privilege_id"
+ *                       type: integer
+ *                       format: int64
  *                     name:
  *                       type: string
- *                       example: "create_user"
  *                     description:
  *                       type: string
- *                       example: "Permite criar usuários"
  *                     createdAt:
  *                       type: string
  *                       format: date-time
- *                       example: "2024-03-20T10:00:00Z"
  *       400:
  *         description: Dados inválidos
  *         content:
@@ -241,21 +223,15 @@ router.post("/", hasPrivilege("create_privilege"), createPrivilege);
  *         name: id
  *         required: true
  *         schema:
- *           type: string
+ *           type: integer
+ *           format: int64
  *         description: ID do privilégio
  *     requestBody:
  *       required: true
  *       content:
  *         application/json:
  *           schema:
- *             type: object
- *             properties:
- *               name:
- *                 type: string
- *                 example: "create_user"
- *               description:
- *                 type: string
- *                 example: "Permite criar usuários"
+ *             $ref: '#/components/schemas/UpdatePrivilegeInput'
  *     responses:
  *       200:
  *         description: Privilégio atualizado com sucesso
@@ -271,18 +247,15 @@ router.post("/", hasPrivilege("create_privilege"), createPrivilege);
  *                   type: object
  *                   properties:
  *                     id:
- *                       type: string
- *                       example: "privilege_id"
+ *                       type: integer
+ *                       format: int64
  *                     name:
  *                       type: string
- *                       example: "create_user"
  *                     description:
  *                       type: string
- *                       example: "Permite criar usuários"
  *                     updatedAt:
  *                       type: string
  *                       format: date-time
- *                       example: "2024-03-20T10:00:00Z"
  *       400:
  *         description: Dados inválidos
  *         content:
@@ -292,7 +265,7 @@ router.post("/", hasPrivilege("create_privilege"), createPrivilege);
  *               properties:
  *                 message:
  *                   type: string
- *                   example: "Dados inválidos para atualização"
+ *                   example: "Dados de atualização inválidos"
  *       401:
  *         description: Não autenticado
  *         content:
@@ -341,7 +314,8 @@ router.put("/:id", hasPrivilege("update_privilege"), updatePrivilege);
  *         name: id
  *         required: true
  *         schema:
- *           type: string
+ *           type: integer
+ *           format: int64
  *         description: ID do privilégio
  *     responses:
  *       200:
@@ -353,7 +327,20 @@ router.put("/:id", hasPrivilege("update_privilege"), updatePrivilege);
  *               properties:
  *                 message:
  *                   type: string
- *                   example: "Privilégio removido com sucesso"
+ *                   example: "Privilégio deletado com sucesso"
+ *                 deletedPrivilege:
+ *                   type: object
+ *                   properties:
+ *                     id:
+ *                       type: integer
+ *                       format: int64
+ *                     name:
+ *                       type: string
+ *                     description:
+ *                       type: string
+ *                     deletedAt:
+ *                       type: string
+ *                       format: date-time
  *       401:
  *         description: Não autenticado
  *         content:

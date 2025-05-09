@@ -22,28 +22,7 @@ const router = Router();
  *       content:
  *         application/json:
  *           schema:
- *             type: object
- *             required:
- *               - name
- *               - email
- *               - password
- *               - confirmPassword
- *             properties:
- *               name:
- *                 type: string
- *                 example: "John Doe"
- *               email:
- *                 type: string
- *                 format: email
- *                 example: "john@example.com"
- *               password:
- *                 type: string
- *                 format: password
- *                 example: "senha123"
- *               confirmPassword:
- *                 type: string
- *                 format: password
- *                 example: "senha123"
+ *             $ref: '#/components/schemas/RegisterInput'
  *     responses:
  *       201:
  *         description: Usuário criado com sucesso
@@ -60,17 +39,15 @@ const router = Router();
  *                   properties:
  *                     id:
  *                       type: string
- *                       example: "user_id"
- *                     name:
+ *                     firstName:
  *                       type: string
- *                       example: "John Doe"
+ *                     surname:
+ *                       type: string
  *                     email:
  *                       type: string
- *                       example: "john@example.com"
  *                     createdAt:
  *                       type: string
  *                       format: date-time
- *                       example: "2024-03-20T10:00:00Z"
  *       400:
  *         description: Erro de validação
  *         content:
@@ -108,19 +85,7 @@ router.post("/register", register);
  *       content:
  *         application/json:
  *           schema:
- *             type: object
- *             required:
- *               - email
- *               - password
- *             properties:
- *               email:
- *                 type: string
- *                 format: email
- *                 example: "john@example.com"
- *               password:
- *                 type: string
- *                 format: password
- *                 example: "senha123"
+ *             $ref: '#/components/schemas/LoginInput'
  *     responses:
  *       200:
  *         description: Login realizado com sucesso
@@ -137,22 +102,19 @@ router.post("/register", register);
  *                   properties:
  *                     id:
  *                       type: string
- *                       example: "user_id"
- *                     name:
+ *                     firstName:
  *                       type: string
- *                       example: "John Doe"
+ *                     surname:
+ *                       type: string
  *                     email:
  *                       type: string
- *                       example: "john@example.com"
  *                     roles:
  *                       type: array
  *                       items:
  *                         type: string
- *                       example: ["admin", "user"]
  *                     createdAt:
  *                       type: string
  *                       format: date-time
- *                       example: "2024-03-20T10:00:00Z"
  *       401:
  *         description: Credenciais inválidas
  *         content:
@@ -190,14 +152,7 @@ router.post("/login", login);
  *       content:
  *         application/json:
  *           schema:
- *             type: object
- *             required:
- *               - email
- *             properties:
- *               email:
- *                 type: string
- *                 format: email
- *                 example: "john@example.com"
+ *             $ref: '#/components/schemas/ForgotPasswordInput'
  *     responses:
  *       200:
  *         description: Email de recuperação enviado
@@ -246,23 +201,7 @@ router.post("/forgot-password", forgotPassword);
  *       content:
  *         application/json:
  *           schema:
- *             type: object
- *             required:
- *               - token
- *               - password
- *               - confirmPassword
- *             properties:
- *               token:
- *                 type: string
- *                 example: "reset_token_here"
- *               password:
- *                 type: string
- *                 format: password
- *                 example: "nova_senha123"
- *               confirmPassword:
- *                 type: string
- *                 format: password
- *                 example: "nova_senha123"
+ *             $ref: '#/components/schemas/ResetPasswordInput'
  *     responses:
  *       200:
  *         description: Senha alterada com sucesso

@@ -23,17 +23,7 @@ const router = Router();
  *       content:
  *         application/json:
  *           schema:
- *             type: object
- *             required:
- *               - roleId
- *               - privilegeId
- *             properties:
- *               roleId:
- *                 type: string
- *                 example: "role_id"
- *               privilegeId:
- *                 type: string
- *                 example: "privilege_id"
+ *             $ref: '#/components/schemas/AssignRolePrivilegeInput'
  *     responses:
  *       200:
  *         description: Privilégio atribuído com sucesso
@@ -48,16 +38,15 @@ const router = Router();
  *                 rolePrivilege:
  *                   type: object
  *                   properties:
- *                     roleId:
- *                       type: string
- *                       example: "role_id"
- *                     privilegeId:
- *                       type: string
- *                       example: "privilege_id"
+ *                     idRole:
+ *                       type: integer
+ *                       format: int64
+ *                     idPrivilege:
+ *                       type: integer
+ *                       format: int64
  *                     createdAt:
  *                       type: string
  *                       format: date-time
- *                       example: "2024-03-20T10:00:00Z"
  *       400:
  *         description: Dados inválidos
  *         content:
@@ -126,17 +115,7 @@ router.post("/assign", hasPrivilege("update_role_privileges"), assignPrivilege);
  *       content:
  *         application/json:
  *           schema:
- *             type: object
- *             required:
- *               - roleId
- *               - privilegeId
- *             properties:
- *               roleId:
- *                 type: string
- *                 example: "role_id"
- *               privilegeId:
- *                 type: string
- *                 example: "privilege_id"
+ *             $ref: '#/components/schemas/RemoveRolePrivilegeInput'
  *     responses:
  *       200:
  *         description: Privilégio removido com sucesso
@@ -151,16 +130,15 @@ router.post("/assign", hasPrivilege("update_role_privileges"), assignPrivilege);
  *                 removedPrivilege:
  *                   type: object
  *                   properties:
- *                     roleId:
- *                       type: string
- *                       example: "role_id"
- *                     privilegeId:
- *                       type: string
- *                       example: "privilege_id"
+ *                     idRole:
+ *                       type: integer
+ *                       format: int64
+ *                     idPrivilege:
+ *                       type: integer
+ *                       format: int64
  *                     removedAt:
  *                       type: string
  *                       format: date-time
- *                       example: "2024-03-20T10:00:00Z"
  *       400:
  *         description: Dados inválidos
  *         content:
@@ -219,7 +197,8 @@ router.post("/remove", hasPrivilege("update_role_privileges"), removePrivilege);
  *         name: id
  *         required: true
  *         schema:
- *           type: string
+ *           type: integer
+ *           format: int64
  *         description: ID do papel
  *     responses:
  *       200:
@@ -235,18 +214,15 @@ router.post("/remove", hasPrivilege("update_role_privileges"), removePrivilege);
  *                     type: object
  *                     properties:
  *                       id:
- *                         type: string
- *                         example: "privilege_id"
+ *                         type: integer
+ *                         format: int64
  *                       name:
  *                         type: string
- *                         example: "create_user"
  *                       description:
  *                         type: string
- *                         example: "Permite criar usuários"
  *                       assignedAt:
  *                         type: string
  *                         format: date-time
- *                         example: "2024-03-20T10:00:00Z"
  *       401:
  *         description: Não autenticado
  *         content:

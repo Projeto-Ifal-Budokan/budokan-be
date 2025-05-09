@@ -1,3 +1,27 @@
+/**
+ * @openapi
+ * components:
+ *   schemas:
+ *     AssignRolePrivilegeInput:
+ *       type: object
+ *       required:
+ *         - idRole
+ *         - idPrivilege
+ *       properties:
+ *         idRole:
+ *           type: integer
+ *           format: int64
+ *           minimum: 1
+ *           example: 1
+ *         idPrivilege:
+ *           type: integer
+ *           format: int64
+ *           minimum: 1
+ *           example: 1
+ *     RemoveRolePrivilegeInput:
+ *       $ref: '#/components/schemas/AssignRolePrivilegeInput'
+ */
+
 import { z } from "zod";
 
 export const assignRolePrivilegeSchema = z.object({

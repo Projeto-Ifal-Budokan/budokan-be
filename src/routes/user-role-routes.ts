@@ -23,17 +23,7 @@ const router = Router();
  *       content:
  *         application/json:
  *           schema:
- *             type: object
- *             required:
- *               - userId
- *               - roleId
- *             properties:
- *               userId:
- *                 type: string
- *                 example: "user_id"
- *               roleId:
- *                 type: string
- *                 example: "role_id"
+ *             $ref: '#/components/schemas/AssignUserRoleInput'
  *     responses:
  *       200:
  *         description: Papel atribuído com sucesso
@@ -48,16 +38,15 @@ const router = Router();
  *                 userRole:
  *                   type: object
  *                   properties:
- *                     userId:
- *                       type: string
- *                       example: "user_id"
- *                     roleId:
- *                       type: string
- *                       example: "role_id"
+ *                     idUser:
+ *                       type: integer
+ *                       format: int64
+ *                     idRole:
+ *                       type: integer
+ *                       format: int64
  *                     createdAt:
  *                       type: string
  *                       format: date-time
- *                       example: "2024-03-20T10:00:00Z"
  *       400:
  *         description: Dados inválidos
  *         content:
@@ -126,17 +115,7 @@ router.post("/assign", hasPrivilege("update_user_roles"), assignRole);
  *       content:
  *         application/json:
  *           schema:
- *             type: object
- *             required:
- *               - userId
- *               - roleId
- *             properties:
- *               userId:
- *                 type: string
- *                 example: "user_id"
- *               roleId:
- *                 type: string
- *                 example: "role_id"
+ *             $ref: '#/components/schemas/RemoveUserRoleInput'
  *     responses:
  *       200:
  *         description: Papel removido com sucesso
@@ -151,16 +130,15 @@ router.post("/assign", hasPrivilege("update_user_roles"), assignRole);
  *                 removedRole:
  *                   type: object
  *                   properties:
- *                     userId:
- *                       type: string
- *                       example: "user_id"
- *                     roleId:
- *                       type: string
- *                       example: "role_id"
+ *                     idUser:
+ *                       type: integer
+ *                       format: int64
+ *                     idRole:
+ *                       type: integer
+ *                       format: int64
  *                     removedAt:
  *                       type: string
  *                       format: date-time
- *                       example: "2024-03-20T10:00:00Z"
  *       400:
  *         description: Dados inválidos
  *         content:
@@ -219,7 +197,8 @@ router.post("/remove", hasPrivilege("update_user_roles"), removeRole);
  *         name: id
  *         required: true
  *         schema:
- *           type: string
+ *           type: integer
+ *           format: int64
  *         description: ID do usuário
  *     responses:
  *       200:
@@ -235,18 +214,15 @@ router.post("/remove", hasPrivilege("update_user_roles"), removeRole);
  *                     type: object
  *                     properties:
  *                       id:
- *                         type: string
- *                         example: "role_id"
+ *                         type: integer
+ *                         format: int64
  *                       name:
  *                         type: string
- *                         example: "admin"
  *                       description:
  *                         type: string
- *                         example: "Administrador do sistema"
  *                       assignedAt:
  *                         type: string
  *                         format: date-time
- *                         example: "2024-03-20T10:00:00Z"
  *       401:
  *         description: Não autenticado
  *         content:

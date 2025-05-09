@@ -34,18 +34,15 @@ const router = Router();
  *                     type: object
  *                     properties:
  *                       id:
- *                         type: string
- *                         example: "role_id"
+ *                         type: integer
+ *                         format: int64
  *                       name:
  *                         type: string
- *                         example: "admin"
  *                       description:
  *                         type: string
- *                         example: "Administrador do sistema"
  *                       createdAt:
  *                         type: string
  *                         format: date-time
- *                         example: "2024-03-20T10:00:00Z"
  *       401:
  *         description: Não autenticado
  *         content:
@@ -84,7 +81,8 @@ router.get("/", hasPrivilege("list_roles"), listRoles);
  *         name: id
  *         required: true
  *         schema:
- *           type: string
+ *           type: integer
+ *           format: int64
  *         description: ID do papel
  *     responses:
  *       200:
@@ -95,18 +93,15 @@ router.get("/", hasPrivilege("list_roles"), listRoles);
  *               type: object
  *               properties:
  *                 id:
- *                   type: string
- *                   example: "role_id"
+ *                   type: integer
+ *                   format: int64
  *                 name:
  *                   type: string
- *                   example: "admin"
  *                 description:
  *                   type: string
- *                   example: "Administrador do sistema"
  *                 createdAt:
  *                   type: string
  *                   format: date-time
- *                   example: "2024-03-20T10:00:00Z"
  *       401:
  *         description: Não autenticado
  *         content:
@@ -147,7 +142,7 @@ router.get("/:id", hasPrivilege("view_role"), getRoleById);
  *     tags:
  *       - Papéis
  *     summary: Cria um novo papel
- *     description: Cria um novo papel no sistema com os privilégios especificados
+ *     description: Cria um novo papel no sistema
  *     security:
  *       - bearerAuth: []
  *     requestBody:
@@ -155,22 +150,7 @@ router.get("/:id", hasPrivilege("view_role"), getRoleById);
  *       content:
  *         application/json:
  *           schema:
- *             type: object
- *             required:
- *               - name
- *               - description
- *             properties:
- *               name:
- *                 type: string
- *                 example: "admin"
- *               description:
- *                 type: string
- *                 example: "Administrador do sistema"
- *               privileges:
- *                 type: array
- *                 items:
- *                   type: string
- *                 example: ["create_user", "delete_user"]
+ *             $ref: '#/components/schemas/CreateRoleInput'
  *     responses:
  *       201:
  *         description: Papel criado com sucesso
@@ -186,18 +166,15 @@ router.get("/:id", hasPrivilege("view_role"), getRoleById);
  *                   type: object
  *                   properties:
  *                     id:
- *                       type: string
- *                       example: "role_id"
+ *                       type: integer
+ *                       format: int64
  *                     name:
  *                       type: string
- *                       example: "admin"
  *                     description:
  *                       type: string
- *                       example: "Administrador do sistema"
  *                     createdAt:
  *                       type: string
  *                       format: date-time
- *                       example: "2024-03-20T10:00:00Z"
  *       400:
  *         description: Dados inválidos
  *         content:
@@ -246,26 +223,15 @@ router.post("/", hasPrivilege("create_role"), createRole);
  *         name: id
  *         required: true
  *         schema:
- *           type: string
+ *           type: integer
+ *           format: int64
  *         description: ID do papel
  *     requestBody:
  *       required: true
  *       content:
  *         application/json:
  *           schema:
- *             type: object
- *             properties:
- *               name:
- *                 type: string
- *                 example: "admin"
- *               description:
- *                 type: string
- *                 example: "Administrador do sistema"
- *               privileges:
- *                 type: array
- *                 items:
- *                   type: string
- *                 example: ["create_user", "delete_user"]
+ *             $ref: '#/components/schemas/UpdateRoleInput'
  *     responses:
  *       200:
  *         description: Papel atualizado com sucesso
@@ -281,18 +247,15 @@ router.post("/", hasPrivilege("create_role"), createRole);
  *                   type: object
  *                   properties:
  *                     id:
- *                       type: string
- *                       example: "role_id"
+ *                       type: integer
+ *                       format: int64
  *                     name:
  *                       type: string
- *                       example: "admin"
  *                     description:
  *                       type: string
- *                       example: "Administrador do sistema"
  *                     updatedAt:
  *                       type: string
  *                       format: date-time
- *                       example: "2024-03-20T10:00:00Z"
  *       400:
  *         description: Dados inválidos
  *         content:
@@ -302,7 +265,7 @@ router.post("/", hasPrivilege("create_role"), createRole);
  *               properties:
  *                 message:
  *                   type: string
- *                   example: "Dados inválidos para atualização"
+ *                   example: "Dados de atualização inválidos"
  *       401:
  *         description: Não autenticado
  *         content:
@@ -351,7 +314,8 @@ router.put("/:id", hasPrivilege("update_role"), updateRole);
  *         name: id
  *         required: true
  *         schema:
- *           type: string
+ *           type: integer
+ *           format: int64
  *         description: ID do papel
  *     responses:
  *       200:
@@ -363,7 +327,20 @@ router.put("/:id", hasPrivilege("update_role"), updateRole);
  *               properties:
  *                 message:
  *                   type: string
- *                   example: "Papel removido com sucesso"
+ *                   example: "Papel deletado com sucesso"
+ *                 deletedRole:
+ *                   type: object
+ *                   properties:
+ *                     id:
+ *                       type: integer
+ *                       format: int64
+ *                     name:
+ *                       type: string
+ *                     description:
+ *                       type: string
+ *                     deletedAt:
+ *                       type: string
+ *                       format: date-time
  *       401:
  *         description: Não autenticado
  *         content:

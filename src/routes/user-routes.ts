@@ -16,68 +16,38 @@ const router = Router();
  *     tags:
  *       - Usuários
  *     summary: Lista todos os usuários
- *     description: Retorna uma lista paginada de todos os usuários cadastrados no sistema
+ *     description: Retorna uma lista de todos os usuários cadastrados no sistema
  *     security:
  *       - bearerAuth: []
- *     parameters:
- *       - in: query
- *         name: page
- *         schema:
- *           type: integer
- *           default: 1
- *         description: Número da página
- *       - in: query
- *         name: limit
- *         schema:
- *           type: integer
- *           default: 10
- *         description: Quantidade de itens por página
  *     responses:
  *       200:
  *         description: Lista de usuários retornada com sucesso
  *         content:
  *           application/json:
  *             schema:
- *               type: object
- *               properties:
- *                 users:
- *                   type: array
- *                   items:
+ *               type: array
+ *               items:
  *                     type: object
  *                     properties:
  *                       id:
  *                         type: string
- *                         example: "user_id"
- *                       name:
+ *                       firstName:
  *                         type: string
- *                         example: "John Doe"
+ *                       surname:
+ *                         type: string
  *                       email:
  *                         type: string
- *                         example: "john@example.com"
- *                       roles:
- *                         type: array
- *                         items:
- *                           type: string
- *                         example: ["admin", "user"]
+ *                       phone:
+ *                         type: string
+ *                       birthDate:
+ *                         type: string
+ *                         format: date
+ *                       status:
+ *                         type: string
+ *                         enum: ["active", "inactive", "suspended"]
  *                       createdAt:
  *                         type: string
  *                         format: date-time
- *                         example: "2024-03-20T10:00:00Z"
- *                 pagination:
- *                   type: object
- *                   properties:
- *                     total:
- *                       type: integer
- *                       example: 50
- *                     pages:
- *                       type: integer
- *                       example: 5
- *                     currentPage:
- *                       type: integer
- *                       example: 1
- *                     limit:
- *                       type: integer
- *                       example: 10
  *       401:
  *         description: Não autenticado
  *         content:
@@ -128,26 +98,20 @@ router.get("/", hasPrivilege("list_users"), listUsers);
  *               properties:
  *                 id:
  *                   type: string
- *                   example: "user_id"
- *                 name:
+ *                 firstName:
  *                   type: string
- *                   example: "John Doe"
+ *                 surname:
+ *                   type: string
  *                 email:
  *                   type: string
- *                   example: "john@example.com"
- *                 roles:
- *                   type: array
- *                   items:
- *                     type: string
- *                   example: ["admin", "user"]
- *                 createdAt:
+ *                 phone:
  *                   type: string
- *                   format: date-time
- *                   example: "2024-03-20T10:00:00Z"
- *                 updatedAt:
+ *                 birthDate:
  *                   type: string
- *                   format: date-time
- *                   example: "2024-03-20T10:00:00Z"
+ *                   format: date
+ *                 status:
+ *                   type: string
+ *                   enum: ["active", "inactive", "suspended"]
  *       401:
  *         description: Não autenticado
  *         content:
@@ -203,20 +167,7 @@ router.get("/:id", hasPrivilege("view_user"), getUserById);
  *       content:
  *         application/json:
  *           schema:
- *             type: object
- *             properties:
- *               name:
- *                 type: string
- *                 example: "John Doe"
- *               email:
- *                 type: string
- *                 format: email
- *                 example: "john@example.com"
- *               roles:
- *                 type: array
- *                 items:
- *                   type: string
- *                 example: ["admin", "user"]
+ *             $ref: '#/components/schemas/UpdateUserInput'
  *     responses:
  *       200:
  *         description: Usuário atualizado com sucesso
@@ -227,22 +178,23 @@ router.get("/:id", hasPrivilege("view_user"), getUserById);
  *               properties:
  *                 id:
  *                   type: string
- *                   example: "user_id"
- *                 name:
+ *                 firstName:
  *                   type: string
- *                   example: "John Doe"
+ *                 surname:
+ *                   type: string
  *                 email:
  *                   type: string
- *                   example: "john@example.com"
- *                 roles:
- *                   type: array
- *                   items:
- *                     type: string
- *                   example: ["admin", "user"]
+ *                 phone:
+ *                   type: string
+ *                 birthDate:
+ *                   type: string
+ *                   format: date
+ *                 status:
+ *                   type: string
+ *                   enum: ["active", "inactive", "suspended"]
  *                 updatedAt:
  *                   type: string
  *                   format: date-time
- *                   example: "2024-03-20T10:00:00Z"
  *       400:
  *         description: Dados inválidos
  *         content:
@@ -324,22 +276,6 @@ router.put("/:id", hasPrivilege("update_user"), updateUser);
  *                 message:
  *                   type: string
  *                   example: "Usuário deletado com sucesso"
- *                 deletedUser:
- *                   type: object
- *                   properties:
- *                     id:
- *                       type: string
- *                       example: "user_id"
- *                     name:
- *                       type: string
- *                       example: "John Doe"
- *                     email:
- *                       type: string
- *                       example: "john@example.com"
- *                     deletedAt:
- *                       type: string
- *                       format: date-time
- *                       example: "2024-03-20T10:00:00Z"
  *       401:
  *         description: Não autenticado
  *         content:
