@@ -26,11 +26,8 @@ const router = Router();
  *         content:
  *           application/json:
  *             schema:
- *               type: object
- *               properties:
- *                 privileges:
- *                   type: array
- *                   items:
+ *               type: array
+ *               items:
  *                     type: object
  *                     properties:
  *                       id:
@@ -43,6 +40,8 @@ const router = Router();
  *                       createdAt:
  *                         type: string
  *                         format: date-time
+ *
+ *
  *       401:
  *         description: Não autenticado
  *         content:

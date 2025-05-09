@@ -26,23 +26,23 @@ const router = Router();
  *         content:
  *           application/json:
  *             schema:
- *               type: object
- *               properties:
- *                 roles:
- *                   type: array
- *                   items:
- *                     type: object
- *                     properties:
- *                       id:
- *                         type: integer
- *                         format: int64
- *                       name:
- *                         type: string
- *                       description:
- *                         type: string
- *                       createdAt:
- *                         type: string
- *                         format: date-time
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   id:
+ *                     type: integer
+ *                     format: int64
+ *                   name:
+ *                     type: string
+ *                   description:
+ *                     type: string
+ *                   createdAt:
+ *                     type: string
+ *                     format: date-time
+ *                   updatedAt:
+ *                     type: string
+ *                     format: date-time
  *       401:
  *         description: Não autenticado
  *         content:
@@ -100,6 +100,9 @@ router.get("/", hasPrivilege("list_roles"), listRoles);
  *                 description:
  *                   type: string
  *                 createdAt:
+ *                   type: string
+ *                   format: date-time
+ *                 updatedAt:
  *                   type: string
  *                   format: date-time
  *       401:

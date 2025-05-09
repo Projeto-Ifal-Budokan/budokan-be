@@ -97,7 +97,7 @@ router.get("/", hasPrivilege("list_users"), listUsers);
  *               type: object
  *               properties:
  *                 id:
- *                   type: string
+ *                   type: integer
  *                 firstName:
  *                   type: string
  *                 surname:
@@ -176,25 +176,9 @@ router.get("/:id", hasPrivilege("view_user"), getUserById);
  *             schema:
  *               type: object
  *               properties:
- *                 id:
+ *                 message:
  *                   type: string
- *                 firstName:
- *                   type: string
- *                 surname:
- *                   type: string
- *                 email:
- *                   type: string
- *                 phone:
- *                   type: string
- *                 birthDate:
- *                   type: string
- *                   format: date
- *                 status:
- *                   type: string
- *                   enum: ["active", "inactive", "suspended"]
- *                 updatedAt:
- *                   type: string
- *                   format: date-time
+ *                   example: "Usuário atualizado com sucesso"
  *       400:
  *         description: Dados inválidos
  *         content:

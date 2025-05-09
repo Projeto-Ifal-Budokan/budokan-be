@@ -34,20 +34,6 @@ const router = Router();
  *                 message:
  *                   type: string
  *                   example: "Usuário criado com sucesso"
- *                 user:
- *                   type: object
- *                   properties:
- *                     id:
- *                       type: string
- *                     firstName:
- *                       type: string
- *                     surname:
- *                       type: string
- *                     email:
- *                       type: string
- *                     createdAt:
- *                       type: string
- *                       format: date-time
  *       400:
  *         description: Erro de validação
  *         content:

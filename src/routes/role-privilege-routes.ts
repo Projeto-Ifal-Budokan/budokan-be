@@ -35,18 +35,6 @@ const router = Router();
  *                 message:
  *                   type: string
  *                   example: "Privilégio atribuído com sucesso"
- *                 rolePrivilege:
- *                   type: object
- *                   properties:
- *                     idRole:
- *                       type: integer
- *                       format: int64
- *                     idPrivilege:
- *                       type: integer
- *                       format: int64
- *                     createdAt:
- *                       type: string
- *                       format: date-time
  *       400:
  *         description: Dados inválidos
  *         content:

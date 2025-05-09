@@ -60,20 +60,7 @@ export class UserService {
 			})
 			.where(eq(usersTable.id, id));
 
-		const updatedUser = await db
-			.select({
-				id: usersTable.id,
-				firstName: usersTable.firstName,
-				surname: usersTable.surname,
-				email: usersTable.email,
-				phone: usersTable.phone,
-				birthDate: usersTable.birthDate,
-				status: usersTable.status,
-			})
-			.from(usersTable)
-			.where(eq(usersTable.id, id));
-
-		return updatedUser[0];
+		return { message: "Usuário atualizado com sucesso" };
 	}
 
 	async deleteUser(id: number) {

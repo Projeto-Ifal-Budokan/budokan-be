@@ -35,18 +35,6 @@ const router = Router();
  *                 message:
  *                   type: string
  *                   example: "Papel atribuído com sucesso"
- *                 userRole:
- *                   type: object
- *                   properties:
- *                     idUser:
- *                       type: integer
- *                       format: int64
- *                     idRole:
- *                       type: integer
- *                       format: int64
- *                     createdAt:
- *                       type: string
- *                       format: date-time
  *       400:
  *         description: Dados inválidos
  *         content:
@@ -127,18 +115,6 @@ router.post("/assign", hasPrivilege("update_user_roles"), assignRole);
  *                 message:
  *                   type: string
  *                   example: "Papel removido com sucesso"
- *                 removedRole:
- *                   type: object
- *                   properties:
- *                     idUser:
- *                       type: integer
- *                       format: int64
- *                     idRole:
- *                       type: integer
- *                       format: int64
- *                     removedAt:
- *                       type: string
- *                       format: date-time
  *       400:
  *         description: Dados inválidos
  *         content:
@@ -206,11 +182,8 @@ router.post("/remove", hasPrivilege("update_user_roles"), removeRole);
  *         content:
  *           application/json:
  *             schema:
- *               type: object
- *               properties:
- *                 roles:
- *                   type: array
- *                   items:
+ *               type: array
+ *               items:
  *                     type: object
  *                     properties:
  *                       id:
@@ -220,9 +193,7 @@ router.post("/remove", hasPrivilege("update_user_roles"), removeRole);
  *                         type: string
  *                       description:
  *                         type: string
- *                       assignedAt:
- *                         type: string
- *                         format: date-time
+ *
  *       401:
  *         description: Não autenticado
  *         content:

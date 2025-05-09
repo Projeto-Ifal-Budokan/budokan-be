@@ -10,40 +10,6 @@ import userRoutes from "./user-routes.ts";
 
 const router = Router();
 
-/**
- * @openapi
- * /:
- *   get:
- *     tags:
- *       - Sistema
- *     summary: Informações da API
- *     description: Retorna informações básicas sobre a API
- *     responses:
- *       200:
- *         description: Informações retornadas com sucesso
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: "Bem-vindo à API do Portal Budokan"
- *                 status:
- *                   type: string
- *                   example: "online"
- *                 version:
- *                   type: string
- *                   example: "1.0.0"
- */
-router.get("/", (req, res) => {
-	res.json({
-		message: "Bem-vindo à API do Portal Budokan",
-		status: "online",
-		version: "1.0.0",
-	});
-});
-
 router.use("/auth", authRoutes);
 router.use(
 	"/users",
@@ -69,51 +35,6 @@ router.use(
 	"/role-privileges",
 	passport.authenticate("jwt", { session: false }),
 	rolePrivilegeRoutes,
-);
-
-/**
- * @openapi
- * /protected:
- *   get:
- *     tags:
- *       - Sistema
- *     summary: Rota protegida de exemplo
- *     description: Exemplo de rota que requer autenticação JWT
- *     security:
- *       - bearerAuth: []
- *     responses:
- *       200:
- *         description: Acesso permitido
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: "Você acessou uma rota protegida!"
- *                 user:
- *                   type: object
- *                   description: Informações do usuário autenticado
- *       401:
- *         description: Não autorizado
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: "Não autorizado"
- */
-router.get(
-	"/protected",
-	passport.authenticate("jwt", { session: false }),
-	(req, res) => {
-		res
-			.status(200)
-			.json({ message: "Você acessou uma rota protegida!", user: req.user });
-	},
 );
 
 export default router;
