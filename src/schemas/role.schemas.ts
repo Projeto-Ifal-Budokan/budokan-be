@@ -1,38 +1,3 @@
-/**
- * @openapi
- * components:
- *   schemas:
- *     CreateRoleInput:
- *       type: object
- *       required:
- *         - name
- *         - description
- *       properties:
- *         name:
- *           type: string
- *           minLength: 2
- *           maxLength: 100
- *           example: "admin"
- *         description:
- *           type: string
- *           minLength: 2
- *           maxLength: 255
- *           example: "Administrador do sistema"
- *     UpdateRoleInput:
- *       type: object
- *       properties:
- *         name:
- *           type: string
- *           minLength: 2
- *           maxLength: 100
- *           example: "admin"
- *         description:
- *           type: string
- *           minLength: 2
- *           maxLength: 255
- *           example: "Administrador do sistema"
- */
-
 import { z } from "zod";
 
 export const createRoleSchema = z.object({

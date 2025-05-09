@@ -1,35 +1,3 @@
-/**
- * @openapi
- * components:
- *   schemas:
- *     UpdateUserInput:
- *       type: object
- *       properties:
- *         firstName:
- *           type: string
- *           minLength: 2
- *           example: "John"
- *         surname:
- *           type: string
- *           minLength: 2
- *           example: "Doe"
- *         email:
- *           type: string
- *           format: email
- *           example: "john.doe@example.com"
- *         phone:
- *           type: string
- *           example: "+55 82 99999-9999"
- *         birthDate:
- *           type: string
- *           format: date
- *           example: "1990-01-01"
- *         status:
- *           type: string
- *           enum: ["active", "inactive", "suspended"]
- *           example: "active"
- */
-
 import { z } from "zod";
 
 export const updateUserSchema = z.object({

@@ -100,6 +100,13 @@ export const resetPassword: RequestHandler = async (req, res) => {
 			});
 			return;
 		}
+		if (
+			error instanceof Error &&
+			error.message === "Token inválido ou expirado."
+		) {
+			res.status(401).json({ message: error.message });
+			return;
+		}
 		console.error("Erro ao resetar senha:", error);
 		res.status(500).json({ message: "Erro interno do servidor" });
 	}
