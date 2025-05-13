@@ -3,8 +3,10 @@ import { bigint, mysqlTable, timestamp } from "drizzle-orm/mysql-core";
 import { privilegesTable } from "./privileges.ts";
 import { rolesTable } from "./roles.ts";
 
-export const rolesPrivilegesTable = mysqlTable("tb_roles_privileges", {
-	id: bigint("id", { mode: "number", unsigned: true }).autoincrement().primaryKey(),
+export const rolePrivilegesTable = mysqlTable("tb_role_privileges", {
+	id: bigint("id", { mode: "number", unsigned: true })
+		.autoincrement()
+		.primaryKey(),
 	idRole: bigint("id_role", {
 		mode: "number",
 		unsigned: true,
@@ -22,17 +24,17 @@ export const rolesPrivilegesTable = mysqlTable("tb_roles_privileges", {
 });
 
 export const rolesPrivilegesRelations = relations(
-	rolesPrivilegesTable,
+	rolePrivilegesTable,
 	({ one }) => ({
 		role: one(rolesTable, {
-			fields: [rolesPrivilegesTable.idRole],
+			fields: [rolePrivilegesTable.idRole],
 			references: [rolesTable.id],
 			relationName: "roles",
 		}),
 		privilege: one(privilegesTable, {
-			fields: [rolesPrivilegesTable.idPrivilege],
+			fields: [rolePrivilegesTable.idPrivilege],
 			references: [privilegesTable.id],
-			relationName: "privilleges",
+			relationName: "privileges",
 		}),
 	}),
 );

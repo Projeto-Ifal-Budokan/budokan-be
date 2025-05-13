@@ -5,6 +5,10 @@ import { error } from "./middlewares/error.ts";
 import { notFound } from "./middlewares/not-found.ts";
 
 import authRoutes from "./routes/auth-routes.ts";
+import privilegeRoutes from "./routes/privilege-routes.ts";
+import rolePrivilegeRoutes from "./routes/role-privilege-routes.ts";
+import roleRoutes from "./routes/role-routes.ts";
+import userRoleRoutes from "./routes/user-role-routes.ts";
 import userRoutes from "./routes/user-routes.ts";
 
 import cors from "cors";
@@ -46,6 +50,22 @@ app.get("/", (req, res) => {
 
 app.use("/auth", authRoutes);
 app.use("/users", passport.authenticate("jwt", { session: false }), userRoutes);
+app.use("/roles", passport.authenticate("jwt", { session: false }), roleRoutes);
+app.use(
+	"/privileges",
+	passport.authenticate("jwt", { session: false }),
+	privilegeRoutes,
+);
+app.use(
+	"/user-roles",
+	passport.authenticate("jwt", { session: false }),
+	userRoleRoutes,
+);
+app.use(
+	"/role-privileges",
+	passport.authenticate("jwt", { session: false }),
+	rolePrivilegeRoutes,
+);
 
 // Exemplo de rota protegida:
 app.get(
