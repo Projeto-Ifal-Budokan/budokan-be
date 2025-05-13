@@ -10,6 +10,7 @@ import rolePrivilegeRoutes from "./routes/role-privilege-routes.ts";
 import roleRoutes from "./routes/role-routes.ts";
 import userRoleRoutes from "./routes/user-role-routes.ts";
 import userRoutes from "./routes/user-routes.ts";
+import disciplinesRoutes from "./routes/discipline-routes.ts";
 
 import cors from "cors";
 
@@ -65,6 +66,11 @@ app.use(
 	"/role-privileges",
 	passport.authenticate("jwt", { session: false }),
 	rolePrivilegeRoutes,
+);
+app.use(
+	"/disciplines",
+	passport.authenticate("jwt", { session: false }),
+	disciplinesRoutes,
 );
 
 // Exemplo de rota protegida:

@@ -6,6 +6,7 @@ import { rolePrivilegesTable } from "./schema/user-schemas/role-privileges";
 import { rolesTable } from "./schema/user-schemas/roles";
 import { userRolesTable } from "./schema/user-schemas/user-roles";
 import { usersTable } from "./schema/user-schemas/users";
+import { disciplinesTable } from "./schema/discipline-schemas/disciplines";
 
 async function seedPrivileges() {
 	try {
@@ -56,6 +57,15 @@ async function seedPrivileges() {
 				name: "view_role_privileges",
 				description: "Visualizar privilégios de um papel",
 			},
+
+			// Discipline management
+			{ name: "list_disciplines", description: "Listar todas as disciplinas" },
+			{
+				name: "view_discipline",
+				description: "Visualizar detalhes da disciplina",
+			},
+			{ name: "create_discipline", description: "Criar nova disciplina" },
+			{ name: "update_discipline", description: "Atualizar disciplina" },
 		];
 
 		// Find privileges that don't exist yet
@@ -175,6 +185,49 @@ async function seedRolePrivileges() {
 	}
 }
 
+async function seedDisciplines() {
+	try {
+		// Get existing disciplines
+		const existingDisciplines = await db.select().from(disciplinesTable);
+
+		// Define all disciplines that should exist
+		const disciplines = [
+			{
+				name: "Karate-Do",
+				description: "Modalidade de Karate-Do",
+			},
+			{
+				name: "Kendo",
+				description: "Modalidade de Kendo",
+			},
+			{
+				name: "Arqueria",
+				description: "Modalidade de Arqueria",
+			},
+		];
+
+		// Find disciplines that don't exist yet
+		const existingDisciplineNames = existingDisciplines.map((r) => r.name);
+		const newDisciplines = disciplines.filter((r) => !existingDisciplineNames.includes(r.name));
+
+		if (newDisciplines.length === 0) {
+			console.log("Nenhuma nova disciplina para adicionar");
+			return existingDisciplines;
+		}
+
+		// Add only new disciplines
+		await db.insert(disciplinesTable).values(newDisciplines);
+		console.log(`${newDisciplines.length} novas disciplinas criadas com sucesso`);
+
+		// Return all disciplines (existing + new)
+		const allDisciplines = await db.select().from(disciplinesTable);
+		return allDisciplines;
+	} catch (error) {
+		console.error("Erro ao criar disciplinas:", error);
+		throw error;
+	}
+}
+
 async function seedAdminUser() {
 	try {
 		// Check if admin user already exists
@@ -264,6 +317,7 @@ export const seed = async () => {
 		await seedPrivileges();
 		await seedRoles();
 		await seedRolePrivileges();
+		await seedDisciplines();
 		const adminUser = await seedAdminUser();
 		if (adminUser) {
 			await assignAdminRole(adminUser);
