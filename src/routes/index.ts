@@ -2,6 +2,7 @@ import { Request, Response, Router } from "express";
 import passport from "../../passport.ts";
 
 import authRoutes from "./auth-routes.ts";
+import disciplinesRoutes from "./discipline-routes.ts";
 import privilegeRoutes from "./privilege-routes.ts";
 import rolePrivilegeRoutes from "./role-privilege-routes.ts";
 import roleRoutes from "./role-routes.ts";
@@ -35,6 +36,11 @@ router.use(
 	"/role-privileges",
 	passport.authenticate("jwt", { session: false }),
 	rolePrivilegeRoutes,
+);
+router.use(
+	"/disciplines",
+	passport.authenticate("jwt", { session: false }),
+	disciplinesRoutes,
 );
 
 export default router;
