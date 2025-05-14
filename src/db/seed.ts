@@ -1,12 +1,13 @@
 import bcrypt from "bcrypt";
 import { eq } from "drizzle-orm";
 import { db } from "./index";
+import { disciplinesTable } from "./schema/discipline-schemas/disciplines";
+import { ranksTable } from "./schema/discipline-schemas/ranks";
 import { privilegesTable } from "./schema/user-schemas/privileges";
 import { rolePrivilegesTable } from "./schema/user-schemas/role-privileges";
 import { rolesTable } from "./schema/user-schemas/roles";
 import { userRolesTable } from "./schema/user-schemas/user-roles";
 import { usersTable } from "./schema/user-schemas/users";
-import { disciplinesTable } from "./schema/discipline-schemas/disciplines";
 
 async function seedPrivileges() {
 	try {
@@ -66,6 +67,14 @@ async function seedPrivileges() {
 			},
 			{ name: "create_discipline", description: "Criar nova disciplina" },
 			{ name: "update_discipline", description: "Atualizar disciplina" },
+			{ name: "delete_discipline", description: "Excluir disciplina" },
+
+			// Rank management
+			{ name: "list_ranks", description: "Listar todos os ranks" },
+			{ name: "view_rank", description: "Visualizar detalhes do rank" },
+			{ name: "create_rank", description: "Criar novo rank" },
+			{ name: "update_rank", description: "Atualizar rank" },
+			{ name: "delete_rank", description: "Excluir rank" },
 		];
 
 		// Find privileges that don't exist yet
@@ -142,7 +151,14 @@ async function seedRolePrivileges() {
 		// Define role-privilege mappings
 		const rolePrivilegeMappings = {
 			admin: allPrivileges.map((p) => p.name), // Admin gets all privileges
-			instructor: ["list_users", "view_user"], // Instructor gets limited privileges
+			instructor: [
+				"list_users",
+				"view_user",
+				"list_disciplines",
+				"view_discipline",
+				"list_ranks",
+				"view_rank",
+			], // Instructor gets limited privileges
 		};
 
 		// Process each role
@@ -208,7 +224,9 @@ async function seedDisciplines() {
 
 		// Find disciplines that don't exist yet
 		const existingDisciplineNames = existingDisciplines.map((r) => r.name);
-		const newDisciplines = disciplines.filter((r) => !existingDisciplineNames.includes(r.name));
+		const newDisciplines = disciplines.filter(
+			(r) => !existingDisciplineNames.includes(r.name),
+		);
 
 		if (newDisciplines.length === 0) {
 			console.log("Nenhuma nova disciplina para adicionar");
@@ -217,13 +235,108 @@ async function seedDisciplines() {
 
 		// Add only new disciplines
 		await db.insert(disciplinesTable).values(newDisciplines);
-		console.log(`${newDisciplines.length} novas disciplinas criadas com sucesso`);
+		console.log(
+			`${newDisciplines.length} novas disciplinas criadas com sucesso`,
+		);
 
 		// Return all disciplines (existing + new)
 		const allDisciplines = await db.select().from(disciplinesTable);
 		return allDisciplines;
 	} catch (error) {
 		console.error("Erro ao criar disciplinas:", error);
+		throw error;
+	}
+}
+
+async function seedRanks() {
+	try {
+		// Get existing disciplines
+		const disciplines = await db.select().from(disciplinesTable);
+		if (disciplines.length === 0) {
+			console.log("Nenhuma disciplina encontrada para adicionar ranks");
+			return [];
+		}
+
+		// Define ranks for each discipline
+		const ranksByDiscipline = {
+			"Karate-Do": [
+				{ name: "7º Kyu", description: "Faixa Branca" },
+				{ name: "6º Kyu", description: "Faixa Amarela" },
+				{ name: "5º Kyu", description: "Faixa Laranja" },
+				{ name: "4º Kyu", description: "Faixa Verde" },
+				{ name: "3º Kyu", description: "Faixa Roxa" },
+				{ name: "2º Kyu", description: "Faixa Marrom" },
+				{ name: "1º Kyu", description: "Faixa Marrom" },
+				{ name: "1º Dan", description: "Faixa Preta" },
+				{ name: "2º Dan", description: "Faixa Preta" },
+				{ name: "3º Dan", description: "Faixa Preta" },
+			],
+			Kendo: [
+				{ name: "Kyu", description: "Nível iniciante" },
+				{ name: "Shodan", description: "1º Dan" },
+				{ name: "Nidan", description: "2º Dan" },
+				{ name: "Sandan", description: "3º Dan" },
+				{ name: "Yondan", description: "4º Dan" },
+				{ name: "Godan", description: "5º Dan" },
+			],
+			Arqueria: [
+				{ name: "Iniciante", description: "Nível iniciante" },
+				{ name: "Intermediário", description: "Nível intermediário" },
+				{ name: "Avançado", description: "Nível avançado" },
+				{ name: "Mestre", description: "Nível mestre" },
+			],
+		};
+
+		// Keep track of newly added ranks
+		let addedRanksCount = 0;
+
+		// Add ranks for each discipline
+		for (const discipline of disciplines) {
+			const ranksForDiscipline =
+				ranksByDiscipline[discipline.name as keyof typeof ranksByDiscipline];
+
+			if (!ranksForDiscipline) {
+				console.log(
+					`Nenhum rank definido para a disciplina ${discipline.name}`,
+				);
+				continue;
+			}
+
+			// Get existing ranks for this discipline
+			const existingRanks = await db
+				.select()
+				.from(ranksTable)
+				.where(eq(ranksTable.idDiscipline, discipline.id));
+
+			// Find ranks that don't exist yet
+			const existingRankNames = existingRanks.map((r) => r.name);
+			const newRanks = ranksForDiscipline
+				.filter((r) => !existingRankNames.includes(r.name))
+				.map((r) => ({
+					idDiscipline: discipline.id,
+					name: r.name,
+					description: r.description,
+				}));
+
+			if (newRanks.length === 0) {
+				console.log(
+					`Nenhum novo rank para adicionar à disciplina ${discipline.name}`,
+				);
+				continue;
+			}
+
+			// Add new ranks
+			await db.insert(ranksTable).values(newRanks);
+			addedRanksCount += newRanks.length;
+			console.log(
+				`${newRanks.length} novos ranks adicionados à disciplina ${discipline.name}`,
+			);
+		}
+
+		console.log(`Total de ${addedRanksCount} novos ranks criados`);
+		return await db.select().from(ranksTable);
+	} catch (error) {
+		console.error("Erro ao criar ranks:", error);
 		throw error;
 	}
 }
@@ -318,6 +431,7 @@ export const seed = async () => {
 		await seedRoles();
 		await seedRolePrivileges();
 		await seedDisciplines();
+		await seedRanks();
 		const adminUser = await seedAdminUser();
 		if (adminUser) {
 			await assignAdminRole(adminUser);
