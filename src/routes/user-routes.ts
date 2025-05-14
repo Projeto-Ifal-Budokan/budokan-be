@@ -1,4 +1,4 @@
-import express from "express";
+import { Router } from "express";
 import {
 	deleteUser,
 	getUserById,
@@ -7,9 +7,8 @@ import {
 } from "../controllers/user-controller";
 import { hasPrivilege } from "../middlewares/auth/check-privilege.middleware";
 
-const router = express.Router();
+const router = Router();
 
-// Protected routes
 router.get("/", hasPrivilege("list_users"), listUsers);
 router.get("/:id", hasPrivilege("view_user"), getUserById);
 router.put("/:id", hasPrivilege("update_user"), updateUser);
