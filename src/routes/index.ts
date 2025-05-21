@@ -3,6 +3,8 @@ import passport from "../../passport.ts";
 
 import authRoutes from "./auth-routes.ts";
 import disciplinesRoutes from "./discipline-routes.ts";
+import instructorDisciplineRoutes from "./instructor-discipline-routes.ts";
+import matriculationRoutes from "./matriculation-routes.ts";
 import privilegeRoutes from "./privilege-routes.ts";
 import rankRoutes from "./rank-routes.ts";
 import rolePrivilegeRoutes from "./role-privilege-routes.ts";
@@ -47,6 +49,16 @@ router.use(
 	"/ranks",
 	passport.authenticate("jwt", { session: false }),
 	rankRoutes,
+);
+router.use(
+	"/matriculations",
+	passport.authenticate("jwt", { session: false }),
+	matriculationRoutes,
+);
+router.use(
+	"/instructor-disciplines",
+	passport.authenticate("jwt", { session: false }),
+	instructorDisciplineRoutes,
 );
 
 export default router;
