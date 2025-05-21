@@ -4,6 +4,7 @@ import passport from "../../passport.ts";
 import authRoutes from "./auth-routes.ts";
 import disciplinesRoutes from "./discipline-routes.ts";
 import privilegeRoutes from "./privilege-routes.ts";
+import rankRoutes from "./rank-routes.ts";
 import rolePrivilegeRoutes from "./role-privilege-routes.ts";
 import roleRoutes from "./role-routes.ts";
 import userRoleRoutes from "./user-role-routes.ts";
@@ -41,6 +42,11 @@ router.use(
 	"/disciplines",
 	passport.authenticate("jwt", { session: false }),
 	disciplinesRoutes,
+);
+router.use(
+	"/ranks",
+	passport.authenticate("jwt", { session: false }),
+	rankRoutes,
 );
 
 export default router;
