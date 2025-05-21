@@ -8,8 +8,6 @@ import routes from "./routes";
 
 import cors from "cors";
 
-const port = process.env.PORT || 8000;
-
 const app = express();
 
 /* MIDDLEWARES */

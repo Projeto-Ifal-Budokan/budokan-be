@@ -1,6 +1,33 @@
 version: '3.8'
 
 services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: budokan-be-app
+    restart: always
+    tty: true
+    stdin_open: true
+    ports:
+      - "3000:8000"
+    environment:
+      - DATABASE_URL=mysql://budokan:budokan@mysql:3306/budokan-db
+      - DATABASE_URL_FROM_CONTAINER=mysql://budokan:budokan@mysql:3306/budokan-db
+      - JWT_SECRET=beb52a940d2eb3fb91488adac8b3f265dcec56daf6db0ff8ba3ef05ac430e28b
+      - NODE_ENV=develop
+      - DEV_URL=http://localhost:3000
+      - PROD_URL=http://budokanryu.com.br
+      - PORT=8000
+      - ETHEREAL_USER=frida20@ethereal.email
+      - ETHEREAL_PASS=Debt5yAYKFeQDvDQR4
+      - NODE_OPTIONS=--no-warnings
+      - DOCKER_BUILDKIT=1
+    depends_on:
+      - mysql
+    networks:
+      - budokan-network
+
   mysql:
     image: mysql:8.2
     container_name: budokan-be-mysql
@@ -16,6 +43,12 @@ services:
       - mysql_data:/var/lib/mysql
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql
     command: --default-authentication-plugin=mysql_native_password
+    networks:
+      - budokan-network
+
+networks:
+  budokan-network:
+    driver: bridge
 
 volumes:
   mysql_data:
