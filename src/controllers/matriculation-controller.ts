@@ -78,7 +78,7 @@ export const createMatriculation: RequestHandler = async (req, res) => {
 			}
 			if (
 				error.message ===
-				"Este estudante já possui uma matrícula ativa nesta disciplina"
+				"Este estudante já possui uma matrícula nesta disciplina"
 			) {
 				res.status(409).json({ message: error.message });
 				return;
@@ -109,7 +109,8 @@ export const updateMatriculation: RequestHandler = async (req, res) => {
 		if (error instanceof Error) {
 			if (
 				error.message === "Matrícula não encontrada" ||
-				error.message === "Graduação não encontrada"
+				error.message ===
+					"Graduação não encontrada ou não pertence à disciplina da matrícula"
 			) {
 				res.status(404).json({ message: error.message });
 				return;

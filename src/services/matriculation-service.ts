@@ -146,13 +146,12 @@ export class MatriculationService {
 				and(
 					eq(matriculationsTable.idStudent, data.idStudent),
 					eq(matriculationsTable.idDiscipline, data.idDiscipline),
-					eq(matriculationsTable.status, "active"),
 				),
 			);
 
 		if (existingMatriculation.length > 0) {
 			throw new Error(
-				"Este estudante já possui uma matrícula ativa nesta disciplina",
+				"Este estudante já possui uma matrícula nesta disciplina",
 			);
 		}
 

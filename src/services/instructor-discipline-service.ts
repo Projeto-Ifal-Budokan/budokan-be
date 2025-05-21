@@ -143,13 +143,12 @@ export class InstructorDisciplineService {
 				and(
 					eq(instructorDisciplinesTable.idInstructor, data.idInstructor),
 					eq(instructorDisciplinesTable.idDiscipline, data.idDiscipline),
-					eq(instructorDisciplinesTable.status, "active"),
 				),
 			);
 
 		if (existingInstructorDiscipline.length > 0) {
 			throw new Error(
-				"Este instrutor já possui um vínculo ativo com esta disciplina",
+				"Este instrutor já possui um vínculo com esta disciplina",
 			);
 		}
 

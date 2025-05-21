@@ -77,14 +77,14 @@ export const createInstructorDiscipline: RequestHandler = async (req, res) => {
 				error.message === "Disciplina não encontrada" ||
 				error.message === "Falha ao criar registro de instrutor" ||
 				error.message ===
-					"Graduação não encontrada ou não pertence à disciplina do vínculo"
+					"Graduação não encontrada ou não pertence à disciplina selecionada"
 			) {
 				res.status(404).json({ message: error.message });
 				return;
 			}
 			if (
 				error.message ===
-				"Este instrutor já possui um vínculo ativo com esta disciplina"
+				"Este instrutor já possui um vínculo com esta disciplina"
 			) {
 				res.status(409).json({ message: error.message });
 				return;
@@ -115,7 +115,8 @@ export const updateInstructorDiscipline: RequestHandler = async (req, res) => {
 		if (error instanceof Error) {
 			if (
 				error.message === "Vínculo instrutor-disciplina não encontrado" ||
-				error.message === "Graduação não encontrada"
+				error.message ===
+					"Graduação não encontrada ou não pertence à disciplina do vínculo"
 			) {
 				res.status(404).json({ message: error.message });
 				return;
