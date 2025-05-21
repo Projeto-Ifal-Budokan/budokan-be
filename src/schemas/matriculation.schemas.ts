@@ -3,7 +3,7 @@ import { z } from "zod";
 export const createMatriculationSchema = z.object({
 	idStudent: z.number().int().positive("ID do estudante é obrigatório"),
 	idDiscipline: z.number().int().positive("ID da disciplina é obrigatório"),
-	idRank: z.number().int().positive("ID da graduação").optional(),
+	idRank: z.number().int().positive("ID da graduação é obrigatório"),
 	status: z.enum(["active", "inactive", "suspended"]).optional(),
 	isPaymentExempt: z.enum(["Y", "N"]).optional(),
 	activatedBy: z.number().int().positive().optional(),

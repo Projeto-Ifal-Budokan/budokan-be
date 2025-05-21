@@ -4,6 +4,7 @@ import { disciplinesTable } from "../db/schema/discipline-schemas/disciplines";
 import { ranksTable } from "../db/schema/discipline-schemas/ranks";
 import { instructorDisciplinesTable } from "../db/schema/practitioner-schemas/instructor-disciplines";
 import { instructorsTable } from "../db/schema/practitioner-schemas/instructors";
+import { practitionersTable } from "../db/schema/practitioner-schemas/practitioners";
 import type {
 	CreateInstructorDisciplineInput,
 	UpdateInstructorDisciplineInput,
@@ -71,14 +72,40 @@ export class InstructorDisciplineService {
 	}
 
 	async createInstructorDiscipline(data: CreateInstructorDisciplineInput) {
-		// Verificar se o instrutor existe
-		const instructor = await db
+		// Verificar se o usuário existe como praticante
+		const practitioner = await db
+			.select()
+			.from(practitionersTable)
+			.where(eq(practitionersTable.idUser, data.idInstructor));
+
+		if (practitioner.length === 0) {
+			throw new Error("Usuário não encontrado como praticante");
+		}
+
+		// Verificar se o praticante já está registrado como instrutor, se não, criar
+		let instructor = await db
 			.select()
 			.from(instructorsTable)
 			.where(eq(instructorsTable.idPractitioner, data.idInstructor));
 
 		if (instructor.length === 0) {
-			throw new Error("Instrutor não encontrado");
+			// Criar automaticamente um registro de instrutor
+			await db.insert(instructorsTable).values({
+				idPractitioner: data.idInstructor,
+			});
+
+			console.log(
+				`Registro de instrutor criado automaticamente para o praticante ${data.idInstructor}`,
+			);
+
+			instructor = await db
+				.select()
+				.from(instructorsTable)
+				.where(eq(instructorsTable.idPractitioner, data.idInstructor));
+
+			if (instructor.length === 0) {
+				throw new Error("Falha ao criar registro de instrutor");
+			}
 		}
 
 		// Verificar se a disciplina existe
@@ -91,16 +118,21 @@ export class InstructorDisciplineService {
 			throw new Error("Disciplina não encontrada");
 		}
 
-		// Verificar se a graduação existe (se fornecida)
-		if (data.idRank) {
-			const rank = await db
-				.select()
-				.from(ranksTable)
-				.where(eq(ranksTable.id, data.idRank));
+		// Verificar se a graduação existe e pertence à disciplina selecionada
+		const rank = await db
+			.select()
+			.from(ranksTable)
+			.where(
+				and(
+					eq(ranksTable.id, data.idRank),
+					eq(ranksTable.idDiscipline, data.idDiscipline),
+				),
+			);
 
-			if (rank.length === 0) {
-				throw new Error("Graduação não encontrada");
-			}
+		if (rank.length === 0) {
+			throw new Error(
+				"Graduação não encontrada ou não pertence à disciplina selecionada",
+			);
 		}
 
 		// Verificar se já existe um vínculo ativo para este instrutor nesta disciplina
@@ -138,15 +170,25 @@ export class InstructorDisciplineService {
 			throw new Error("Vínculo instrutor-disciplina não encontrado");
 		}
 
-		// Verificar se a graduação existe (se fornecida)
+		// Verificar se a graduação existe e pertence à disciplina do vínculo
 		if (data.idRank) {
+			const instructorDisciplineDiscipline =
+				existingInstructorDiscipline[0].idDiscipline;
+
 			const rank = await db
 				.select()
 				.from(ranksTable)
-				.where(eq(ranksTable.id, data.idRank));
+				.where(
+					and(
+						eq(ranksTable.id, data.idRank),
+						eq(ranksTable.idDiscipline, instructorDisciplineDiscipline),
+					),
+				);
 
 			if (rank.length === 0) {
-				throw new Error("Graduação não encontrada");
+				throw new Error(
+					"Graduação não encontrada ou não pertence à disciplina do vínculo",
+				);
 			}
 		}
 

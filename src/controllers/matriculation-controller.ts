@@ -57,6 +57,7 @@ export const createMatriculation: RequestHandler = async (req, res) => {
 			await matriculationService.createMatriculation(validatedData);
 		res.status(201).json(result);
 	} catch (error) {
+		console.log(error);
 		if (error instanceof ZodError) {
 			res.status(400).json({
 				message: "Dados inválidos",
@@ -66,9 +67,11 @@ export const createMatriculation: RequestHandler = async (req, res) => {
 		}
 		if (error instanceof Error) {
 			if (
-				error.message === "Estudante não encontrado" ||
+				error.message === "Usuário não encontrado como praticante" ||
 				error.message === "Disciplina não encontrada" ||
-				error.message === "Graduação não encontrada"
+				error.message === "Falha ao criar registro de estudante" ||
+				error.message ===
+					"Graduação não encontrada ou não pertence à disciplina selecionada"
 			) {
 				res.status(404).json({ message: error.message });
 				return;

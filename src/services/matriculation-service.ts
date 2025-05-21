@@ -3,6 +3,7 @@ import { db } from "../db";
 import { disciplinesTable } from "../db/schema/discipline-schemas/disciplines";
 import { ranksTable } from "../db/schema/discipline-schemas/ranks";
 import { matriculationsTable } from "../db/schema/practitioner-schemas/matriculations";
+import { practitionersTable } from "../db/schema/practitioner-schemas/practitioners";
 import { studentsTable } from "../db/schema/practitioner-schemas/students";
 import type {
 	CreateMatriculationInput,
@@ -74,14 +75,40 @@ export class MatriculationService {
 	}
 
 	async createMatriculation(data: CreateMatriculationInput) {
-		// Verificar se o estudante existe
-		const student = await db
+		// Verificar se o usuário existe como praticante
+		const practitioner = await db
+			.select()
+			.from(practitionersTable)
+			.where(eq(practitionersTable.idUser, data.idStudent));
+
+		if (practitioner.length === 0) {
+			throw new Error("Usuário não encontrado como praticante");
+		}
+
+		// Verificar se o praticante já está registrado como estudante, se não, criar
+		let student = await db
 			.select()
 			.from(studentsTable)
 			.where(eq(studentsTable.idPractitioner, data.idStudent));
 
 		if (student.length === 0) {
-			throw new Error("Estudante não encontrado");
+			// Criar automaticamente um registro de estudante
+			await db.insert(studentsTable).values({
+				idPractitioner: data.idStudent,
+			});
+
+			console.log(
+				`Registro de estudante criado automaticamente para o praticante ${data.idStudent}`,
+			);
+
+			student = await db
+				.select()
+				.from(studentsTable)
+				.where(eq(studentsTable.idPractitioner, data.idStudent));
+
+			if (student.length === 0) {
+				throw new Error("Falha ao criar registro de estudante");
+			}
 		}
 
 		// Verificar se a disciplina existe
@@ -94,16 +121,21 @@ export class MatriculationService {
 			throw new Error("Disciplina não encontrada");
 		}
 
-		// Verificar se a graduação existe (se fornecida)
-		if (data.idRank) {
-			const rank = await db
-				.select()
-				.from(ranksTable)
-				.where(eq(ranksTable.id, data.idRank));
+		// Verificar se a graduação existe e pertence à disciplina selecionada
+		const rank = await db
+			.select()
+			.from(ranksTable)
+			.where(
+				and(
+					eq(ranksTable.id, data.idRank),
+					eq(ranksTable.idDiscipline, data.idDiscipline),
+				),
+			);
 
-			if (rank.length === 0) {
-				throw new Error("Graduação não encontrada");
-			}
+		if (rank.length === 0) {
+			throw new Error(
+				"Graduação não encontrada ou não pertence à disciplina selecionada",
+			);
 		}
 
 		// Verificar se já existe uma matrícula ativa para este estudante nesta disciplina
@@ -138,15 +170,24 @@ export class MatriculationService {
 			throw new Error("Matrícula não encontrada");
 		}
 
-		// Verificar se a graduação existe (se fornecida)
+		// Verificar se a graduação existe e pertence à disciplina da matrícula
 		if (data.idRank) {
+			const matriculationDiscipline = existingMatriculation[0].idDiscipline;
+
 			const rank = await db
 				.select()
 				.from(ranksTable)
-				.where(eq(ranksTable.id, data.idRank));
+				.where(
+					and(
+						eq(ranksTable.id, data.idRank),
+						eq(ranksTable.idDiscipline, matriculationDiscipline),
+					),
+				);
 
 			if (rank.length === 0) {
-				throw new Error("Graduação não encontrada");
+				throw new Error(
+					"Graduação não encontrada ou não pertence à disciplina da matrícula",
+				);
 			}
 		}
 
