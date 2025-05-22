@@ -1,10 +1,14 @@
 import passport from 'passport';
 import { Strategy as JwtStrategy, ExtractJwt } from 'passport-jwt';
-import { eq } from 'drizzle-orm';
+import { eq, inArray } from 'drizzle-orm';
 import { usersTable } from './src/db/schema/user-schemas/users';
 import { db } from './src/db';
 import { Request } from 'express';
-import type { User } from './src/types/auth.types';
+import type { User, Role, Privilege } from './src/types/auth.types';
+import { rolesTable } from './src/db/schema/user-schemas/roles';
+import { userRolesTable } from './src/db/schema/user-schemas/user-roles';
+import { privilegesTable } from './src/db/schema/user-schemas/privileges';
+import { rolePrivilegesTable } from './src/db/schema/user-schemas/role-privileges';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'seuSegredoAqui';
 
@@ -18,6 +22,7 @@ const options = {
 
 passport.use(new JwtStrategy(options, async (jwt_payload, done) => {
   try {
+    // Buscar dados básicos do usuário
     const userResult = await db.select({
       id: usersTable.id,
       email: usersTable.email,
@@ -31,6 +36,44 @@ passport.use(new JwtStrategy(options, async (jwt_payload, done) => {
     }
 
     const user: User = userResult[0];
+
+    // Buscar roles do usuário
+    const userRoles = await db
+      .select({
+        id: rolesTable.id,
+        name: rolesTable.name,
+        description: rolesTable.description,
+      })
+      .from(userRolesTable)
+      .innerJoin(rolesTable, eq(userRolesTable.idRole, rolesTable.id))
+      .where(eq(userRolesTable.idUser, user.id));
+
+    user.roles = userRoles as Role[];
+
+    // Buscar privileges associados às roles do usuário
+    if (user.roles.length > 0) {
+      const roleIds = user.roles.map(role => role.id);
+      
+      const userPrivileges = await db
+        .select({
+          id: privilegesTable.id,
+          name: privilegesTable.name,
+          description: privilegesTable.description,
+        })
+        .from(rolePrivilegesTable)
+        .innerJoin(privilegesTable, eq(rolePrivilegesTable.idPrivilege, privilegesTable.id))
+        .where(inArray(rolePrivilegesTable.idRole, roleIds));
+
+      // Remove duplicados (caso o usuário tenha a mesma privilege em diferentes roles)
+      const uniquePrivileges = Array.from(
+        new Map(userPrivileges.map(item => [item.id, item])).values()
+      );
+      
+      user.privileges = uniquePrivileges as Privilege[];
+    } else {
+      user.privileges = [];
+    }
+
     return done(null, user);
   } catch (error) {
     return done(error, false);
