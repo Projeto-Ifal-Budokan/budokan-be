@@ -48,6 +48,10 @@ export const getInstructorDisciplinesByInstructor: RequestHandler = async (
 			await instructorDisciplineService.getInstructorDisciplinesByInstructor(
 				Number(instructorId),
 			);
+			if (instructorDisciplines.length === 0) {
+				res.status(404).json({ message: "Vínculo de instrutor-disciplina não encontrado" });
+				return;
+			}
 		res.status(200).json(instructorDisciplines);
 	} catch (error) {
 		console.error("Erro ao buscar vínculos do instrutor:", error);
