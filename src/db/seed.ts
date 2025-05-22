@@ -1,13 +1,32 @@
 import bcrypt from "bcrypt";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { db } from "./index";
 import { disciplinesTable } from "./schema/discipline-schemas/disciplines";
 import { ranksTable } from "./schema/discipline-schemas/ranks";
+import { instructorDisciplinesTable } from "./schema/practitioner-schemas/instructor-disciplines";
+import { instructorsTable } from "./schema/practitioner-schemas/instructors";
+import { matriculationsTable } from "./schema/practitioner-schemas/matriculations";
+import { practitionersTable } from "./schema/practitioner-schemas/practitioners";
+import { studentsTable } from "./schema/practitioner-schemas/students";
 import { privilegesTable } from "./schema/user-schemas/privileges";
 import { rolePrivilegesTable } from "./schema/user-schemas/role-privileges";
 import { rolesTable } from "./schema/user-schemas/roles";
 import { userRolesTable } from "./schema/user-schemas/user-roles";
 import { usersTable } from "./schema/user-schemas/users";
+
+// Definindo interfaces para os tipos
+interface User {
+	id: number;
+	email: string;
+	firstName: string;
+	surname: string;
+	[key: string]: unknown;
+}
+
+interface Practitioner {
+	idUser: number;
+	[key: string]: unknown;
+}
 
 async function seedPrivileges() {
 	try {
@@ -75,6 +94,41 @@ async function seedPrivileges() {
 			{ name: "create_rank", description: "Criar novo rank" },
 			{ name: "update_rank", description: "Atualizar rank" },
 			{ name: "delete_rank", description: "Excluir rank" },
+
+			// Matriculation management
+			{
+				name: "list_matriculations",
+				description: "Listar todas as matrículas",
+			},
+			{
+				name: "view_matriculation",
+				description: "Visualizar detalhes da matrícula",
+			},
+			{ name: "create_matriculation", description: "Criar nova matrícula" },
+			{ name: "update_matriculation", description: "Atualizar matrícula" },
+			{ name: "delete_matriculation", description: "Excluir matrícula" },
+
+			// Instructor-Discipline management
+			{
+				name: "list_instructor_disciplines",
+				description: "Listar todos os vínculos instrutor-disciplina",
+			},
+			{
+				name: "view_instructor_discipline",
+				description: "Visualizar detalhes do vínculo instrutor-disciplina",
+			},
+			{
+				name: "create_instructor_discipline",
+				description: "Criar novo vínculo instrutor-disciplina",
+			},
+			{
+				name: "update_instructor_discipline",
+				description: "Atualizar vínculo instrutor-disciplina",
+			},
+			{
+				name: "delete_instructor_discipline",
+				description: "Excluir vínculo instrutor-disciplina",
+			},
 		];
 
 		// Find privileges that don't exist yet
@@ -118,6 +172,10 @@ async function seedRoles() {
 				name: "instructor",
 				description: "Instrutor com acesso limitado",
 			},
+			{
+				name: "student",
+				description: "Estudante com acesso básico",
+			},
 		];
 
 		// Find roles that don't exist yet
@@ -158,7 +216,19 @@ async function seedRolePrivileges() {
 				"view_discipline",
 				"list_ranks",
 				"view_rank",
+				"list_matriculations",
+				"view_matriculation",
+				"list_instructor_disciplines",
+				"view_instructor_discipline",
 			], // Instructor gets limited privileges
+			student: [
+				"view_user",
+				"list_disciplines",
+				"view_discipline",
+				"list_ranks",
+				"view_rank",
+				"view_matriculation",
+			], // Student gets basic privileges
 		};
 
 		// Process each role
@@ -424,6 +494,327 @@ async function assignAdminRole(adminUser: { id: number }) {
 	}
 }
 
+async function seedTestUsers() {
+	try {
+		// Create test instructor user
+		let instructorUser = await db
+			.select()
+			.from(usersTable)
+			.where(eq(usersTable.email, "instructor@budokan.com"));
+
+		if (instructorUser.length === 0) {
+			const hashedPassword = await bcrypt.hash("instructor123", 10);
+			await db.insert(usersTable).values({
+				firstName: "Sensei",
+				surname: "Miyagi",
+				email: "instructor@budokan.com",
+				password: hashedPassword,
+				phone: "11999998888",
+				birthDate: new Date("1970-01-01"),
+				status: "active" as const,
+			});
+
+			instructorUser = await db
+				.select()
+				.from(usersTable)
+				.where(eq(usersTable.email, "instructor@budokan.com"));
+
+			console.log("Usuário instrutor criado com sucesso");
+		}
+
+		// Create test student user
+		let studentUser = await db
+			.select()
+			.from(usersTable)
+			.where(eq(usersTable.email, "student@budokan.com"));
+
+		if (studentUser.length === 0) {
+			const hashedPassword = await bcrypt.hash("student123", 10);
+			await db.insert(usersTable).values({
+				firstName: "Aluno",
+				surname: "Silva",
+				email: "student@budokan.com",
+				password: hashedPassword,
+				phone: "11988887777",
+				birthDate: new Date("1995-05-15"),
+				status: "active" as const,
+			});
+
+			studentUser = await db
+				.select()
+				.from(usersTable)
+				.where(eq(usersTable.email, "student@budokan.com"));
+
+			console.log("Usuário estudante criado com sucesso");
+		}
+
+		// Assign roles to users
+		if (instructorUser.length > 0) {
+			const instructorRole = await db
+				.select()
+				.from(rolesTable)
+				.where(eq(rolesTable.name, "instructor"));
+
+			if (instructorRole.length > 0) {
+				const existingRole = await db
+					.select()
+					.from(userRolesTable)
+					.where(
+						eq(userRolesTable.idUser, instructorUser[0].id) &&
+							eq(userRolesTable.idRole, instructorRole[0].id),
+					);
+
+				if (existingRole.length === 0) {
+					await db.insert(userRolesTable).values({
+						idUser: instructorUser[0].id,
+						idRole: instructorRole[0].id,
+					});
+					console.log("Papel instrutor atribuído ao usuário instrutor");
+				}
+			}
+		}
+
+		if (studentUser.length > 0) {
+			const studentRole = await db
+				.select()
+				.from(rolesTable)
+				.where(eq(rolesTable.name, "student"));
+
+			if (studentRole.length > 0) {
+				const existingRole = await db
+					.select()
+					.from(userRolesTable)
+					.where(
+						eq(userRolesTable.idUser, studentUser[0].id) &&
+							eq(userRolesTable.idRole, studentRole[0].id),
+					);
+
+				if (existingRole.length === 0) {
+					await db.insert(userRolesTable).values({
+						idUser: studentUser[0].id,
+						idRole: studentRole[0].id,
+					});
+					console.log("Papel estudante atribuído ao usuário estudante");
+				}
+			}
+		}
+
+		return { instructor: instructorUser[0], student: studentUser[0] };
+	} catch (error) {
+		console.error("Erro ao criar usuários de teste:", error);
+		throw error;
+	}
+}
+
+async function seedPractitioners(users: {
+	instructor: User;
+	student: User;
+}): Promise<{ instructor: Practitioner; student: Practitioner }> {
+	try {
+		// Create practitioner records
+		let instructorPractitioner = await db
+			.select()
+			.from(practitionersTable)
+			.where(eq(practitionersTable.idUser, users.instructor.id));
+
+		if (instructorPractitioner.length === 0) {
+			await db.insert(practitionersTable).values({
+				idUser: users.instructor.id,
+			});
+
+			instructorPractitioner = await db
+				.select()
+				.from(practitionersTable)
+				.where(eq(practitionersTable.idUser, users.instructor.id));
+
+			console.log("Praticante instrutor criado com sucesso");
+		}
+
+		let studentPractitioner = await db
+			.select()
+			.from(practitionersTable)
+			.where(eq(practitionersTable.idUser, users.student.id));
+
+		if (studentPractitioner.length === 0) {
+			await db.insert(practitionersTable).values({
+				idUser: users.student.id,
+			});
+
+			studentPractitioner = await db
+				.select()
+				.from(practitionersTable)
+				.where(eq(practitionersTable.idUser, users.student.id));
+
+			console.log("Praticante estudante criado com sucesso");
+		}
+
+		// Create instructor record
+		if (instructorPractitioner.length > 0) {
+			const existingInstructor = await db
+				.select()
+				.from(instructorsTable)
+				.where(
+					eq(instructorsTable.idPractitioner, instructorPractitioner[0].idUser),
+				);
+
+			if (existingInstructor.length === 0) {
+				await db.insert(instructorsTable).values({
+					idPractitioner: instructorPractitioner[0].idUser,
+				});
+				console.log("Instrutor criado com sucesso");
+			}
+		}
+
+		// Create student record
+		if (studentPractitioner.length > 0) {
+			const existingStudent = await db
+				.select()
+				.from(studentsTable)
+				.where(eq(studentsTable.idPractitioner, studentPractitioner[0].idUser));
+
+			if (existingStudent.length === 0) {
+				await db.insert(studentsTable).values({
+					idPractitioner: studentPractitioner[0].idUser,
+				});
+				console.log("Estudante criado com sucesso");
+			}
+		}
+
+		return {
+			instructor: instructorPractitioner[0],
+			student: studentPractitioner[0],
+		};
+	} catch (error) {
+		console.error("Erro ao criar praticantes:", error);
+		throw error;
+	}
+}
+
+async function seedInstructorDisciplines(instructor: Practitioner) {
+	try {
+		// Get disciplines
+		const disciplines = await db.select().from(disciplinesTable);
+		if (disciplines.length === 0) return;
+
+		// Get karate discipline
+		const karateDiscipline = disciplines.find((d) => d.name === "Karate-Do");
+		if (!karateDiscipline) return;
+
+		// Get a rank for the discipline
+		const ranks = await db
+			.select()
+			.from(ranksTable)
+			.where(eq(ranksTable.idDiscipline, karateDiscipline.id));
+
+		const blackBeltRank =
+			ranks.find((r) => r.name === "3º Dan") || ranks[ranks.length - 1];
+		if (!blackBeltRank) return;
+
+		// Check if instructor discipline already exists
+		const existingInstructorDiscipline = await db
+			.select()
+			.from(instructorDisciplinesTable)
+			.where(
+				and(
+					eq(instructorDisciplinesTable.idInstructor, instructor.idUser),
+					eq(instructorDisciplinesTable.idDiscipline, karateDiscipline.id),
+				),
+			);
+
+		if (existingInstructorDiscipline.length === 0) {
+			await db.insert(instructorDisciplinesTable).values({
+				idInstructor: instructor.idUser,
+				idDiscipline: karateDiscipline.id,
+				idRank: blackBeltRank.id,
+				status: "active",
+			});
+			console.log("Vínculo instrutor-disciplina criado com sucesso");
+		}
+	} catch (error) {
+		console.error("Erro ao criar vínculos instrutor-disciplina:", error);
+		throw error;
+	}
+}
+
+async function seedMatriculations(student: Practitioner) {
+	try {
+		// Get disciplines
+		const disciplines = await db.select().from(disciplinesTable);
+		if (disciplines.length === 0) return;
+
+		// Get karate discipline
+		const karateDiscipline = disciplines.find((d) => d.name === "Karate-Do");
+		if (!karateDiscipline) return;
+
+		// Get a rank for the discipline
+		const ranks = await db
+			.select()
+			.from(ranksTable)
+			.where(eq(ranksTable.idDiscipline, karateDiscipline.id));
+
+		const beginnerRank = ranks.find((r) => r.name === "7º Kyu") || ranks[0];
+		if (!beginnerRank) return;
+
+		// Check if matriculation already exists
+		const existingMatriculation = await db
+			.select()
+			.from(matriculationsTable)
+			.where(
+				and(
+					eq(matriculationsTable.idStudent, student.idUser),
+					eq(matriculationsTable.idDiscipline, karateDiscipline.id),
+				),
+			);
+
+		if (existingMatriculation.length === 0) {
+			await db.insert(matriculationsTable).values({
+				idStudent: student.idUser,
+				idDiscipline: karateDiscipline.id,
+				idRank: beginnerRank.id,
+				status: "active",
+				isPaymentExempt: "N",
+			});
+			console.log("Matrícula criada com sucesso");
+		}
+
+		// Add another discipline if available
+		const kendoDiscipline = disciplines.find((d) => d.name === "Kendo");
+		if (kendoDiscipline) {
+			const kendoRanks = await db
+				.select()
+				.from(ranksTable)
+				.where(eq(ranksTable.idDiscipline, kendoDiscipline.id));
+
+			const kendoBeginnerRank = kendoRanks[0];
+			if (kendoBeginnerRank) {
+				const existingKendoMatriculation = await db
+					.select()
+					.from(matriculationsTable)
+					.where(
+						and(
+							eq(matriculationsTable.idStudent, student.idUser),
+							eq(matriculationsTable.idDiscipline, kendoDiscipline.id),
+						),
+					);
+
+				if (existingKendoMatriculation.length === 0) {
+					await db.insert(matriculationsTable).values({
+						idStudent: student.idUser,
+						idDiscipline: kendoDiscipline.id,
+						idRank: kendoBeginnerRank.id,
+						status: "active",
+						isPaymentExempt: "N",
+					});
+					console.log("Matrícula adicional criada com sucesso");
+				}
+			}
+		}
+	} catch (error) {
+		console.error("Erro ao criar matrículas:", error);
+		throw error;
+	}
+}
+
 // Export the seed function to be called when needed
 export const seed = async () => {
 	try {
@@ -436,6 +827,13 @@ export const seed = async () => {
 		if (adminUser) {
 			await assignAdminRole(adminUser);
 		}
+
+		// Seed test users and their relationships
+		const users = await seedTestUsers();
+		const practitioners = await seedPractitioners(users);
+		await seedInstructorDisciplines(practitioners.instructor);
+		await seedMatriculations(practitioners.student);
+
 		console.log("População do banco de dados concluída");
 	} catch (error) {
 		console.error("Erro ao popular banco de dados:", error);
