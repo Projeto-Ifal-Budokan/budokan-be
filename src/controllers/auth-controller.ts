@@ -8,6 +8,7 @@ import {
 	registerSchema,
 	resetPasswordSchema,
 } from "../schemas/auth.schemas";
+import type { User } from "../types/auth.types";
 
 const authService = new AuthService();
 
@@ -110,4 +111,13 @@ export const resetPassword: RequestHandler = async (req, res) => {
 		console.error("Erro ao resetar senha:", error);
 		res.status(500).json({ message: "Erro interno do servidor" });
 	}
+};
+
+export const me: RequestHandler = async (req, res) => {
+	const user = req.user as User | undefined;
+	if (!user) {
+		res.status(401).json({ message: "Não autenticado" });
+		return;
+	}
+	res.status(200).json(user);
 };
