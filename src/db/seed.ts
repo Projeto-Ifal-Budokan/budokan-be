@@ -129,6 +129,28 @@ async function seedPrivileges() {
 				name: "delete_instructor_discipline",
 				description: "Excluir vínculo instrutor-disciplina",
 			},
+
+			// Session management
+			{
+				name: "list_sessions",
+				description: "Listar todas as aulas",
+			},
+			{
+				name: "view_session",
+				description: "Visualizar detalhes da aula do id informado",
+			},
+			{
+				name: "create_session",
+				description: "Criar uma nova aula",
+			},
+			{
+				name: "update_session",
+				description: "Atualizar uma aula",
+			},
+			{
+				name: "delete_session",
+				description: "Exclui uma aula",
+			},
 		];
 
 		// Find privileges that don't exist yet
@@ -220,6 +242,11 @@ async function seedRolePrivileges() {
 				"view_matriculation",
 				"list_instructor_disciplines",
 				"view_instructor_discipline",
+				"list_sessions",
+				"view_session",
+				"create_session",
+				"update_session",
+				"delete_session",
 			], // Instructor gets limited privileges
 			student: [
 				"view_user",

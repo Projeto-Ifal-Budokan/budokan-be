@@ -1,4 +1,4 @@
-import { and, eq, or, lt, lte, gt, gte } from "drizzle-orm";
+import { and, eq, gt, gte, lt, lte, or } from "drizzle-orm";
 import { db } from "../db";
 import { sessionsTable } from "../db/schema/attendance-schemas/sessions";
 import { disciplinesTable } from "../db/schema/discipline-schemas/disciplines";
@@ -105,42 +105,52 @@ export class SessionService {
 			);
 		}
 
-		// Verificar se já existe uma aula ativa para este dia e horario
+		// Adicionar o idInstructorDiscipline ao objeto de dados pois na tabela sessions a FK é idInstructorDiscipline e não idInstructor
+		const sessionData = {
+			...data,
+			idInstructorDiscipline: instructorDisciplines[0].id,
+		};
 
+		// Verificar se já existe uma aula ativa para este dia e horario
 		const conflictingSessions = await db
 			.select()
 			.from(sessionsTable)
 			.where(
 				and(
-					// Mesma disciplina e mesmo dia
-					eq(sessionsTable.idDiscipline, data.idDiscipline),
-					eq(sessionsTable.date, data.date),
+					// Mesma disciplina, mesmo instrutor e mesmo dia
+					eq(
+						sessionsTable.idInstructorDiscipline,
+						sessionData.idInstructorDiscipline,
+					),
+					eq(sessionsTable.idDiscipline, sessionData.idDiscipline),
+					eq(sessionsTable.date, sessionData.date),
 
 					// Verifica sobreposição de horários:
 					or(
 						// 1. Novo horário começa DENTRO de uma aula existente
 						and(
-							gt(data.startTime, sessionsTable.startingTime),
-							lt(data.startTime, sessionsTable.endingTime),
+							lt(sessionsTable.startingTime, sessionData.startingTime),
+							gt(sessionsTable.endingTime, sessionData.startingTime),
 						),
 						// 2. Novo horário termina DENTRO de uma aula existente
 						and(
-							gt(data.endTime, sessionsTable.startingTime),
-							lt(data.endTime, sessionsTable.endingTime),
+							lt(sessionsTable.startingTime, sessionData.endingTime),
+							gt(sessionsTable.endingTime, sessionData.endingTime),
 						),
 						// 3. Novo horário ENGLOBA completamente uma aula existente
 						and(
-							lte(data.startTime, sessionsTable.startingTime),
-							gte(data.endTime, sessionsTable.endingTime),
+							gte(sessionsTable.startingTime, sessionData.startingTime),
+							lte(sessionsTable.endingTime, sessionData.endingTime),
 						),
 						// 4. Aula existente ENGLOBA completamente o novo horário
 						and(
-							lte(sessionsTable.startingTime, data.startTime),
-							gte(sessionsTable.endingTime, data.endTime),
+							lte(sessionsTable.startingTime, sessionData.startingTime),
+							gte(sessionsTable.endingTime, sessionData.endingTime),
 						),
 					),
 				),
-			);
+			)
+			.limit(1);
 
 		if (conflictingSessions.length > 0) {
 			throw new Error(
@@ -148,7 +158,7 @@ export class SessionService {
 			);
 		}
 
-		await db.insert(sessionsTable).values(data);
+		await db.insert(sessionsTable).values(sessionData);
 		return { message: "Aula criada com sucesso" };
 	}
 

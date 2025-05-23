@@ -11,6 +11,7 @@ import rolePrivilegeRoutes from "./role-privilege-routes.ts";
 import roleRoutes from "./role-routes.ts";
 import userRoleRoutes from "./user-role-routes.ts";
 import userRoutes from "./user-routes.ts";
+import sessionRoutes from "./session-routes.ts";
 
 const router = Router();
 
@@ -60,5 +61,9 @@ router.use(
 	passport.authenticate("jwt", { session: false }),
 	instructorDisciplineRoutes,
 );
-
+router.use(
+	"/sessions",
+	passport.authenticate("jwt", { session: false }),
+	sessionRoutes,
+);
 export default router;

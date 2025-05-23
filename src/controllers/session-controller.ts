@@ -74,7 +74,7 @@ export const createSession: RequestHandler = async (req, res) => {
 				return;
 			}
 			if (
-				error.message === "Já existe uma aula ativa para este dia e horário"
+				error.message === "Conflito de horário: já existe uma aula agendada neste intervalo"
 			) {
 				res.status(409).json({ message: error.message });
 				return;
