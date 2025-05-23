@@ -5,6 +5,12 @@ import nodemailer from "nodemailer";
 import { db } from "../db";
 import { practitionersTable } from "../db/schema/practitioner-schemas/practitioners";
 import { usersTable } from "../db/schema/user-schemas/users";
+import {
+	ConflictError,
+	ForbiddenError,
+	NotFoundError,
+	UnauthorizedError,
+} from "../errors/app-errors";
 import type {
 	ForgotPasswordInput,
 	LoginInput,
@@ -43,7 +49,7 @@ export class AuthService {
 			.where(eq(usersTable.email, email));
 
 		if (existingUser.length > 0) {
-			throw new Error("Email já cadastrado.");
+			throw new ConflictError("Email já cadastrado.");
 		}
 
 		const hashedPassword = await bcrypt.hash(password, 10);
@@ -90,18 +96,18 @@ export class AuthService {
 			.where(eq(usersTable.email, email));
 
 		if (userResult.length === 0) {
-			throw new Error("Credenciais inválidas.");
+			throw new UnauthorizedError("Credenciais inválidas.");
 		}
 
 		const user = userResult[0];
 		const passwordMatch = await bcrypt.compare(password, user.password);
 
 		if (!passwordMatch) {
-			throw new Error("Credenciais inválidas.");
+			throw new UnauthorizedError("Credenciais inválidas.");
 		}
 
 		if (user.status !== "active") {
-			throw new Error("Usuário inativo ou suspenso.");
+			throw new ForbiddenError("Usuário inativo ou suspenso.");
 		}
 
 		const token = jwt.sign(
@@ -196,14 +202,18 @@ export class AuthService {
 	async resetPassword(data: ResetPasswordInput) {
 		const { token, password } = data;
 
-		const payload = jwt.verify(token, JWT_SECRET) as { id: number };
-		const hashedPassword = await bcrypt.hash(password, 10);
+		try {
+			const payload = jwt.verify(token, JWT_SECRET) as { id: number };
+			const hashedPassword = await bcrypt.hash(password, 10);
 
-		await db
-			.update(usersTable)
-			.set({ password: hashedPassword })
-			.where(eq(usersTable.id, payload.id));
+			await db
+				.update(usersTable)
+				.set({ password: hashedPassword })
+				.where(eq(usersTable.id, payload.id));
 
-		return { msg: "Senha redefinida com sucesso!" };
+			return { msg: "Senha redefinida com sucesso!" };
+		} catch (error) {
+			throw new UnauthorizedError("Token inválido ou expirado.");
+		}
 	}
 }

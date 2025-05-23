@@ -5,6 +5,7 @@ import { ranksTable } from "../db/schema/discipline-schemas/ranks";
 import { instructorDisciplinesTable } from "../db/schema/practitioner-schemas/instructor-disciplines";
 import { instructorsTable } from "../db/schema/practitioner-schemas/instructors";
 import { practitionersTable } from "../db/schema/practitioner-schemas/practitioners";
+import { ConflictError, NotFoundError } from "../errors/app-errors";
 import type {
 	CreateInstructorDisciplineInput,
 	UpdateInstructorDisciplineInput,
@@ -46,7 +47,7 @@ export class InstructorDisciplineService {
 			.where(eq(instructorDisciplinesTable.id, id));
 
 		if (instructorDiscipline.length === 0) {
-			throw new Error("Vínculo de instrutor-disciplina não encontrado");
+			throw new NotFoundError("Vínculo de instrutor-disciplina não encontrado");
 		}
 
 		return instructorDiscipline[0];
@@ -79,7 +80,7 @@ export class InstructorDisciplineService {
 			.where(eq(practitionersTable.idUser, data.idInstructor));
 
 		if (practitioner.length === 0) {
-			throw new Error("Usuário não encontrado como praticante");
+			throw new NotFoundError("Usuário não encontrado como praticante");
 		}
 
 		// Verificar se o praticante já está registrado como instrutor, se não, criar
@@ -104,7 +105,7 @@ export class InstructorDisciplineService {
 				.where(eq(instructorsTable.idPractitioner, data.idInstructor));
 
 			if (instructor.length === 0) {
-				throw new Error("Falha ao criar registro de instrutor");
+				throw new NotFoundError("Falha ao criar registro de instrutor");
 			}
 		}
 
@@ -115,7 +116,7 @@ export class InstructorDisciplineService {
 			.where(eq(disciplinesTable.id, data.idDiscipline));
 
 		if (discipline.length === 0) {
-			throw new Error("Disciplina não encontrada");
+			throw new NotFoundError("Disciplina não encontrada");
 		}
 
 		// Verificar se a graduação existe e pertence à disciplina selecionada
@@ -130,7 +131,7 @@ export class InstructorDisciplineService {
 			);
 
 		if (rank.length === 0) {
-			throw new Error(
+			throw new NotFoundError(
 				"Graduação não encontrada ou não pertence à disciplina selecionada",
 			);
 		}
@@ -147,7 +148,7 @@ export class InstructorDisciplineService {
 			);
 
 		if (existingInstructorDiscipline.length > 0) {
-			throw new Error(
+			throw new ConflictError(
 				"Este instrutor já possui um vínculo com esta disciplina",
 			);
 		}
@@ -166,7 +167,7 @@ export class InstructorDisciplineService {
 			.where(eq(instructorDisciplinesTable.id, id));
 
 		if (existingInstructorDiscipline.length === 0) {
-			throw new Error("Vínculo instrutor-disciplina não encontrado");
+			throw new NotFoundError("Vínculo instrutor-disciplina não encontrado");
 		}
 
 		// Verificar se a graduação existe e pertence à disciplina do vínculo
@@ -185,7 +186,7 @@ export class InstructorDisciplineService {
 				);
 
 			if (rank.length === 0) {
-				throw new Error(
+				throw new NotFoundError(
 					"Graduação não encontrada ou não pertence à disciplina do vínculo",
 				);
 			}
@@ -206,7 +207,7 @@ export class InstructorDisciplineService {
 			.where(eq(instructorDisciplinesTable.id, id));
 
 		if (existingInstructorDiscipline.length === 0) {
-			throw new Error("Vínculo instrutor-disciplina não encontrado");
+			throw new NotFoundError("Vínculo instrutor-disciplina não encontrado");
 		}
 
 		await db
