@@ -3,6 +3,7 @@ import { db } from "../db";
 import { rolesTable } from "../db/schema/user-schemas/roles";
 import { userRolesTable } from "../db/schema/user-schemas/user-roles";
 import { usersTable } from "../db/schema/user-schemas/users";
+import { ConflictError, NotFoundError } from "../errors/app-errors";
 import type {
 	AssignUserRoleInput,
 	RemoveUserRoleInput,
@@ -17,7 +18,7 @@ export class UserRoleService {
 			.where(eq(usersTable.id, idUser));
 
 		if (user.length === 0) {
-			throw new Error("Usuário não encontrado");
+			throw new NotFoundError("Usuário não encontrado");
 		}
 
 		// Check if role exists
@@ -27,7 +28,7 @@ export class UserRoleService {
 			.where(eq(rolesTable.id, idRole));
 
 		if (role.length === 0) {
-			throw new Error("Papel não encontrado");
+			throw new NotFoundError("Papel não encontrado");
 		}
 
 		// Check if user already has this role
@@ -42,7 +43,7 @@ export class UserRoleService {
 			);
 
 		if (existingUserRole.length > 0) {
-			throw new Error("Usuário já possui este papel");
+			throw new ConflictError("Usuário já possui este papel");
 		}
 
 		// Assign role to user
@@ -67,7 +68,7 @@ export class UserRoleService {
 			);
 
 		if (existingUserRole.length === 0) {
-			throw new Error("Usuário não possui este papel");
+			throw new NotFoundError("Usuário não possui este papel");
 		}
 
 		// Remove role from user
@@ -91,7 +92,7 @@ export class UserRoleService {
 			.where(eq(usersTable.id, userId));
 
 		if (user.length === 0) {
-			throw new Error("Usuário não encontrado");
+			throw new NotFoundError("Usuário não encontrado");
 		}
 
 		// Get user roles with role details

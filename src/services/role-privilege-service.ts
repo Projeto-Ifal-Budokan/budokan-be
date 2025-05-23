@@ -3,6 +3,7 @@ import { db } from "../db";
 import { privilegesTable } from "../db/schema/user-schemas/privileges";
 import { rolePrivilegesTable } from "../db/schema/user-schemas/role-privileges";
 import { rolesTable } from "../db/schema/user-schemas/roles";
+import { ConflictError, NotFoundError } from "../errors/app-errors";
 import type {
 	AssignRolePrivilegeInput,
 	RemoveRolePrivilegeInput,
@@ -17,7 +18,7 @@ export class RolePrivilegeService {
 			.where(eq(rolesTable.id, idRole));
 
 		if (role.length === 0) {
-			throw new Error("Papel não encontrado");
+			throw new NotFoundError("Papel não encontrado");
 		}
 
 		// Check if privilege exists
@@ -27,7 +28,7 @@ export class RolePrivilegeService {
 			.where(eq(privilegesTable.id, idPrivilege));
 
 		if (privilege.length === 0) {
-			throw new Error("Privilégio não encontrado");
+			throw new NotFoundError("Privilégio não encontrado");
 		}
 
 		// Check if role already has this privilege
@@ -42,7 +43,7 @@ export class RolePrivilegeService {
 			);
 
 		if (existingRolePrivilege.length > 0) {
-			throw new Error("Papel já possui este privilégio");
+			throw new ConflictError("Papel já possui este privilégio");
 		}
 
 		// Assign privilege to role
@@ -67,7 +68,7 @@ export class RolePrivilegeService {
 			);
 
 		if (existingRolePrivilege.length === 0) {
-			throw new Error("Papel não possui este privilégio");
+			throw new NotFoundError("Papel não possui este privilégio");
 		}
 
 		// Remove privilege from role
@@ -91,7 +92,7 @@ export class RolePrivilegeService {
 			.where(eq(rolesTable.id, roleId));
 
 		if (role.length === 0) {
-			throw new Error("Papel não encontrado");
+			throw new NotFoundError("Papel não encontrado");
 		}
 
 		// Get role privileges with privilege details
