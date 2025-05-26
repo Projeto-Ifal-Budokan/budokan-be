@@ -109,6 +109,16 @@ export class TrainingScheduleService {
 			throw new NotFoundError("Disciplina não encontrada");
 		}
 
+		// Verificar se o horário de início é anterior ao horário de fim
+		const startTime = this.timeStringToMinutes(data.startTime);
+		const endTime = this.timeStringToMinutes(data.endTime);
+
+		if (startTime >= endTime) {
+			throw new ConflictError(
+				"O horário de início deve ser anterior ao horário de fim",
+			);
+		}
+
 		// Buscar todos os horários existentes para a mesma disciplina e dia da semana
 		const existingSchedules = await db
 			.select()
@@ -119,10 +129,6 @@ export class TrainingScheduleService {
 					eq(trainingSchedulesTable.weekday, data.weekday),
 				),
 			);
-
-		// Converter os horários de início e fim para objetos Date para facilitar comparação
-		const startTime = this.timeStringToMinutes(data.startTime);
-		const endTime = this.timeStringToMinutes(data.endTime);
 
 		// Verificar se há sobreposição de horários
 		const hasOverlap = existingSchedules.some((schedule) => {
@@ -183,6 +189,16 @@ export class TrainingScheduleService {
 		const endTime =
 			data.endTime !== undefined ? data.endTime : existingSchedule[0].endTime;
 
+		// Verificar se o horário de início é anterior ao horário de fim
+		const updatedStartTime = this.timeStringToMinutes(startTime);
+		const updatedEndTime = this.timeStringToMinutes(endTime);
+
+		if (updatedStartTime >= updatedEndTime) {
+			throw new ConflictError(
+				"O horário de início deve ser anterior ao horário de fim",
+			);
+		}
+
 		// Buscar todos os horários para a mesma disciplina e dia da semana, exceto o atual
 		const allSchedules = await db
 			.select()
@@ -194,10 +210,6 @@ export class TrainingScheduleService {
 			(schedule) =>
 				schedule.id !== id && schedule.idDiscipline === idDiscipline,
 		);
-
-		// Converter os horários para minutos para facilitar comparação
-		const updatedStartTime = this.timeStringToMinutes(startTime);
-		const updatedEndTime = this.timeStringToMinutes(endTime);
 
 		// Verificar se há sobreposição de horários
 		const hasOverlap = otherSchedules.some((schedule) => {

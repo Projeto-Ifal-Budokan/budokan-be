@@ -3,6 +3,7 @@ import { and, eq } from "drizzle-orm";
 import { db } from "./index";
 import { disciplinesTable } from "./schema/discipline-schemas/disciplines";
 import { ranksTable } from "./schema/discipline-schemas/ranks";
+import { trainingSchedulesTable } from "./schema/discipline-schemas/training-schedules";
 import { instructorDisciplinesTable } from "./schema/practitioner-schemas/instructor-disciplines";
 import { instructorsTable } from "./schema/practitioner-schemas/instructors";
 import { matriculationsTable } from "./schema/practitioner-schemas/matriculations";
@@ -129,6 +130,28 @@ async function seedPrivileges() {
 				name: "delete_instructor_discipline",
 				description: "Excluir vínculo instrutor-disciplina",
 			},
+
+			// Training Schedule management
+			{
+				name: "list_training_schedules",
+				description: "Listar todos os horários de treino",
+			},
+			{
+				name: "view_training_schedule",
+				description: "Visualizar detalhes do horário de treino",
+			},
+			{
+				name: "create_training_schedule",
+				description: "Criar novo horário de treino",
+			},
+			{
+				name: "update_training_schedule",
+				description: "Atualizar horário de treino",
+			},
+			{
+				name: "delete_training_schedule",
+				description: "Excluir horário de treino",
+			},
 		];
 
 		// Find privileges that don't exist yet
@@ -220,6 +243,8 @@ async function seedRolePrivileges() {
 				"view_matriculation",
 				"list_instructor_disciplines",
 				"view_instructor_discipline",
+				"list_training_schedules",
+				"view_training_schedule",
 			], // Instructor gets limited privileges
 			student: [
 				"view_user",
@@ -228,6 +253,8 @@ async function seedRolePrivileges() {
 				"list_ranks",
 				"view_rank",
 				"view_matriculation",
+				"list_training_schedules",
+				"view_training_schedule",
 			], // Student gets basic privileges
 		};
 
@@ -407,6 +434,172 @@ async function seedRanks() {
 		return await db.select().from(ranksTable);
 	} catch (error) {
 		console.error("Erro ao criar ranks:", error);
+		throw error;
+	}
+}
+
+async function seedTrainingSchedules() {
+	try {
+		// Get existing disciplines
+		const disciplines = await db.select().from(disciplinesTable);
+		if (disciplines.length === 0) {
+			console.log("Nenhuma disciplina encontrada para adicionar horários");
+			return [];
+		}
+
+		// Find discipline IDs
+		const karateDiscipline = disciplines.find((d) => d.name === "Karate-Do");
+		const kendoDiscipline = disciplines.find((d) => d.name === "Kendo");
+		const archeryDiscipline = disciplines.find((d) => d.name === "Arqueria");
+
+		if (!karateDiscipline || !kendoDiscipline || !archeryDiscipline) {
+			console.log("Uma ou mais disciplinas não foram encontradas");
+			return [];
+		}
+
+		// Define training schedules
+		const trainingSchedules = [
+			// Karate-Do - Segunda-feira
+			{
+				idDiscipline: karateDiscipline.id,
+				weekday: "monday" as const,
+				startTime: "07:00:00",
+				endTime: "08:00:00",
+			},
+			{
+				idDiscipline: karateDiscipline.id,
+				weekday: "monday" as const,
+				startTime: "17:00:00",
+				endTime: "18:00:00",
+			},
+			{
+				idDiscipline: karateDiscipline.id,
+				weekday: "monday" as const,
+				startTime: "18:30:00",
+				endTime: "19:30:00",
+			},
+			{
+				idDiscipline: karateDiscipline.id,
+				weekday: "monday" as const,
+				startTime: "19:30:00",
+				endTime: "20:30:00",
+			},
+
+			// Karate-Do - Quarta-feira
+			{
+				idDiscipline: karateDiscipline.id,
+				weekday: "wednesday" as const,
+				startTime: "07:00:00",
+				endTime: "08:00:00",
+			},
+			{
+				idDiscipline: karateDiscipline.id,
+				weekday: "wednesday" as const,
+				startTime: "17:00:00",
+				endTime: "18:00:00",
+			},
+			{
+				idDiscipline: karateDiscipline.id,
+				weekday: "wednesday" as const,
+				startTime: "18:30:00",
+				endTime: "19:30:00",
+			},
+			{
+				idDiscipline: karateDiscipline.id,
+				weekday: "wednesday" as const,
+				startTime: "19:30:00",
+				endTime: "20:30:00",
+			},
+
+			// Karate-Do - Sexta-feira
+			{
+				idDiscipline: karateDiscipline.id,
+				weekday: "friday" as const,
+				startTime: "07:00:00",
+				endTime: "08:00:00",
+			},
+			{
+				idDiscipline: karateDiscipline.id,
+				weekday: "friday" as const,
+				startTime: "17:00:00",
+				endTime: "18:00:00",
+			},
+			{
+				idDiscipline: karateDiscipline.id,
+				weekday: "friday" as const,
+				startTime: "18:30:00",
+				endTime: "19:30:00",
+			},
+			{
+				idDiscipline: karateDiscipline.id,
+				weekday: "friday" as const,
+				startTime: "19:30:00",
+				endTime: "20:30:00",
+			},
+
+			// Kendo - Terça-feira
+			{
+				idDiscipline: kendoDiscipline.id,
+				weekday: "tuesday" as const,
+				startTime: "20:00:00",
+				endTime: "21:30:00",
+			},
+
+			// Kendo - Quinta-feira
+			{
+				idDiscipline: kendoDiscipline.id,
+				weekday: "thursday" as const,
+				startTime: "20:00:00",
+				endTime: "21:30:00",
+			},
+
+			// Arqueria - Terça-feira
+			{
+				idDiscipline: archeryDiscipline.id,
+				weekday: "tuesday" as const,
+				startTime: "18:50:00",
+				endTime: "19:50:00",
+			},
+
+			// Arqueria - Quinta-feira
+			{
+				idDiscipline: archeryDiscipline.id,
+				weekday: "thursday" as const,
+				startTime: "18:50:00",
+				endTime: "19:50:00",
+			},
+		];
+
+		// Check existing training schedules to avoid duplicates
+		const existingSchedules = await db.select().from(trainingSchedulesTable);
+
+		// Filter out schedules that already exist
+		const newSchedules = trainingSchedules.filter((schedule) => {
+			return !existingSchedules.some(
+				(existing) =>
+					existing.idDiscipline === schedule.idDiscipline &&
+					existing.weekday === schedule.weekday &&
+					existing.startTime === schedule.startTime &&
+					existing.endTime === schedule.endTime,
+			);
+		});
+
+		if (newSchedules.length === 0) {
+			console.log("Nenhum novo horário de treino para adicionar");
+			return existingSchedules;
+		}
+
+		// Add only new schedules
+		await db.insert(trainingSchedulesTable).values(newSchedules);
+		console.log(
+			`${newSchedules.length} novos horários de treino criados com sucesso`,
+		);
+
+		// Return all schedules
+		const allSchedules = await db.select().from(trainingSchedulesTable);
+		return allSchedules;
+	} catch (error) {
+		console.error("Erro ao criar horários de treino:", error);
 		throw error;
 	}
 }
@@ -823,6 +1016,7 @@ export const seed = async () => {
 		await seedRolePrivileges();
 		await seedDisciplines();
 		await seedRanks();
+		await seedTrainingSchedules();
 		const adminUser = await seedAdminUser();
 		if (adminUser) {
 			await assignAdminRole(adminUser);
