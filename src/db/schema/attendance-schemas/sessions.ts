@@ -28,7 +28,7 @@ export const sessionsTable = mysqlTable("tb_sessions", {
 export const sessionsRelations = relations(
     sessionsTable,
     ({ one, many }) => ({
-        instructor: one(instructorDisciplinesTable, {
+        instructorDiscipline: one(instructorDisciplinesTable, {
             fields: [sessionsTable.idInstructorDiscipline],
             references: [instructorDisciplinesTable.id],
         }),

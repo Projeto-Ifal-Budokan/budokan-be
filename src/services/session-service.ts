@@ -1,81 +1,160 @@
-import { and, eq, gt, gte, lt, lte, or } from "drizzle-orm";
+import { and, desc, eq, gt, gte, lt, lte, or, inArray } from "drizzle-orm";
 import { db } from "../db";
+import { AttendanceService } from "./attendance-service";
 import { sessionsTable } from "../db/schema/attendance-schemas/sessions";
 import { disciplinesTable } from "../db/schema/discipline-schemas/disciplines";
-import { ranksTable } from "../db/schema/discipline-schemas/ranks";
 import { instructorDisciplinesTable } from "../db/schema/practitioner-schemas/instructor-disciplines";
 import { instructorsTable } from "../db/schema/practitioner-schemas/instructors";
 import type {
 	CreateSessionInput,
 	UpdateSessionInput,
+	ListSessionInput,
 } from "../schemas/session.schemas";
+import { attendancesTable } from "../db/schema";
 
 export class SessionService {
-	async listSessions() {
-		const sessions = await db
-			.select({
-				id: sessionsTable.id,
-				idInstructorDiscipline: sessionsTable.idInstructorDiscipline,
-				idDiscipline: sessionsTable.idDiscipline,
-				date: sessionsTable.date,
-				startingTime: sessionsTable.startingTime,
-				endingTime: sessionsTable.endingTime,
-				createdAt: sessionsTable.createdAt,
-				updatedAt: sessionsTable.updatedAt,
+	async listSessions(filters: ListSessionInput) {
+		// busca os IDs de das disciplinas que o usuario é instrutor, se informada uma disciplina busca apenas o id dessa disciplina.
+		const instructorDisciplineID = await db.
+			select({
+				id: instructorDisciplinesTable.id,
 			})
-			.from(sessionsTable);
+			.from(instructorDisciplinesTable)
+			.where(
+				and(
+					filters.idInstructor ? eq(instructorDisciplinesTable.idInstructor, filters.idInstructor) : undefined,
+					filters.idDiscipline ? eq(instructorDisciplinesTable.idDiscipline, filters.idDiscipline) : undefined,
+				)
+			);
 
-		return sessions;
-	}
-
-	async getSessionById(id: number) {
-		const session = await db
-			.select({
-				id: sessionsTable.id,
-				idInstructorDiscipline: sessionsTable.idInstructorDiscipline,
-				idDiscipline: sessionsTable.idDiscipline,
-				date: sessionsTable.date,
-				startingTime: sessionsTable.startingTime,
-				endingTime: sessionsTable.endingTime,
-				createdAt: sessionsTable.createdAt,
-				updatedAt: sessionsTable.updatedAt,
-			})
-			.from(sessionsTable)
-			.where(eq(sessionsTable.id, id));
-
-		if (session.length === 0) {
-			throw new Error("Aula não encontrada");
-		}
-
-		return session[0];
-	}
-
-	async getSessionsByInstructorDiscipline(idInstructorDiscipline: number) {
-		const sessions = await db
-			.select({
-				id: sessionsTable.id,
-				idInstructorDiscipline: sessionsTable.idInstructorDiscipline,
-				idDiscipline: sessionsTable.idDiscipline,
-				date: sessionsTable.date,
-				startingTime: sessionsTable.startingTime,
-				endingTime: sessionsTable.endingTime,
-				createdAt: sessionsTable.createdAt,
-				updatedAt: sessionsTable.updatedAt,
-			})
-			.from(sessionsTable)
-			.where(eq(sessionsTable.idInstructorDiscipline, idInstructorDiscipline));
+		// Buscar sessões ministradas por um instrutor específico
+		const sessions = await db.query.sessionsTable.findMany({
+			// filtro abaixo funcionar é o sonho.
+			where: (session) => {
+				const conditions = [
+					filters.idDiscipline
+						? eq(session.idDiscipline, filters.idDiscipline)
+						: undefined,
+					instructorDisciplineID
+						? inArray(session.idInstructorDiscipline, instructorDisciplineID.map(id => id.id))
+						: undefined,
+					filters.initialDate
+						? gte(sessionsTable.date, new Date(filters.initialDate))
+						: undefined,
+					filters.finalDate
+						? lte(sessionsTable.date, new Date(filters.finalDate))
+						: undefined,
+				].filter(Boolean);
+				return and(...conditions);
+			},
+			with: {
+				instructorDiscipline: {
+					columns: {
+						id: true,
+						idInstructor: true,
+						idDiscipline: true,
+					},
+				},
+				attendances: {
+					columns: {
+						id: true,
+						idMatriculation: true,
+						idSession: true,
+						status: true,
+						justification: true,
+						justificationDescription: true,
+					},
+					with: {
+						matriculation: {
+							columns: {
+								id: true,
+								idStudent: true,
+								idDiscipline: true,
+								idRank: true,
+								status: true,
+							},
+							with: {
+								user: {
+									columns: {
+										id: true,
+										firstName: true,
+										surname: true,
+										phone: true,
+										email: true,
+									}
+								},
+							},
+						},
+					}
+				}
+			},
+			orderBy: desc(sessionsTable.date),
+			limit: filters.limit || 100, // Limite padrão de 100 sessões
+		});
 
 		return sessions;
 	}
 
 	async createSession(data: CreateSessionInput) {
-		// Verificar se a disciplina existe
+		const sessionData = await this.validateSession(data);
+
+		const result = await db.insert(sessionsTable).values(sessionData);
+
+		// lancamento de presença para a nova aula
+		const insertId = Array.isArray(result) && result[0]?.insertId
+			? result[0].insertId
+			: undefined;
+
+		const attendanceService = new AttendanceService();
+		if (insertId) {
+			await attendanceService.createAttendance({
+				idSession: insertId,
+			});
+		}
+
+		return { message: "Aula criada com sucesso" };
+	}
+
+	async updateSession(id: number, data: UpdateSessionInput) {
+		const existingSession = await db
+			.select()
+			.from(sessionsTable)
+			.where(eq(sessionsTable.id, id));
+
+		if (existingSession.length === 0) {
+			throw new Error("Aula não encontrada");
+		}
+
+		const sessionData = await this.validateSession(data);
+
+		await db.update(sessionsTable).set(sessionData).where(eq(sessionsTable.id, id));
+
+		return { message: "Aula atualizada com sucesso" };
+	}
+
+	async deleteSession(id: number) {
+		const existingSession = await db
+			.select()
+			.from(sessionsTable)
+			.where(eq(sessionsTable.id, id));
+
+		if (existingSession.length === 0) {
+			throw new Error("Aula não encontrada");
+		}
+
+		await db.delete(attendancesTable).where(eq(attendancesTable.idSession, id));
+		await db.delete(sessionsTable).where(eq(sessionsTable.id, id));
+
+		return { message: "Aula excluída com sucesso" };
+	}
+
+	async validateSession(data: CreateSessionInput | UpdateSessionInput) {
 		const discipline = await db
 			.select()
 			.from(disciplinesTable)
-			.where(eq(disciplinesTable.id, data.idDiscipline));
+			.where(data.idDiscipline ? eq(disciplinesTable.id, data.idDiscipline) : undefined);
 
-		if (discipline.length === 0) {
+		if (discipline.length === 0 && data.idDiscipline) {
 			throw new Error("Disciplina não encontrada");
 		}
 
@@ -83,32 +162,35 @@ export class SessionService {
 		const instructor = await db
 			.select()
 			.from(instructorsTable)
-			.where(eq(instructorsTable.idPractitioner, data.idInstructor));
+			.where(data.idInstructor ? eq(instructorsTable.idPractitioner, data.idInstructor) : undefined);
 
-		if (instructor.length === 0) {
+		if (instructor.length === 0 && data.idInstructor) {
 			throw new Error("Instrutor não encontrado");
 		}
+
 		// Verificar se o instrutor é responsável pela disciplina informada
 		const instructorDisciplines = await db
 			.select()
 			.from(instructorDisciplinesTable)
 			.where(
 				and(
-					eq(instructorDisciplinesTable.idInstructor, data.idInstructor),
-					eq(instructorDisciplinesTable.idDiscipline, data.idDiscipline),
+					data.idInstructor ? eq(instructorDisciplinesTable.idInstructor, data.idInstructor) : undefined,
+					data.idDiscipline ? eq(instructorDisciplinesTable.idDiscipline, data.idDiscipline) : undefined,
 				),
 			);
 
-		if (instructorDisciplines.length === 0) {
+		if (instructorDisciplines.length === 0 && data.idInstructor && data.idDiscipline) {
 			throw new Error(
 				"O instrutor informado não é responsável pela disciplina",
 			);
 		}
 
 		// Adicionar o idInstructorDiscipline ao objeto de dados pois na tabela sessions a FK é idInstructorDiscipline e não idInstructor
+		// Também formata a data para o formato YYYY-MM-DD
 		const sessionData = {
 			...data,
-			idInstructorDiscipline: instructorDisciplines[0].id,
+			idInstructorDiscipline: instructorDisciplines ? instructorDisciplines[0].id : undefined,
+			date: data.date ? new Date(data.date).toISOString().split("T")[0] : undefined, // Formato YYYY-MM-DD
 		};
 
 		// Verificar se já existe uma aula ativa para este dia e horario
@@ -118,34 +200,34 @@ export class SessionService {
 			.where(
 				and(
 					// Mesma disciplina, mesmo instrutor e mesmo dia
-					eq(
+					sessionData.idInstructorDiscipline ? eq(
 						sessionsTable.idInstructorDiscipline,
 						sessionData.idInstructorDiscipline,
-					),
-					eq(sessionsTable.idDiscipline, sessionData.idDiscipline),
-					eq(sessionsTable.date, sessionData.date),
+					) : undefined,
+					sessionData.idDiscipline ? eq(sessionsTable.idDiscipline, sessionData.idDiscipline) : undefined,
+					sessionData.date ? eq(sessionsTable.date, sessionData.date) : undefined,
 
 					// Verifica sobreposição de horários:
 					or(
 						// 1. Novo horário começa DENTRO de uma aula existente
 						and(
-							lt(sessionsTable.startingTime, sessionData.startingTime),
-							gt(sessionsTable.endingTime, sessionData.startingTime),
+							sessionData.startingTime ? lt(sessionsTable.startingTime, sessionData.startingTime) : undefined,
+							sessionData.startingTime ? gt(sessionsTable.endingTime, sessionData.startingTime) : undefined,
 						),
 						// 2. Novo horário termina DENTRO de uma aula existente
 						and(
-							lt(sessionsTable.startingTime, sessionData.endingTime),
-							gt(sessionsTable.endingTime, sessionData.endingTime),
+							sessionData.endingTime ? lt(sessionsTable.startingTime, sessionData.endingTime) : undefined,
+							sessionData.endingTime ? gt(sessionsTable.endingTime, sessionData.endingTime) : undefined,
 						),
 						// 3. Novo horário ENGLOBA completamente uma aula existente
 						and(
-							gte(sessionsTable.startingTime, sessionData.startingTime),
-							lte(sessionsTable.endingTime, sessionData.endingTime),
+							sessionData.startingTime ? gte(sessionsTable.startingTime, sessionData.startingTime) : undefined,
+							sessionData.endingTime ? lte(sessionsTable.endingTime, sessionData.endingTime) : undefined,
 						),
 						// 4. Aula existente ENGLOBA completamente o novo horário
 						and(
-							lte(sessionsTable.startingTime, sessionData.startingTime),
-							gte(sessionsTable.endingTime, sessionData.endingTime),
+							sessionData.startingTime ? lte(sessionsTable.startingTime, sessionData.startingTime) : undefined,
+							sessionData.endingTime ? gte(sessionsTable.endingTime, sessionData.endingTime) : undefined,
 						),
 					),
 				),
@@ -157,59 +239,6 @@ export class SessionService {
 				"Conflito de horário: já existe uma aula agendada neste intervalo",
 			);
 		}
-
-		await db.insert(sessionsTable).values(sessionData);
-		return { message: "Aula criada com sucesso" };
-	}
-
-	async updateSession(id: number, data: UpdateSessionInput) {
-		const existingSession = await db
-			.select()
-			.from(sessionsTable)
-			.where(eq(sessionsTable.id, id));
-
-		if (existingSession.length === 0) {
-			throw new Error("Matrícula não encontrada");
-		}
-
-		// Verificar se a graduação existe e pertence à disciplina da matrícula
-		if (data.idRank) {
-			const sessionDiscipline = existingSession[0].idDiscipline;
-
-			const rank = await db
-				.select()
-				.from(ranksTable)
-				.where(
-					and(
-						eq(ranksTable.id, data.idRank),
-						eq(ranksTable.idDiscipline, sessionDiscipline),
-					),
-				);
-
-			if (rank.length === 0) {
-				throw new Error(
-					"Graduação não encontrada ou não pertence à disciplina da matrícula",
-				);
-			}
-		}
-
-		await db.update(sessionsTable).set(data).where(eq(sessionsTable.id, id));
-
-		return { message: "Matrícula atualizada com sucesso" };
-	}
-
-	async deleteSession(id: number) {
-		const existingSession = await db
-			.select()
-			.from(sessionsTable)
-			.where(eq(sessionsTable.id, id));
-
-		if (existingSession.length === 0) {
-			throw new Error("Matrícula não encontrada");
-		}
-
-		await db.delete(sessionsTable).where(eq(sessionsTable.id, id));
-
-		return { message: "Matrícula excluída com sucesso" };
+		return sessionData;
 	}
 }

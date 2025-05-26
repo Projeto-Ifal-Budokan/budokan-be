@@ -51,6 +51,10 @@ export const matriculationsTable = mysqlTable("tb_matriculations", {
 export const matriculationsRelations = relations(
 	matriculationsTable,
 	({ one, many }) => ({
+		user: one(usersTable, {
+			fields: [matriculationsTable.idStudent],
+			references: [usersTable.id],
+		}),
 		student: one(studentsTable, {
 			fields: [matriculationsTable.idStudent],
 			references: [studentsTable.idPractitioner],

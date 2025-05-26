@@ -136,10 +136,6 @@ async function seedPrivileges() {
 				description: "Listar todas as aulas",
 			},
 			{
-				name: "view_session",
-				description: "Visualizar detalhes da aula do id informado",
-			},
-			{
 				name: "create_session",
 				description: "Criar uma nova aula",
 			},
@@ -243,7 +239,6 @@ async function seedRolePrivileges() {
 				"list_instructor_disciplines",
 				"view_instructor_discipline",
 				"list_sessions",
-				"view_session",
 				"create_session",
 				"update_session",
 				"delete_session",
@@ -255,6 +250,7 @@ async function seedRolePrivileges() {
 				"list_ranks",
 				"view_rank",
 				"view_matriculation",
+				"list_sessions",
 			], // Student gets basic privileges
 		};
 

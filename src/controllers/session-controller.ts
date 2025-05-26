@@ -2,6 +2,7 @@ import type { RequestHandler } from "express";
 import { ZodError } from "zod";
 import {
 	createSessionSchema,
+	listSessionSchema,
 	updateSessionSchema,
 } from "../schemas/session.schemas";
 import { SessionService } from "../services/session-service";
@@ -10,41 +11,11 @@ const sessionService = new SessionService();
 
 export const listSessions: RequestHandler = async (req, res) => {
 	try {
-		const sessions = await sessionService.listSessions();
+		const validatedData = listSessionSchema.parse(req.body);
+		const sessions = await sessionService.listSessions(validatedData);
 		res.status(200).json(sessions);
 	} catch (error) {
 		console.error("Erro ao listar Aulas:", error);
-		res.status(500).json({ message: "Erro interno do servidor" });
-	}
-};
-
-export const getSessionById: RequestHandler = async (req, res) => {
-	try {
-		const { id } = req.params;
-		const session = await sessionService.getSessionById(Number(id));
-		res.status(200).json(session);
-	} catch (error) {
-		if (error instanceof Error && error.message === "Aula não encontrada") {
-			res.status(404).json({ message: error.message });
-			return;
-		}
-		console.error("Erro ao buscar aula:", error);
-		res.status(500).json({ message: "Erro interno do servidor" });
-	}
-};
-
-export const getSessionsByInstructorDiscipline: RequestHandler = async (
-	req,
-	res,
-) => {
-	try {
-		const { studentId } = req.params;
-		const sessions = await sessionService.getSessionsByInstructorDiscipline(
-			Number(studentId),
-		);
-		res.status(200).json(sessions);
-	} catch (error) {
-		console.error("Erro ao buscar matrículas do estudante:", error);
 		res.status(500).json({ message: "Erro interno do servidor" });
 	}
 };
@@ -68,7 +39,7 @@ export const createSession: RequestHandler = async (req, res) => {
 				error.message === "Disciplina não encontrada" ||
 				error.message === "Instrutor não encontrado" ||
 				error.message ===
-					"O instrutor informado não é responsável pela disciplina"
+				"O instrutor informado não é responsável pela disciplina"
 			) {
 				res.status(404).json({ message: error.message });
 				return;
@@ -104,15 +75,22 @@ export const updateSession: RequestHandler = async (req, res) => {
 		}
 		if (error instanceof Error) {
 			if (
-				error.message === "Matrícula não encontrada" ||
+				error.message === "Disciplina não encontrada" ||
+				error.message === "Instrutor não encontrado" ||
 				error.message ===
-					"Graduação não encontrada ou não pertence à disciplina da matrícula"
+				"O instrutor informado não é responsável pela disciplina"
 			) {
 				res.status(404).json({ message: error.message });
 				return;
 			}
+			if (
+				error.message === "Conflito de horário: já existe uma aula agendada neste intervalo"
+			) {
+				res.status(409).json({ message: error.message });
+				return;
+			}
 		}
-		console.error("Erro ao atualizar matrícula:", error);
+		console.error("Erro ao atualizar aula:", error);
 		res.status(500).json({ message: "Erro interno do servidor" });
 	}
 };
@@ -125,12 +103,12 @@ export const deleteSession: RequestHandler = async (req, res) => {
 	} catch (error) {
 		if (
 			error instanceof Error &&
-			error.message === "Matrícula não encontrada"
+			error.message === "Aula não encontrada"
 		) {
 			res.status(404).json({ message: error.message });
 			return;
 		}
-		console.error("Erro ao excluir matrícula:", error);
+		console.error("Erro ao excluir aula:", error);
 		res.status(500).json({ message: "Erro interno do servidor" });
 	}
 };
