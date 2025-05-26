@@ -147,6 +147,10 @@ async function seedPrivileges() {
 				name: "delete_session",
 				description: "Exclui uma aula",
 			},
+			{
+				name: "view_matriculation_sessions",
+				description: "Lista a frequência de uma matrícula",
+			},
 		];
 
 		// Find privileges that don't exist yet
@@ -239,6 +243,7 @@ async function seedRolePrivileges() {
 				"list_instructor_disciplines",
 				"view_instructor_discipline",
 				"list_sessions",
+				"view_matriculation_sessions",
 				"create_session",
 				"update_session",
 				"delete_session",
@@ -250,7 +255,7 @@ async function seedRolePrivileges() {
 				"list_ranks",
 				"view_rank",
 				"view_matriculation",
-				"list_sessions",
+				"view_matriculation_sessions",
 			], // Student gets basic privileges
 		};
 

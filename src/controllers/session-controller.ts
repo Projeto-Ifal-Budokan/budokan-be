@@ -4,6 +4,7 @@ import {
 	createSessionSchema,
 	listSessionSchema,
 	updateSessionSchema,
+	viewMatriculationSessionsSchema,
 } from "../schemas/session.schemas";
 import { SessionService } from "../services/session-service";
 
@@ -17,6 +18,23 @@ export const listSessions: RequestHandler = async (req, res) => {
 	} catch (error) {
 		console.error("Erro ao listar Aulas:", error);
 		res.status(500).json({ message: "Erro interno do servidor" });
+	}
+};
+
+export const viewMatriculationSessions: RequestHandler = async (req, res) => {
+	try {
+		const { idMatriculation } = req.params;
+		const validatedData = await viewMatriculationSessionsSchema.parse(req.body);
+		const sessions = await sessionService.viewMatriculationSessions(
+			Number(idMatriculation),
+			validatedData
+		);
+		res.status(200).json(sessions);
+	} catch (error) {
+		if (error instanceof Error && error.message === "Nenhum registro de frequência encontrado") {
+			res.status(404).json({ message: error.message });
+			return;
+		}
 	}
 };
 

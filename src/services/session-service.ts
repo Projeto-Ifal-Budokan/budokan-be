@@ -9,6 +9,8 @@ import type {
 	CreateSessionInput,
 	UpdateSessionInput,
 	ListSessionInput,
+	viewMatriculationSessionsSchema,
+	ViewMatriculationSessionsInput,
 } from "../schemas/session.schemas";
 import { attendancesTable } from "../db/schema";
 
@@ -93,6 +95,26 @@ export class SessionService {
 		});
 
 		return sessions;
+	}
+
+	async viewMatriculationSessions(idMatriculation: number, data: ViewMatriculationSessionsInput) {
+		const attendance = await db
+			.select()
+			.from(attendancesTable)
+			.innerJoin(
+				sessionsTable,
+				eq(attendancesTable.idSession, sessionsTable.id),
+			)
+			.where(
+				and(
+					eq(attendancesTable.idMatriculation, idMatriculation),
+					eq(sessionsTable.idDiscipline, data.idDiscipline),
+				)
+			);
+		if (attendance.length === 0) {
+			throw new Error("Nenhum registro de frequência encontrado");
+		}
+		return attendance
 	}
 
 	async createSession(data: CreateSessionInput) {

@@ -81,8 +81,11 @@ export const listSessionSchema = z.object({
     }, "Data final inválida").optional(),
     idInstructor: z.number().int().positive().optional(),
     idDiscipline: z.number().int().positive().optional(),
-    idMatriculation: z.number().int().positive().optional(),
     limit: z.number().int().positive().optional(),
+});
+
+export const viewMatriculationSessionsSchema = z.object({
+    idDiscipline: z.number().int().positive("ID da disciplina é obrigatório"),
 });
 
 export type CreateSessionInput = z.infer<
@@ -93,4 +96,7 @@ export type UpdateSessionInput = z.infer<
 >;
 export type ListSessionInput = z.infer<
     typeof listSessionSchema
+>;
+export type ViewMatriculationSessionsInput = z.infer<
+    typeof viewMatriculationSessionsSchema
 >;
