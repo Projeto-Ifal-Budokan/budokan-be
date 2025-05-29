@@ -3,15 +3,16 @@ import { eq } from "drizzle-orm";
 import jwt from "jsonwebtoken";
 import nodemailer from "nodemailer";
 import { db } from "../db";
+import { practitionerContactsTable } from "../db/schema/practitioner-schemas/practitioner-contacts";
 import { practitionersTable } from "../db/schema/practitioner-schemas/practitioners";
 import { usersTable } from "../db/schema/user-schemas/users";
 import {
 	ConflictError,
 	ForbiddenError,
-	NotFoundError,
 	UnauthorizedError,
 } from "../errors/app-errors";
 import type {
+	EmergencyContactInput,
 	ForgotPasswordInput,
 	LoginInput,
 	RegisterInput,
@@ -41,7 +42,10 @@ export class AuthService {
 			birthDate,
 			isPractitioner,
 			healthObservations,
+			emergencyContacts,
 		} = data;
+
+		// A validação dos contatos já é feita pelo Zod schema
 
 		const existingUser = await db
 			.select()
@@ -81,6 +85,19 @@ export class AuthService {
 					idUser: user.id,
 					healthObservations: healthObservations || null,
 				});
+
+				// Adicionar contatos de emergência
+				if (emergencyContacts && emergencyContacts.length > 0) {
+					const contactsToInsert = emergencyContacts.map(
+						(contact: EmergencyContactInput) => ({
+							idPractitioner: user.id,
+							phone: contact.phone,
+							relationship: contact.relationship,
+						}),
+					);
+
+					await tx.insert(practitionerContactsTable).values(contactsToInsert);
+				}
 			}
 		});
 

@@ -5,6 +5,7 @@ import authRoutes from "./auth-routes.ts";
 import disciplinesRoutes from "./discipline-routes.ts";
 import instructorDisciplineRoutes from "./instructor-discipline-routes.ts";
 import matriculationRoutes from "./matriculation-routes.ts";
+import practitionerContactRoutes from "./practitioner-contact.routes.ts";
 import privilegeRoutes from "./privilege-routes.ts";
 import rankRoutes from "./rank-routes.ts";
 import rolePrivilegeRoutes from "./role-privilege-routes.ts";
@@ -65,6 +66,11 @@ router.use(
 	"/training-schedules",
 	passport.authenticate("jwt", { session: false }),
 	trainingScheduleRoutes,
+);
+router.use(
+	"/practitioner-contacts",
+	passport.authenticate("jwt", { session: false }),
+	practitionerContactRoutes,
 );
 
 export default router;
