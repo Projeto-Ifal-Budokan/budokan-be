@@ -115,17 +115,12 @@ export class PractitionerContactService {
 	}
 
 	// Excluir um contato
-	async delete(id: number, practitionerId: number) {
+	async delete(id: number) {
 		// Verificar se o contato existe e pertence ao praticante
 		const contact = await db
 			.select()
 			.from(practitionerContactsTable)
-			.where(
-				and(
-					eq(practitionerContactsTable.id, id),
-					eq(practitionerContactsTable.idPractitioner, practitionerId),
-				),
-			);
+			.where(and(eq(practitionerContactsTable.id, id)));
 
 		if (contact.length === 0) {
 			throw new NotFoundError(
@@ -137,7 +132,9 @@ export class PractitionerContactService {
 		const existingContacts = await db
 			.select()
 			.from(practitionerContactsTable)
-			.where(eq(practitionerContactsTable.idPractitioner, practitionerId));
+			.where(
+				eq(practitionerContactsTable.idPractitioner, contact[0].idPractitioner),
+			);
 
 		// Verificar se o praticante ficará com menos de 3 contatos após a exclusão
 		if (existingContacts.length <= 3) {

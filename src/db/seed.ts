@@ -7,6 +7,7 @@ import { trainingSchedulesTable } from "./schema/discipline-schemas/training-sch
 import { instructorDisciplinesTable } from "./schema/practitioner-schemas/instructor-disciplines";
 import { instructorsTable } from "./schema/practitioner-schemas/instructors";
 import { matriculationsTable } from "./schema/practitioner-schemas/matriculations";
+import { practitionerContactsTable } from "./schema/practitioner-schemas/practitioner-contacts";
 import { practitionersTable } from "./schema/practitioner-schemas/practitioners";
 import { studentsTable } from "./schema/practitioner-schemas/students";
 import { privilegesTable } from "./schema/user-schemas/privileges";
@@ -152,6 +153,28 @@ async function seedPrivileges() {
 				name: "delete_training_schedule",
 				description: "Excluir horário de treino",
 			},
+
+			// Practitioner Contact management
+			{
+				name: "list_practitioner_contacts",
+				description: "Listar todos os contatos de emergência de praticantes",
+			},
+			{
+				name: "view_practitioner_contact",
+				description: "Visualizar detalhes do contato de emergência",
+			},
+			{
+				name: "create_practitioner_contact",
+				description: "Criar novo contato de emergência",
+			},
+			{
+				name: "update_practitioner_contact",
+				description: "Atualizar contato de emergência",
+			},
+			{
+				name: "delete_practitioner_contact",
+				description: "Excluir contato de emergência",
+			},
 		];
 
 		// Find privileges that don't exist yet
@@ -245,6 +268,10 @@ async function seedRolePrivileges() {
 				"view_instructor_discipline",
 				"list_training_schedules",
 				"view_training_schedule",
+				"view_practitioner_contact",
+				"create_practitioner_contact",
+				"update_practitioner_contact",
+				"delete_practitioner_contact",
 			], // Instructor gets limited privileges
 			student: [
 				"view_user",
@@ -255,6 +282,10 @@ async function seedRolePrivileges() {
 				"view_matriculation",
 				"list_training_schedules",
 				"view_training_schedule",
+				"view_practitioner_contact",
+				"create_practitioner_contact",
+				"update_practitioner_contact",
+				"delete_practitioner_contact",
 			], // Student gets basic privileges
 		};
 
@@ -1008,6 +1039,96 @@ async function seedMatriculations(student: Practitioner) {
 	}
 }
 
+async function seedPractitionerContacts(practitioners: {
+	instructor: Practitioner;
+	student: Practitioner;
+}) {
+	try {
+		// Define contacts for the student
+		const studentContacts = [
+			{
+				idPractitioner: practitioners.student.idUser,
+				phone: "11999991111",
+				relationship: "Mãe",
+			},
+			{
+				idPractitioner: practitioners.student.idUser,
+				phone: "11999992222",
+				relationship: "Pai",
+			},
+		];
+
+		// Define contacts for the instructor
+		const instructorContacts = [
+			{
+				idPractitioner: practitioners.instructor.idUser,
+				phone: "11999993333",
+				relationship: "Cônjuge",
+			},
+		];
+
+		// Get existing contacts for each practitioner
+		const existingStudentContacts = await db
+			.select()
+			.from(practitionerContactsTable)
+			.where(
+				eq(
+					practitionerContactsTable.idPractitioner,
+					practitioners.student.idUser,
+				),
+			);
+
+		const existingInstructorContacts = await db
+			.select()
+			.from(practitionerContactsTable)
+			.where(
+				eq(
+					practitionerContactsTable.idPractitioner,
+					practitioners.instructor.idUser,
+				),
+			);
+
+		// Filter student contacts that don't exist yet (based on phone and relationship)
+		const newStudentContacts = studentContacts.filter(
+			(contact) =>
+				!existingStudentContacts.some(
+					(existing) =>
+						existing.phone === contact.phone &&
+						existing.relationship === contact.relationship,
+				),
+		);
+
+		// Filter instructor contacts that don't exist yet
+		const newInstructorContacts = instructorContacts.filter(
+			(contact) =>
+				!existingInstructorContacts.some(
+					(existing) =>
+						existing.phone === contact.phone &&
+						existing.relationship === contact.relationship,
+				),
+		);
+
+		// Add new contacts if any
+		const newContacts = [...newStudentContacts, ...newInstructorContacts];
+
+		if (newContacts.length > 0) {
+			await db.insert(practitionerContactsTable).values(newContacts);
+			console.log(
+				`${newContacts.length} novos contatos de emergência adicionados`,
+			);
+		} else {
+			console.log(
+				"Todos os contatos de emergência já existem no banco de dados",
+			);
+		}
+
+		return await db.select().from(practitionerContactsTable);
+	} catch (error) {
+		console.error("Erro ao criar contatos de emergência:", error);
+		throw error;
+	}
+}
+
 // Export the seed function to be called when needed
 export const seed = async () => {
 	try {
@@ -1027,6 +1148,7 @@ export const seed = async () => {
 		const practitioners = await seedPractitioners(users);
 		await seedInstructorDisciplines(practitioners.instructor);
 		await seedMatriculations(practitioners.student);
+		await seedPractitionerContacts(practitioners);
 
 		console.log("População do banco de dados concluída");
 	} catch (error) {

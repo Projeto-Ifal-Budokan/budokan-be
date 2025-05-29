@@ -115,14 +115,7 @@ export const deleteContact: RequestHandler = async (req, res, next) => {
 		const user = req.user as User | undefined;
 		const practitionerId = user?.id;
 
-		if (!practitionerId) {
-			throw new ValidationError("ID do praticante não encontrado");
-		}
-
-		const deleteResult = await practitionerContactService.delete(
-			contactId,
-			practitionerId,
-		);
+		const deleteResult = await practitionerContactService.delete(contactId);
 		res.json(deleteResult);
 	} catch (error) {
 		next(error);
