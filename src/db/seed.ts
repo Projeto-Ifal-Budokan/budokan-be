@@ -151,6 +151,32 @@ async function seedPrivileges() {
 				name: "view_matriculation_sessions",
 				description: "Lista a frequência de uma matrícula",
 			},
+
+			// Attendance management
+			{
+				name: "list_attendances",
+				description: "Listar a frequência",
+			},
+			{
+				name: "create_attendance",
+				description: "Lançar frequência",
+			},
+			{
+				name: "update_attendance",
+				description: "Atualizar frequência",
+			},
+			{
+				name: "justify_attendance",
+				description: "Atualizar frequência",
+			},
+			{
+				name: "delete_attendance",
+				description: "Exclui frequência",
+			},
+			{
+				name: "view_matriculation_attendances",
+				description: "Lista a frequência de uma matrícula",
+			},
 		];
 
 		// Find privileges that don't exist yet
@@ -247,6 +273,12 @@ async function seedRolePrivileges() {
 				"create_session",
 				"update_session",
 				"delete_session",
+				"list_attendances",
+				"create_attendance",
+				"update_attendance",
+				"justify_attendance",
+				"delete_attendance",
+				"view_matriculation_attendances",
 			], // Instructor gets limited privileges
 			student: [
 				"view_user",
@@ -256,6 +288,9 @@ async function seedRolePrivileges() {
 				"view_rank",
 				"view_matriculation",
 				"view_matriculation_sessions",
+				"list_attendances",
+				"justify_attendance",
+				"view_matriculation_attendances",
 			], // Student gets basic privileges
 		};
 
@@ -503,7 +538,7 @@ async function assignAdminRole(adminUser: { id: number }) {
 			.from(userRolesTable)
 			.where(
 				eq(userRolesTable.idUser, adminUser.id) &&
-					eq(userRolesTable.idRole, adminRole[0].id),
+				eq(userRolesTable.idRole, adminRole[0].id),
 			);
 
 		if (existingUserRole.length === 0) {
@@ -589,7 +624,7 @@ async function seedTestUsers() {
 					.from(userRolesTable)
 					.where(
 						eq(userRolesTable.idUser, instructorUser[0].id) &&
-							eq(userRolesTable.idRole, instructorRole[0].id),
+						eq(userRolesTable.idRole, instructorRole[0].id),
 					);
 
 				if (existingRole.length === 0) {
@@ -614,7 +649,7 @@ async function seedTestUsers() {
 					.from(userRolesTable)
 					.where(
 						eq(userRolesTable.idUser, studentUser[0].id) &&
-							eq(userRolesTable.idRole, studentRole[0].id),
+						eq(userRolesTable.idRole, studentRole[0].id),
 					);
 
 				if (existingRole.length === 0) {

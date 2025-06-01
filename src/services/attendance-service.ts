@@ -1,71 +1,102 @@
-import { and, eq, gt, gte, lt, lte, or } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { db } from "../db";
 import { attendancesTable } from "../db/schema/attendance-schemas/attendances";
 import { sessionsTable } from "../db/schema/attendance-schemas/sessions";
 import { matriculationsTable } from "../db/schema/practitioner-schemas/matriculations";
-import { disciplinesTable } from "../db/schema/discipline-schemas/disciplines";
-import { ranksTable } from "../db/schema/discipline-schemas/ranks";
 import { instructorDisciplinesTable } from "../db/schema/practitioner-schemas/instructor-disciplines";
-import { instructorsTable } from "../db/schema/practitioner-schemas/instructors";
+import { dailySessionsTable } from "../db/schema/attendance-schemas/daily-sessions";
+import { dailyAttendancesTable } from "../db/schema/attendance-schemas/daily-attendances";
 import type {
     CreateAttendanceInput,
+    CreateAttendanceDailyInput,
     UpdateAttendanceInput,
+    JustificationAttendanceInput
 } from "../schemas/attendance.schemas";
 
 export class AttendanceService {
     async listAttendances() {
-        const attendances = await db
-            .select({
-                id: attendancesTable.id,
-                idInstructorDiscipline: attendancesTable.idInstructorDiscipline,
-                idDiscipline: attendancesTable.idDiscipline,
-                date: attendancesTable.date,
-                startingTime: attendancesTable.startingTime,
-                endingTime: attendancesTable.endingTime,
-                createdAt: attendancesTable.createdAt,
-                updatedAt: attendancesTable.updatedAt,
-            })
-            .from(attendancesTable);
+        const attendances = await db.query.attendancesTable.findMany({
+            with: { // attendancesRelations
+                matriculation: {
+                    with: { // matriculationsRelations
+                        user: {
+                            columns: {
+                                id: true,
+                                firstName: true,
+                                surname: true,
+                                phone: true,
+                                email: true,
+                            }
+                        },
+                    },
+                },
+                session: {
+                    with: { // sessionsRelations
+                        instructorDiscipline: {
+                            with: { // instructorDisciplineRelations
+                                discipline: {}
+                            }
+                        },
+                    }
+                },
+            }
+        })
 
         return attendances;
     }
 
-    async getAttendanceById(id: number) {
-        const attendance = await db
-            .select({
-                id: attendancesTable.id,
-                idInstructorDiscipline: attendancesTable.idInstructorDiscipline,
-                idDiscipline: attendancesTable.idDiscipline,
-                date: attendancesTable.date,
-                startingTime: attendancesTable.startingTime,
-                endingTime: attendancesTable.endingTime,
-                createdAt: attendancesTable.createdAt,
-                updatedAt: attendancesTable.updatedAt,
-            })
-            .from(attendancesTable)
-            .where(eq(attendancesTable.id, id));
+    async listDailyAttendances() {
+        const attendances = await db.query.dailyAttendancesTable.findMany({
+            with: { // dailyAttendancesRelations
+                matriculation: {
+                    with: { // matriculationsRelations
+                        user: {
+                            columns: {
+                                id: true,
+                                firstName: true,
+                                surname: true,
+                                phone: true,
+                                email: true,
+                            }
+                        },
+                    },
+                },
+                dailySession: {
+                    with: { // dailySessionsRelations
+                        instructorDiscipline: {
+                            with: { // instructorDisciplineRelations
+                                discipline: {}
+                            }
+                        },
+                    }
+                },
+            }
+        })
 
-        if (attendance.length === 0) {
-            throw new Error("Aula não encontrada");
-        }
-
-        return attendance[0];
+        return attendances;
     }
 
-    async getAttendancesByInstructorDiscipline(idInstructorDiscipline: number) {
-        const attendances = await db
-            .select({
-                id: attendancesTable.id,
-                idInstructorDiscipline: attendancesTable.idInstructorDiscipline,
-                idDiscipline: attendancesTable.idDiscipline,
-                date: attendancesTable.date,
-                startingTime: attendancesTable.startingTime,
-                endingTime: attendancesTable.endingTime,
-                createdAt: attendancesTable.createdAt,
-                updatedAt: attendancesTable.updatedAt,
-            })
-            .from(attendancesTable)
-            .where(eq(attendancesTable.idInstructorDiscipline, idInstructorDiscipline));
+    async getAttendanceByMatriculation(id: number) {
+        const attendances = await db.query.dailyAttendancesTable.findMany({
+            where:
+                eq(dailyAttendancesTable.idMatriculation, id),
+            with: { // dailyAttendancesRelations
+                dailySession: {
+                    with: { // dailySessionsRelations
+                        instructorDiscipline: {
+                            with: { // instructorDisciplineRelations
+                                discipline: {}
+                            }
+                        },
+                    }
+                },
+                session: {}
+            }
+        })
+
+        if (attendances.length === 0) {
+            throw new Error("Nenhum registro de frequência encontrado");
+        }
 
         return attendances;
     }
@@ -92,51 +123,180 @@ export class AttendanceService {
             throw new Error("Nenhum aluno matriculado encontrado");
         };
 
+        const activeAttendancesOfThisSession = await db
+            .select()
+            .from(attendancesTable)
+            .where(eq(attendancesTable.idSession, data.idSession));
+
+        if (activeAttendancesOfThisSession.length > 0) {
+            return { message: "Frequência já lançada para esta aula", idDailySession: session[0].idDailySession };
+        }
+
         const attendanceData = matriculations.map((matriculation) => ({
             idMatriculation: matriculation.id,
             idSession: data.idSession,
+            idDailySession: session[0].idDailySession
         }));
 
-
         await db.insert(attendancesTable).values(attendanceData);
+
+        return { message: "Frequência lançada", idDailySession: session[0].idDailySession };
+    }
+
+    async createAttendanceDaily(data: CreateAttendanceDailyInput) {
+        const dailySession = await db
+            .select({
+                id: dailySessionsTable.id,
+                idInstructorDiscipline: dailySessionsTable.idInstructorDiscipline,
+                date: dailySessionsTable.date,
+                idDiscipline: instructorDisciplinesTable.idDiscipline,
+            })
+            .from(dailySessionsTable)
+            .innerJoin(
+                instructorDisciplinesTable,
+                eq(dailySessionsTable.idInstructorDiscipline, instructorDisciplinesTable.id)
+            )
+            .where(eq(dailySessionsTable.id, data.idDailySession));
+
+        if (dailySession.length === 0) {
+            throw new Error("Aula não encontrada");
+        };
+
+        const matriculations = await db
+            .select()
+            .from(matriculationsTable)
+            .where(
+                and(
+                    eq(matriculationsTable.idDiscipline, dailySession[0].idDiscipline),
+                    eq(matriculationsTable.status, "active"),
+                ),
+            );
+        if (matriculations.length === 0) {
+            throw new Error("Nenhum aluno ativo e matriculado encontrado");
+        };
+
+        const activeAttendancesOfThisSession = await db
+            .select()
+            .from(dailyAttendancesTable)
+            .where(eq(dailyAttendancesTable.idDailySession, data.idDailySession));
+
+        if (activeAttendancesOfThisSession.length > 0) {
+            return { message: "Frequência diária já lançada para esta aula" };
+        }
+
+        const dailyAttendanceData = matriculations.map((matriculation) => ({
+            idMatriculation: matriculation.id,
+            idDailySession: data.idDailySession,
+        }));
+
+        await db.insert(dailyAttendancesTable).values(dailyAttendanceData);
 
         return { message: "Frequência lançada" };
     }
 
     async updateAttendance(id: number, data: UpdateAttendanceInput) {
-        const existingAttendance = await db
+        const existingSession = await db
             .select()
-            .from(attendancesTable)
-            .where(eq(attendancesTable.id, id));
+            .from(sessionsTable)
+            .where(eq(sessionsTable.id, id));
 
-        if (existingAttendance.length === 0) {
-            throw new Error("Matrícula não encontrada");
+        if (existingSession.length === 0) {
+            throw new Error("Aula não encontrada");
         }
 
-        // Verificar se a graduação existe e pertence à disciplina da matrícula
-        if (data.idRank) {
-            const attendanceDiscipline = existingAttendance[0].idDiscipline;
-
-            const rank = await db
-                .select()
-                .from(ranksTable)
+        for (const attendanceUpdate of data.attendances) {
+            await db
+                .update(attendancesTable)
+                .set(attendanceUpdate)
                 .where(
                     and(
-                        eq(ranksTable.id, data.idRank),
-                        eq(ranksTable.idDiscipline, attendanceDiscipline),
-                    ),
+                        eq(attendancesTable.idSession, id),
+                        eq(attendancesTable.idMatriculation, attendanceUpdate.idMatriculation)
+                    )
                 );
+        }
 
-            if (rank.length === 0) {
-                throw new Error(
-                    "Graduação não encontrada ou não pertence à disciplina da matrícula",
-                );
+        const session = await db.select().from(sessionsTable).where(eq(sessionsTable.id, id));
+        const dailySession = await db.select().from(dailySessionsTable).where(eq(dailySessionsTable.id, session[0].idDailySession));
+
+        if (dailySession.length === 0) {
+            throw new Error("Sessão diária não encontrada");
+        }
+
+        const dailyAttendances = await db
+            .select()
+            .from(dailyAttendancesTable)
+            .where(eq(dailyAttendancesTable.idDailySession, dailySession[0].id));
+
+
+        for (const dailyAttendanceUpdate of data.attendances) {
+            // Verifica se existe frequência diária com idSession null e status "absent"
+            const existingAbsent = dailyAttendances.find(
+                (a) =>
+                    a.idMatriculation === dailyAttendanceUpdate.idMatriculation &&
+                    a.idDailySession === dailySession[0].id &&
+                    a.idSession === null &&
+                    a.status === "absent"
+            );
+
+            // Verifica se já existe registro com idSession e status "present"
+            const existingPresent = dailyAttendances.find(
+                (a) =>
+                    a.idMatriculation === dailyAttendanceUpdate.idMatriculation &&
+                    a.idDailySession === dailySession[0].id &&
+                    a.idSession !== null &&
+                    a.status === "present"
+            );
+
+            if (existingAbsent) {
+                // Atualiza o registro existente para o novo status/idSession
+                await db
+                    .update(dailyAttendancesTable)
+                    .set({
+                        status: dailyAttendanceUpdate.status,
+                        idSession: id,
+                    })
+                    .where(
+                        and(
+                            eq(dailyAttendancesTable.idDailySession, dailySession[0].id),
+                            eq(dailyAttendancesTable.idMatriculation, dailyAttendanceUpdate.idMatriculation)
+                        )
+                    );
+            } else if (existingPresent && dailyAttendanceUpdate.status === "present" && existingPresent.idSession !== id) {
+                // Insere novo registro se existir uma "presença" neste dia
+                await db.insert(dailyAttendancesTable).values({
+                    idDailySession: dailySession[0].id,
+                    idMatriculation: dailyAttendanceUpdate.idMatriculation,
+                    idSession: id,
+                    status: "present"
+                });
             }
         }
 
-        await db.update(attendancesTable).set(data).where(eq(attendancesTable.id, id));
+        return { message: "Frequência atualizada com sucesso" };
+    }
 
-        return { message: "Matrícula atualizada com sucesso" };
+    async justifyAttendance(id: number, data: JustificationAttendanceInput) {
+        const existingAttendance = await db
+            .select()
+            .from(dailyAttendancesTable)
+            .where(eq(dailyAttendancesTable.id, id));
+        if (existingAttendance.length === 0) {
+            throw new Error("Registro não encontrado");
+        }
+        if (existingAttendance[0].status !== "absent") {
+            throw new Error("O registro não está ausente, não é possível justificar");
+        }
+
+        await db
+            .update(dailyAttendancesTable)
+            .set({
+                justification: data.justification,
+                justificationDescription: data.justificationDescription,
+            })
+            .where(eq(dailyAttendancesTable.id, id));
+
+        return { message: "Justificativa registrada com sucesso" };
     }
 
     async deleteAttendance(id: number) {
@@ -146,11 +306,26 @@ export class AttendanceService {
             .where(eq(attendancesTable.id, id));
 
         if (existingAttendance.length === 0) {
-            throw new Error("Matrícula não encontrada");
+            throw new Error("Registro não encontrado");
         }
 
         await db.delete(attendancesTable).where(eq(attendancesTable.id, id));
 
-        return { message: "Matrícula excluída com sucesso" };
+        return { message: "Registro excluído com sucesso" };
+    }
+
+    async deleteDailyAttendance(id: number) {
+        const existingAttendance = await db
+            .select()
+            .from(dailyAttendancesTable)
+            .where(eq(dailyAttendancesTable.id, id));
+
+        if (existingAttendance.length === 0) {
+            throw new Error("Registro não encontrado");
+        }
+
+        await db.delete(dailyAttendancesTable).where(eq(dailyAttendancesTable.id, id));
+
+        return { message: "Registro excluído com sucesso" };
     }
 }

@@ -12,6 +12,7 @@ import roleRoutes from "./role-routes.ts";
 import userRoleRoutes from "./user-role-routes.ts";
 import userRoutes from "./user-routes.ts";
 import sessionRoutes from "./session-routes.ts";
+import attendanceRoutes from "./attendance-routes.ts";
 
 const router = Router();
 
@@ -66,4 +67,9 @@ router.use(
 	passport.authenticate("jwt", { session: false }),
 	sessionRoutes,
 );
+router.use(
+	"/attendances",
+	passport.authenticate("jwt", { session: false }),
+	attendanceRoutes,
+)
 export default router;

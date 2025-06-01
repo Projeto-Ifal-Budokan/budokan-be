@@ -16,6 +16,10 @@ export const listSessions: RequestHandler = async (req, res) => {
 		const sessions = await sessionService.listSessions(validatedData);
 		res.status(200).json(sessions);
 	} catch (error) {
+		if (error instanceof Error && error.message === "Nenhuma aula encontrada com os filtros informados") {
+			res.status(404).json({ message: error.message });
+			return;
+		}
 		console.error("Erro ao listar Aulas:", error);
 		res.status(500).json({ message: "Erro interno do servidor" });
 	}
