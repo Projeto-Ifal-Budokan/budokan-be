@@ -11,7 +11,7 @@ const sessionService = new SessionService();
 
 export const listSessions: RequestHandler = async (req, res, next) => {
 	try {
-		const validatedData = listSessionSchema.parse(req.body);
+		const validatedData = listSessionSchema.parse(req.query);
 		const sessions = await sessionService.listSessions(validatedData);
 		res.status(200).json(sessions);
 	} catch (error) {
@@ -19,13 +19,17 @@ export const listSessions: RequestHandler = async (req, res, next) => {
 	}
 };
 
-export const viewMatriculationSessions: RequestHandler = async (req, res, next) => {
+export const viewMatriculationSessions: RequestHandler = async (
+	req,
+	res,
+	next,
+) => {
 	try {
 		const { idMatriculation } = req.params;
-		const validatedData = await viewMatriculationSessionsSchema.parse(req.body);
+		const validatedData = viewMatriculationSessionsSchema.parse(req.query);
 		const sessions = await sessionService.viewMatriculationSessions(
 			Number(idMatriculation),
-			validatedData
+			validatedData,
 		);
 		res.status(200).json(sessions);
 	} catch (error) {

@@ -1,102 +1,167 @@
 import { z } from "zod";
 
-export const createSessionSchema = z.object({
-    idInstructor: z.number().int().positive("ID do instrutor é obrigatório"),
-    idDiscipline: z.number().int().positive("ID da disciplina é obrigatório"),
-    date: z.string().refine((date) => {
-        const parsedDate = new Date(date);
-        return (parsedDate.getDate());
-    }, "Data inválida"),
-    startingTime: z.string().refine((time) => {
-        const [hours, minutes] = time.split(':').map(Number);
-        return (
-            (hours >= 0 && hours <= 23) &&
-            (minutes >= 0 && minutes <= 59)
-        );
-    }, "Hora de início inválida"),
-    endingTime: z.string().refine((time) => {
-        const [hours, minutes] = time.split(':').map(Number);
-        return (
-            (hours >= 0 && hours <= 23) &&
-            (minutes >= 0 && minutes <= 59)
-        );
-    }, "Hora de término inválida"),
-}).refine((data) => {
-    // Converte os horários para minutos totais para comparação
-    const [startHours, startMinutes] = data.startingTime.split(':').map(Number);
-    const [endHours, endMinutes] = data.endingTime.split(':').map(Number);
-    
-    const startTotal = startHours * 60 + startMinutes;
-    const endTotal = endHours * 60 + endMinutes;
-    
-    return endTotal > startTotal;
-}, {
-    message: "O horário de término deve ser após o horário de início",
-    path: ["endingTime"] // Isso associa o erro ao campo endingTime
-});
+// Helper function for time validation
+const validateTimeFormat = (time: string) => {
+	const timeRegex = /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/;
+	return timeRegex.test(time);
+};
 
-export const updateSessionSchema = z.object({
-    idInstructor: z.number().int().positive().optional(),
-    idDiscipline: z.number().int().positive().optional(),
-    date: z.string().refine((date) => {
-        const parsedDate = new Date(date);
-        return (parsedDate.getDate());
-    }, "Data inválida").optional(),
-    startingTime: z.string().refine((time) => {
-        const [hours, minutes] = time.split(':').map(Number);
-        return (
-            (hours >= 0 && hours <= 23) &&
-            (minutes >= 0 && minutes <= 59)
-        );
-    }, "Hora de início inválida").optional(),
-    endingTime: z.string().refine((time) => {
-        const [hours, minutes] = time.split(':').map(Number);
-        return (
-            (hours >= 0 && hours <= 23) &&
-            (minutes >= 0 && minutes <= 59)
-        );
-    }, "Hora de término inválida").optional(),
-}).refine((data) => {
-    // Converte os horários para minutos totais para comparação
-    const [startHours, startMinutes] = data.startingTime ? data.startingTime.split(':').map(Number) : [0, 0];
-    const [endHours, endMinutes] = data.endingTime ? data.endingTime.split(':').map(Number) : [0, 0];
-    
-    const startTotal = startHours * 60 + startMinutes;
-    const endTotal = endHours * 60 + endMinutes;
-    
-    return endTotal > startTotal;
-}, {
-    message: "O horário de término deve ser após o horário de início",
-    path: ["endingTime"] // Isso associa o erro ao campo endingTime
-});
+// Helper function for date validation
+const validateDateFormat = (date: string) => {
+	const timestamp = Date.parse(date);
+	return !Number.isNaN(timestamp);
+};
 
-export const listSessionSchema = z.object({
-    initialDate: z.string().refine((date) => {
-        const parsedDate = new Date(date);
-        return (parsedDate.getDate());
-    }, "Data inicial inválida").optional(),
-    finalDate: z.string().refine((date) => {
-        const parsedDate = new Date(date);
-        return (parsedDate.getDate());
-    }, "Data final inválida").optional(),
-    idInstructor: z.number().int().positive().optional(),
-    idDiscipline: z.number().int().positive().optional(),
-    limit: z.number().int().positive().optional(),
-});
+export const createSessionSchema = z
+	.object({
+		idInstructor: z.number().int().positive("ID do instrutor é obrigatório"),
+		idDiscipline: z.number().int().positive("ID da disciplina é obrigatório"),
+		date: z.string().refine(validateDateFormat, {
+			message: "Data inválida. Utilize o formato YYYY-MM-DD",
+		}),
+		startingTime: z.string().refine(validateTimeFormat, {
+			message: "Hora de início inválida. Utilize o formato HH:MM",
+		}),
+		endingTime: z.string().refine(validateTimeFormat, {
+			message: "Hora de término inválida. Utilize o formato HH:MM",
+		}),
+	})
+	.refine(
+		(data) => {
+			// Converte os horários para minutos totais para comparação
+			const [startHours, startMinutes] = data.startingTime
+				.split(":")
+				.map(Number);
+			const [endHours, endMinutes] = data.endingTime.split(":").map(Number);
 
-export const viewMatriculationSessionsSchema = z.object({
-    idDiscipline: z.number().int().positive("ID da disciplina é obrigatório"),
-});
+			const startTotal = startHours * 60 + startMinutes;
+			const endTotal = endHours * 60 + endMinutes;
 
-export type CreateSessionInput = z.infer<
-    typeof createSessionSchema
->;
-export type UpdateSessionInput = z.infer<
-    typeof updateSessionSchema
->;
-export type ListSessionInput = z.infer<
-    typeof listSessionSchema
->;
+			return endTotal > startTotal;
+		},
+		{
+			message: "O horário de término deve ser após o horário de início",
+			path: ["endingTime"],
+		},
+	);
+
+export const updateSessionSchema = z
+	.object({
+		idInstructor: z.number().int().positive().optional(),
+		idDiscipline: z.number().int().positive().optional(),
+		date: z
+			.string()
+			.refine(validateDateFormat, {
+				message: "Data inválida. Utilize o formato YYYY-MM-DD",
+			})
+			.optional(),
+		startingTime: z
+			.string()
+			.refine(validateTimeFormat, {
+				message: "Hora de início inválida. Utilize o formato HH:MM",
+			})
+			.optional(),
+		endingTime: z
+			.string()
+			.refine(validateTimeFormat, {
+				message: "Hora de término inválida. Utilize o formato HH:MM",
+			})
+			.optional(),
+	})
+	.refine(
+		(data) => {
+			// Se não informados ambos os horários, não precisa validar
+			if (!data.startingTime || !data.endingTime) return true;
+
+			// Converte os horários para minutos totais para comparação
+			const [startHours, startMinutes] = data.startingTime
+				.split(":")
+				.map(Number);
+			const [endHours, endMinutes] = data.endingTime.split(":").map(Number);
+
+			const startTotal = startHours * 60 + startMinutes;
+			const endTotal = endHours * 60 + endMinutes;
+
+			return endTotal > startTotal;
+		},
+		{
+			message: "O horário de término deve ser após o horário de início",
+			path: ["endingTime"],
+		},
+	);
+
+export const listSessionSchema = z
+	.object({
+		initialDate: z
+			.string()
+			.refine(validateDateFormat, {
+				message: "Data inicial inválida. Utilize o formato YYYY-MM-DD",
+			})
+			.optional(),
+		finalDate: z
+			.string()
+			.refine(validateDateFormat, {
+				message: "Data final inválida. Utilize o formato YYYY-MM-DD",
+			})
+			.optional(),
+		idInstructor: z.number().int().positive().optional(),
+		idDiscipline: z.number().int().positive().optional(),
+		limit: z.number().int().positive().optional(),
+	})
+	.refine(
+		(data) => {
+			// Se ambas as datas estiverem presentes, valida que a data final é depois da inicial
+			if (data.initialDate && data.finalDate) {
+				const initialDate = new Date(data.initialDate);
+				const finalDate = new Date(data.finalDate);
+				return finalDate >= initialDate;
+			}
+			return true;
+		},
+		{
+			message: "A data final deve ser igual ou posterior à data inicial",
+			path: ["finalDate"],
+		},
+	);
+
+export const viewMatriculationSessionsSchema = z
+	.object({
+		idDiscipline: z.coerce
+			.number()
+			.int()
+			.positive("ID da disciplina é obrigatório"),
+		initialDate: z
+			.string()
+			.refine(validateDateFormat, {
+				message: "Data inicial inválida. Utilize o formato YYYY-MM-DD",
+			})
+			.optional(),
+		finalDate: z
+			.string()
+			.refine(validateDateFormat, {
+				message: "Data final inválida. Utilize o formato YYYY-MM-DD",
+			})
+			.optional(),
+	})
+	.refine(
+		(data) => {
+			// Se ambas as datas estiverem presentes, valida que a data final é depois da inicial
+			if (data.initialDate && data.finalDate) {
+				const initialDate = new Date(data.initialDate);
+				const finalDate = new Date(data.finalDate);
+				return finalDate >= initialDate;
+			}
+			return true;
+		},
+		{
+			message: "A data final deve ser igual ou posterior à data inicial",
+			path: ["finalDate"],
+		},
+	);
+
+export type CreateSessionInput = z.infer<typeof createSessionSchema>;
+export type UpdateSessionInput = z.infer<typeof updateSessionSchema>;
+export type ListSessionInput = z.infer<typeof listSessionSchema>;
 export type ViewMatriculationSessionsInput = z.infer<
-    typeof viewMatriculationSessionsSchema
+	typeof viewMatriculationSessionsSchema
 >;
