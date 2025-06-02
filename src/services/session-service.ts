@@ -5,16 +5,16 @@ import { sessionsTable } from "../db/schema/attendance-schemas/sessions";
 import { disciplinesTable } from "../db/schema/discipline-schemas/disciplines";
 import { instructorDisciplinesTable } from "../db/schema/practitioner-schemas/instructor-disciplines";
 import { instructorsTable } from "../db/schema/practitioner-schemas/instructors";
+import { attendancesTable } from "../db/schema";
+import { dailySessionsTable } from "../db/schema/attendance-schemas/daily-sessions";
+import { dailyAttendancesTable } from "../db/schema/attendance-schemas/daily-attendances";
+import { ConflictError, NotFoundError } from "../errors/app-errors";
 import type {
 	CreateSessionInput,
 	UpdateSessionInput,
 	ListSessionInput,
-	viewMatriculationSessionsSchema,
 	ViewMatriculationSessionsInput,
 } from "../schemas/session.schemas";
-import { attendancesTable } from "../db/schema";
-import { dailySessionsTable } from "../db/schema/attendance-schemas/daily-sessions";
-import { dailyAttendancesTable } from "../db/schema/attendance-schemas/daily-attendances";
 
 export class SessionService {
 	async listSessions(filters: ListSessionInput) {
@@ -94,7 +94,7 @@ export class SessionService {
 		});
 
 		if (sessions.length === 0) {
-			throw new Error("Nenhuma aula encontrada com os filtros informados");
+			throw new NotFoundError("Nenhuma aula encontrada com os filtros informados");
 		}
 
 		return sessions;
@@ -119,7 +119,7 @@ export class SessionService {
 				)
 			);
 		if (attendance.length === 0) {
-			throw new Error("Nenhum registro de frequência encontrado");
+			throw new NotFoundError("Nenhum registro de frequência encontrado");
 		}
 		return attendance
 	}
@@ -158,7 +158,7 @@ export class SessionService {
 			.where(eq(sessionsTable.id, id));
 
 		if (existingSession.length === 0) {
-			throw new Error("Aula não encontrada");
+			throw new NotFoundError("Aula não encontrada");
 		}
 
 		if( data.date ) { // se informado uma data, cria uma nova sessão diária. A função createDailySession já possui regra de negócio para não criar duplicidade.
@@ -179,7 +179,7 @@ export class SessionService {
 			.where(eq(sessionsTable.id, id));
 
 		if (existingSession.length === 0) {
-			throw new Error("Aula não encontrada");
+			throw new NotFoundError("Aula não encontrada");
 		}
 
 		await db.delete(attendancesTable).where(eq(attendancesTable.idSession, id));
@@ -248,7 +248,7 @@ export class SessionService {
 			.where(data.idDiscipline ? eq(disciplinesTable.id, data.idDiscipline) : undefined);
 
 		if (discipline.length === 0 && data.idDiscipline) {
-			throw new Error("Disciplina não encontrada");
+			throw new NotFoundError("Disciplina não encontrada");
 		}
 
 		// Verificar se o instrutor existe
@@ -258,7 +258,7 @@ export class SessionService {
 			.where(data.idInstructor ? eq(instructorsTable.idPractitioner, data.idInstructor) : undefined);
 
 		if (instructor.length === 0 && data.idInstructor) {
-			throw new Error("Instrutor não encontrado");
+			throw new NotFoundError("Instrutor não encontrado");
 		}
 
 		// Verificar se o instrutor é responsável pela disciplina informada
@@ -273,9 +273,7 @@ export class SessionService {
 			);
 
 		if (instructorDisciplines.length === 0 && data.idInstructor && data.idDiscipline) {
-			throw new Error(
-				"O instrutor informado não é responsável pela disciplina",
-			);
+			throw new NotFoundError("O instrutor informado não é responsável pela disciplina");
 		}
 
 		// Adicionar o idInstructorDiscipline ao objeto de dados pois na tabela sessions a FK é idInstructorDiscipline e não idInstructor
@@ -328,9 +326,7 @@ export class SessionService {
 			.limit(1);
 
 		if (conflictingSessions.length > 0) {
-			throw new Error(
-				"Conflito de horário: já existe uma aula agendada neste intervalo",
-			);
+			throw new ConflictError("Conflito de horário: já existe uma aula agendada neste intervalo");
 		}
 		return sessionData;
 	}

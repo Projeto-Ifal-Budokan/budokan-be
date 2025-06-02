@@ -6,6 +6,7 @@ import { matriculationsTable } from "../db/schema/practitioner-schemas/matricula
 import { instructorDisciplinesTable } from "../db/schema/practitioner-schemas/instructor-disciplines";
 import { dailySessionsTable } from "../db/schema/attendance-schemas/daily-sessions";
 import { dailyAttendancesTable } from "../db/schema/attendance-schemas/daily-attendances";
+import { ConflictError, NotFoundError } from "../errors/app-errors";
 import type {
     CreateAttendanceInput,
     CreateAttendanceDailyInput,
@@ -41,7 +42,9 @@ export class AttendanceService {
                 },
             }
         })
-
+        if (attendances.length === 0) {
+            throw new NotFoundError("Nenhum registro de frequência encontrado");
+        }
         return attendances;
     }
 
@@ -72,7 +75,9 @@ export class AttendanceService {
                 },
             }
         })
-
+        if (attendances.length === 0) {
+            throw new NotFoundError("Nenhum registro de frequência diária encontrado");
+        }
         return attendances;
     }
 
@@ -95,7 +100,7 @@ export class AttendanceService {
         })
 
         if (attendances.length === 0) {
-            throw new Error("Nenhum registro de frequência encontrado");
+            throw new NotFoundError("Nenhum registro de frequência encontrado");
         }
 
         return attendances;
@@ -107,7 +112,7 @@ export class AttendanceService {
             .from(sessionsTable)
             .where(eq(sessionsTable.id, data.idSession));
         if (session.length === 0) {
-            throw new Error("Aula não encontrada");
+            throw new NotFoundError("Aula não encontrada");
         };
 
         const matriculations = await db
@@ -120,7 +125,7 @@ export class AttendanceService {
                 ),
             );
         if (matriculations.length === 0) {
-            throw new Error("Nenhum aluno matriculado encontrado");
+            throw new NotFoundError("Nenhum aluno ativo e matriculado encontrado");
         };
 
         const activeAttendancesOfThisSession = await db
@@ -159,7 +164,7 @@ export class AttendanceService {
             .where(eq(dailySessionsTable.id, data.idDailySession));
 
         if (dailySession.length === 0) {
-            throw new Error("Aula não encontrada");
+            throw new NotFoundError("Sessão diária não encontrada");
         };
 
         const matriculations = await db
@@ -172,7 +177,7 @@ export class AttendanceService {
                 ),
             );
         if (matriculations.length === 0) {
-            throw new Error("Nenhum aluno ativo e matriculado encontrado");
+            throw new NotFoundError("Nenhum aluno ativo e matriculado encontrado");
         };
 
         const activeAttendancesOfThisSession = await db
@@ -201,7 +206,7 @@ export class AttendanceService {
             .where(eq(sessionsTable.id, id));
 
         if (existingSession.length === 0) {
-            throw new Error("Aula não encontrada");
+            throw new NotFoundError("Aula não encontrada");
         }
 
         for (const attendanceUpdate of data.attendances) {
@@ -220,7 +225,7 @@ export class AttendanceService {
         const dailySession = await db.select().from(dailySessionsTable).where(eq(dailySessionsTable.id, session[0].idDailySession));
 
         if (dailySession.length === 0) {
-            throw new Error("Sessão diária não encontrada");
+            throw new NotFoundError("Sessão diária não encontrada");
         }
 
         const dailyAttendances = await db
@@ -282,10 +287,10 @@ export class AttendanceService {
             .from(dailyAttendancesTable)
             .where(eq(dailyAttendancesTable.id, id));
         if (existingAttendance.length === 0) {
-            throw new Error("Registro não encontrado");
+            throw new NotFoundError("Registro não encontrado");
         }
         if (existingAttendance[0].status !== "absent") {
-            throw new Error("O registro não está ausente, não é possível justificar");
+            throw new ConflictError("O registro não está ausente, não é possível justificar");
         }
 
         await db
@@ -306,7 +311,7 @@ export class AttendanceService {
             .where(eq(attendancesTable.id, id));
 
         if (existingAttendance.length === 0) {
-            throw new Error("Registro não encontrado");
+            throw new NotFoundError("Registro não encontrado");
         }
 
         await db.delete(attendancesTable).where(eq(attendancesTable.id, id));
@@ -321,7 +326,7 @@ export class AttendanceService {
             .where(eq(dailyAttendancesTable.id, id));
 
         if (existingAttendance.length === 0) {
-            throw new Error("Registro não encontrado");
+            throw new NotFoundError("Registro não encontrado");
         }
 
         await db.delete(dailyAttendancesTable).where(eq(dailyAttendancesTable.id, id));
