@@ -1,6 +1,7 @@
 import { eq } from "drizzle-orm";
 import { db } from "../db";
 import { privilegesTable } from "../db/schema/user-schemas/privileges";
+import { ConflictError, NotFoundError } from "../errors/app-errors";
 import type {
 	CreatePrivilegeInput,
 	UpdatePrivilegeInput,
@@ -34,7 +35,7 @@ export class PrivilegeService {
 			.where(eq(privilegesTable.id, id));
 
 		if (privilege.length === 0) {
-			throw new Error("Privilégio não encontrado");
+			throw new NotFoundError("Privilégio não encontrado");
 		}
 
 		return privilege[0];
@@ -47,7 +48,7 @@ export class PrivilegeService {
 			.where(eq(privilegesTable.name, data.name));
 
 		if (existingPrivilege.length > 0) {
-			throw new Error("Já existe um privilégio com este nome");
+			throw new ConflictError("Já existe um privilégio com este nome");
 		}
 
 		await db.insert(privilegesTable).values(data);
@@ -61,7 +62,7 @@ export class PrivilegeService {
 			.where(eq(privilegesTable.id, id));
 
 		if (existingPrivilege.length === 0) {
-			throw new Error("Privilégio não encontrado");
+			throw new NotFoundError("Privilégio não encontrado");
 		}
 
 		if (data.name) {
@@ -74,7 +75,7 @@ export class PrivilegeService {
 				privilegeWithSameName.length > 0 &&
 				privilegeWithSameName[0].id !== id
 			) {
-				throw new Error("Já existe um privilégio com este nome");
+				throw new ConflictError("Já existe um privilégio com este nome");
 			}
 		}
 
@@ -93,7 +94,7 @@ export class PrivilegeService {
 			.where(eq(privilegesTable.id, id));
 
 		if (existingPrivilege.length === 0) {
-			throw new Error("Privilégio não encontrado");
+			throw new NotFoundError("Privilégio não encontrado");
 		}
 
 		await db.delete(privilegesTable).where(eq(privilegesTable.id, id));

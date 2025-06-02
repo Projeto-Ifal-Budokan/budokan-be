@@ -1,7 +1,7 @@
 import { eq } from "drizzle-orm";
-import { ZodError } from "zod";
 import { db } from "../db";
 import { usersTable } from "../db/schema/user-schemas/users";
+import { NotFoundError } from "../errors/app-errors";
 import type { UpdateUserInput } from "../schemas/user.schemas";
 
 export class UserService {
@@ -36,7 +36,7 @@ export class UserService {
 			.where(eq(usersTable.id, id));
 
 		if (user.length === 0) {
-			throw new Error("Usuário não encontrado");
+			throw new NotFoundError("Usuário não encontrado");
 		}
 
 		return user[0];
@@ -49,7 +49,7 @@ export class UserService {
 			.where(eq(usersTable.id, id));
 
 		if (existingUser.length === 0) {
-			throw new Error("Usuário não encontrado");
+			throw new NotFoundError("Usuário não encontrado");
 		}
 
 		await db
@@ -70,7 +70,7 @@ export class UserService {
 			.where(eq(usersTable.id, id));
 
 		if (existingUser.length === 0) {
-			throw new Error("Usuário não encontrado");
+			throw new NotFoundError("Usuário não encontrado");
 		}
 
 		await db.delete(usersTable).where(eq(usersTable.id, id));

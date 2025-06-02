@@ -2,6 +2,7 @@ import { eq } from "drizzle-orm";
 import type { NextFunction, Request, Response } from "express";
 import { db } from "../../db";
 import { userRolesTable } from "../../db/schema/user-schemas/user-roles";
+import { ForbiddenError, UnauthorizedError } from "../../errors/app-errors";
 import type { User } from "../../types/auth.types";
 
 export const hasRole = (requiredRole: string) => {
@@ -14,7 +15,7 @@ export const hasRole = (requiredRole: string) => {
 		const userId = user?.id;
 
 		if (!userId) {
-			res.status(401).json({ message: "Não autenticado" });
+			next(new UnauthorizedError("Não autenticado"));
 			return;
 		}
 
@@ -31,17 +32,17 @@ export const hasRole = (requiredRole: string) => {
 			);
 
 			if (!hasRequiredRole) {
-				res.status(403).json({
-					message: "Você não tem permissão para acessar este recurso",
-				});
+				next(
+					new ForbiddenError(
+						"Você não tem permissão para acessar este recurso",
+					),
+				);
 				return;
 			}
 
 			next();
 		} catch (error) {
-			console.error("Erro ao verificar roles:", error);
-			res.status(500).json({ message: "Erro interno do servidor" });
-			return;
+			next(error);
 		}
 	};
 };

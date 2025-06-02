@@ -1,7 +1,7 @@
 import type { RequestHandler } from "express";
-import { ZodError } from "zod";
 import { AuthService } from "../services/auth-service";
 
+import { UnauthorizedError } from "../errors/app-errors";
 import {
 	forgotPasswordSchema,
 	loginSchema,
@@ -12,29 +12,17 @@ import type { User } from "../types/auth.types";
 
 const authService = new AuthService();
 
-export const register: RequestHandler = async (req, res) => {
+export const register: RequestHandler = async (req, res, next) => {
 	try {
 		const validatedData = registerSchema.parse(req.body);
 		const result = await authService.register(validatedData);
 		res.status(201).json(result);
 	} catch (error) {
-		if (error instanceof ZodError) {
-			res.status(400).json({
-				message: "Dados inválidos",
-				errors: error.errors,
-			});
-			return;
-		}
-		if (error instanceof Error && error.message === "Email já cadastrado.") {
-			res.status(409).json({ message: error.message });
-			return;
-		}
-		console.error("Erro ao registrar usuário:", error);
-		res.status(500).json({ message: "Erro interno do servidor" });
+		next(error);
 	}
 };
 
-export const login: RequestHandler = async (req, res) => {
+export const login: RequestHandler = async (req, res, next) => {
 	try {
 		const validatedData = loginSchema.parse(req.body);
 		const { token } = await authService.login(validatedData);
@@ -48,76 +36,38 @@ export const login: RequestHandler = async (req, res) => {
 			})
 			.json({ message: "Login bem-sucedido" });
 	} catch (error) {
-		if (error instanceof ZodError) {
-			res.status(400).json({
-				message: "Dados inválidos",
-				errors: error.errors,
-			});
-			return;
-		}
-		if (error instanceof Error) {
-			if (error.message === "Credenciais inválidas.") {
-				res.status(401).json({ message: error.message });
-				return;
-			}
-			if (error.message === "Usuário inativo ou suspenso.") {
-				res.status(403).json({ message: error.message });
-				return;
-			}
-		}
-		console.error("Erro ao fazer login:", error);
-		res.status(500).json({ message: "Erro interno do servidor" });
+		next(error);
 	}
 };
 
-export const forgotPassword: RequestHandler = async (req, res) => {
+export const forgotPassword: RequestHandler = async (req, res, next) => {
 	try {
 		const validatedData = forgotPasswordSchema.parse(req.body);
 		const result = await authService.forgotPassword(validatedData);
 		res.status(200).json(result);
 	} catch (error) {
-		if (error instanceof ZodError) {
-			res.status(400).json({
-				message: "Dados inválidos",
-				errors: error.errors,
-			});
-			return;
-		}
-		console.error("Erro ao recuperar senha:", error);
-		res.status(500).json({ message: "Erro interno do servidor" });
+		next(error);
 	}
 };
 
-export const resetPassword: RequestHandler = async (req, res) => {
+export const resetPassword: RequestHandler = async (req, res, next) => {
 	try {
 		const validatedData = resetPasswordSchema.parse(req.body);
 		const result = await authService.resetPassword(validatedData);
 		res.status(200).json(result);
 	} catch (error) {
-		if (error instanceof ZodError) {
-			res.status(400).json({
-				message: "Dados inválidos",
-				errors: error.errors,
-			});
-			return;
-		}
-		if (
-			error instanceof Error &&
-			error.message === "Token inválido ou expirado."
-		) {
-			res.status(401).json({ message: error.message });
-			return;
-		}
-		console.error("Erro ao resetar senha:", error);
-		res.status(500).json({ message: "Erro interno do servidor" });
+		next(error);
 	}
 };
 
-export const me: RequestHandler = async (req, res) => {
-	const user = req.user as User | undefined;
-	if (!user) {
-		res.status(401).json({ message: "Não autenticado" });
-		return;
+export const me: RequestHandler = async (req, res, next) => {
+	try {
+		const user = req.user as User | undefined;
+		if (!user) {
+			throw new UnauthorizedError("Não autenticado");
+		}
+		res.status(200).json(user);
+	} catch (error) {
+		next(error);
 	}
-	res.status(200).json(user);
 };

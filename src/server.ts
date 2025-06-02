@@ -1,8 +1,8 @@
 import cookieParser from "cookie-parser";
-import express, { urlencoded, json } from "express";
+import express, { json, urlencoded } from "express";
 import passport from "../passport.ts";
-import { error } from "./middlewares/error.ts";
-import { notFound } from "./middlewares/not-found.ts";
+import { errorHandler } from "./middlewares/error-handler";
+import { notFound } from "./middlewares/not-found";
 
 import routes from "./routes";
 
@@ -41,6 +41,7 @@ app.use(routes);
 
 // Error handlers should be last
 app.use(notFound);
-app.use(error);
+// Registrando o middleware de erro
+app.use(errorHandler);
 
 export default app;
