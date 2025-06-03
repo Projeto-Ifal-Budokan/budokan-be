@@ -1,4 +1,5 @@
 import { SQL, and, desc, eq, gt, gte, inArray, lt, lte, or } from "drizzle-orm";
+import { DateTime } from "luxon";
 import { db } from "../db";
 import { attendancesTable } from "../db/schema";
 import { dailyAttendancesTable } from "../db/schema/attendance-schemas/daily-attendances";
@@ -68,50 +69,36 @@ export class SessionService {
 							)
 						: undefined,
 					filters.initialDate
-						? gte(sessionsTable.date, new Date(filters.initialDate))
+						? gte(
+								sessionsTable.date,
+								DateTime.fromISO(filters.initialDate).toJSDate(),
+							)
 						: undefined,
 					filters.finalDate
-						? lte(sessionsTable.date, new Date(filters.finalDate))
+						? lte(
+								sessionsTable.date,
+								DateTime.fromISO(filters.finalDate).toJSDate(),
+							)
 						: undefined,
 				].filter(Boolean);
 				return and(...conditions);
 			},
+			columns: {
+				id: true,
+				idDiscipline: true,
+				idInstructorDiscipline: true,
+				idDailySession: true,
+				date: true,
+				startingTime: true,
+				endingTime: true,
+			},
 			with: {
-				instructorDiscipline: {
-					columns: {
-						id: true,
-						idInstructor: true,
-						idDiscipline: true,
-					},
-				},
 				attendances: {
 					columns: {
 						id: true,
 						idMatriculation: true,
 						idSession: true,
 						status: true,
-					},
-					with: {
-						matriculation: {
-							columns: {
-								id: true,
-								idStudent: true,
-								idDiscipline: true,
-								idRank: true,
-								status: true,
-							},
-							with: {
-								user: {
-									columns: {
-										id: true,
-										firstName: true,
-										surname: true,
-										phone: true,
-										email: true,
-									},
-								},
-							},
-						},
 					},
 				},
 			},
@@ -152,10 +139,16 @@ export class SessionService {
 					eq(instructorDisciplinesTable.idDiscipline, data.idDiscipline),
 					// Adicionar filtros de data se fornecidos
 					data.initialDate
-						? gte(dailySessionsTable.date, new Date(data.initialDate))
+						? gte(
+								dailySessionsTable.date,
+								DateTime.fromISO(data.initialDate).toJSDate(),
+							)
 						: undefined,
 					data.finalDate
-						? lte(dailySessionsTable.date, new Date(data.finalDate))
+						? lte(
+								dailySessionsTable.date,
+								DateTime.fromISO(data.finalDate).toJSDate(),
+							)
 						: undefined,
 				),
 			);
@@ -186,8 +179,9 @@ export class SessionService {
 		}
 
 		// Convertendo string para Date para compatibilidade com o banco
+		// Usando Luxon para garantir que a data seja tratada corretamente
 		const dateObj = validatedData.date
-			? new Date(validatedData.date)
+			? DateTime.fromISO(validatedData.date).toJSDate()
 			: new Date();
 
 		const idDailySession = await this.createDailySession(
@@ -249,8 +243,8 @@ export class SessionService {
 			sessionData.endingTime = validatedData.endingTime;
 
 		if (data.date) {
-			// Converter string para Date
-			const dateObj = new Date(data.date);
+			// Converter string para Date usando Luxon para garantir o fuso horário correto
+			const dateObj = DateTime.fromISO(data.date).toJSDate();
 			sessionData.date = dateObj;
 
 			if (existingSession[0].idInstructorDiscipline) {
@@ -435,7 +429,8 @@ export class SessionService {
 			validatedData.startingTime &&
 			validatedData.endingTime
 		) {
-			const dateObj = new Date(validatedData.date);
+			// Usando Luxon para garantir o fuso horário correto
+			const dateObj = DateTime.fromISO(validatedData.date).toJSDate();
 
 			const conflictingSessions = await db
 				.select()
