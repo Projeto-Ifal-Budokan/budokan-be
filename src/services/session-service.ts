@@ -119,46 +119,50 @@ export class SessionService {
 		idMatriculation: number,
 		data: ViewMatriculationSessionsInput,
 	) {
-		const baseQuery = db
-			.select()
-			.from(dailyAttendancesTable)
+		const sessions = await db
+			.select({
+				idSession: attendancesTable.idSession,
+				idAttendance: attendancesTable.id,
+				status: attendancesTable.status,
+				date: sessionsTable.date,
+				startingTime: sessionsTable.startingTime,
+				endingTime: sessionsTable.endingTime,
+				idDiscipline: sessionsTable.idDiscipline,
+				idInstructorDiscipline: sessionsTable.idInstructorDiscipline,
+			})
+			.from(attendancesTable)
 			.innerJoin(
-				dailySessionsTable,
-				eq(dailyAttendancesTable.idDailySession, dailySessionsTable.id),
-			)
-			.innerJoin(
-				instructorDisciplinesTable,
-				eq(
-					dailySessionsTable.idInstructorDiscipline,
-					instructorDisciplinesTable.id,
-				),
+				sessionsTable,
+				eq(attendancesTable.idSession, sessionsTable.id),
 			)
 			.where(
 				and(
-					eq(dailyAttendancesTable.idMatriculation, idMatriculation),
-					eq(instructorDisciplinesTable.idDiscipline, data.idDiscipline),
+					eq(attendancesTable.idMatriculation, idMatriculation),
+					data.idDiscipline
+						? eq(sessionsTable.idDiscipline, data.idDiscipline)
+						: undefined,
 					// Adicionar filtros de data se fornecidos
 					data.initialDate
 						? gte(
-								dailySessionsTable.date,
+								sessionsTable.date,
 								DateTime.fromISO(data.initialDate).toJSDate(),
 							)
 						: undefined,
 					data.finalDate
 						? lte(
-								dailySessionsTable.date,
+								sessionsTable.date,
 								DateTime.fromISO(data.finalDate).toJSDate(),
 							)
 						: undefined,
 				),
-			);
+			)
+			.orderBy(desc(sessionsTable.date));
 
-		const attendance = await baseQuery;
-
-		if (attendance.length === 0) {
-			throw new NotFoundError("Nenhum registro de frequência encontrado");
+		if (sessions.length === 0) {
+			throw new NotFoundError("Nenhuma sessão encontrada para esta matrícula");
 		}
-		return attendance;
+
+		return sessions;
 	}
 
 	async createSession(data: CreateSessionInput) {

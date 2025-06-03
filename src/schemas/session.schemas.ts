@@ -129,7 +129,8 @@ export const viewMatriculationSessionsSchema = z
 		idDiscipline: z.coerce
 			.number()
 			.int()
-			.positive("ID da disciplina é obrigatório"),
+			.positive("ID da disciplina é obrigatório")
+			.optional(),
 		initialDate: z
 			.string()
 			.refine(validateDateFormat, {
