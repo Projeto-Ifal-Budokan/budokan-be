@@ -2,12 +2,11 @@ import { SQL, and, desc, eq, gt, gte, inArray, lt, lte, or } from "drizzle-orm";
 import { DateTime } from "luxon";
 import { db } from "../db";
 import { attendancesTable } from "../db/schema";
-import { dailyAttendancesTable } from "../db/schema/attendance-schemas/daily-attendances";
-import { dailySessionsTable } from "../db/schema/attendance-schemas/daily-sessions";
 import { sessionsTable } from "../db/schema/attendance-schemas/sessions";
 import { disciplinesTable } from "../db/schema/discipline-schemas/disciplines";
 import { instructorDisciplinesTable } from "../db/schema/practitioner-schemas/instructor-disciplines";
 import { instructorsTable } from "../db/schema/practitioner-schemas/instructors";
+import { matriculationsTable } from "../db/schema/practitioner-schemas/matriculations";
 import { ConflictError, NotFoundError } from "../errors/app-errors";
 import type {
 	CreateSessionInput,
@@ -22,7 +21,6 @@ type SessionInsertType = {
 	idDiscipline: number;
 	date: Date;
 	idInstructorDiscipline: number;
-	idDailySession: number;
 	startingTime: string;
 	endingTime: string;
 };
@@ -31,7 +29,6 @@ type SessionUpdateType = {
 	idDiscipline?: number;
 	date?: Date;
 	idInstructorDiscipline?: number;
-	idDailySession?: number;
 	startingTime?: string;
 	endingTime?: string;
 };
@@ -87,7 +84,6 @@ export class SessionService {
 				id: true,
 				idDiscipline: true,
 				idInstructorDiscipline: true,
-				idDailySession: true,
 				date: true,
 				startingTime: true,
 				endingTime: true,
@@ -182,22 +178,33 @@ export class SessionService {
 			throw new Error("Horários de início e término são obrigatórios");
 		}
 
+		// Verifica se existem matrículas ativas para esta disciplina
+		const activeMatriculations = await db
+			.select()
+			.from(matriculationsTable)
+			.where(
+				and(
+					eq(matriculationsTable.idDiscipline, validatedData.idDiscipline),
+					eq(matriculationsTable.status, "active"),
+				),
+			);
+
+		if (activeMatriculations.length === 0) {
+			throw new NotFoundError(
+				"Não é possível criar uma aula para uma disciplina sem alunos matriculados ativos",
+			);
+		}
+
 		// Convertendo string para Date para compatibilidade com o banco
 		// Usando Luxon para garantir que a data seja tratada corretamente
 		const dateObj = validatedData.date
 			? DateTime.fromISO(validatedData.date).toJSDate()
 			: new Date();
 
-		const idDailySession = await this.createDailySession(
-			validatedData.idInstructorDiscipline,
-			dateObj,
-		);
-
 		// Preparar dados para inserção conforme o schema da tabela
 		const sessionData: SessionInsertType = {
 			idDiscipline: validatedData.idDiscipline,
 			idInstructorDiscipline: validatedData.idInstructorDiscipline,
-			idDailySession,
 			date: dateObj,
 			startingTime: validatedData.startingTime,
 			endingTime: validatedData.endingTime,
@@ -233,6 +240,28 @@ export class SessionService {
 
 		const validatedData = await this.validateSession(data);
 
+		// Se a disciplina está sendo alterada, verificar se existem matrículas ativas
+		if (
+			validatedData.idDiscipline &&
+			validatedData.idDiscipline !== existingSession[0].idDiscipline
+		) {
+			const activeMatriculations = await db
+				.select()
+				.from(matriculationsTable)
+				.where(
+					and(
+						eq(matriculationsTable.idDiscipline, validatedData.idDiscipline),
+						eq(matriculationsTable.status, "active"),
+					),
+				);
+
+			if (activeMatriculations.length === 0) {
+				throw new NotFoundError(
+					"Não é possível transferir a aula para uma disciplina sem alunos matriculados ativos",
+				);
+			}
+		}
+
 		// Preparar dados para atualização conforme o schema da tabela
 		const sessionData: SessionUpdateType = {};
 
@@ -250,19 +279,6 @@ export class SessionService {
 			// Converter string para Date usando Luxon para garantir o fuso horário correto
 			const dateObj = DateTime.fromISO(data.date).toJSDate();
 			sessionData.date = dateObj;
-
-			if (existingSession[0].idInstructorDiscipline) {
-				// Verificar se já existe uma sessão diária para esta data
-				const idDailySession = await this.createDailySession(
-					existingSession[0].idInstructorDiscipline,
-					dateObj,
-				);
-
-				// Atualizar o idDailySession se for diferente
-				if (idDailySession !== existingSession[0].idDailySession) {
-					sessionData.idDailySession = idDailySession;
-				}
-			}
 		}
 
 		// Só realizar o update se houver campos para atualizar
@@ -286,82 +302,13 @@ export class SessionService {
 			throw new NotFoundError("Aula não encontrada");
 		}
 
+		// Primeiro exclui as frequências associadas à aula
 		await db.delete(attendancesTable).where(eq(attendancesTable.idSession, id));
+
+		// Depois exclui a aula
 		await db.delete(sessionsTable).where(eq(sessionsTable.id, id));
 
-		const stillHaveSessionsOfThisDay = await db
-			.select()
-			.from(sessionsTable)
-			.where(
-				and(
-					eq(sessionsTable.idDailySession, existingSession[0].idDailySession),
-					eq(
-						sessionsTable.idInstructorDiscipline,
-						existingSession[0].idInstructorDiscipline,
-					),
-				),
-			);
-
-		if (stillHaveSessionsOfThisDay.length === 0) {
-			await db
-				.delete(dailyAttendancesTable)
-				.where(
-					eq(
-						dailyAttendancesTable.idDailySession,
-						existingSession[0].idDailySession,
-					),
-				);
-			await db
-				.delete(dailySessionsTable)
-				.where(eq(dailySessionsTable.id, existingSession[0].idDailySession));
-		}
-
 		return { message: "Aula excluída com sucesso" };
-	}
-
-	async createDailySession(
-		idInstructorDiscipline: number,
-		date: Date,
-	): Promise<number> {
-		const existsDailySession = await db
-			.select()
-			.from(dailySessionsTable)
-			.where(
-				and(
-					eq(dailySessionsTable.idInstructorDiscipline, idInstructorDiscipline),
-					eq(dailySessionsTable.date, date),
-				),
-			);
-
-		// Se já existe uma sessão diária para o instrutor e disciplina no dia informado, retorna o ID dessa sessão
-		if (existsDailySession.length > 0) {
-			return existsDailySession[0].id;
-		}
-
-		// Se não existe, cria uma nova sessão diária
-		const insertDailySession = {
-			idInstructorDiscipline,
-			date,
-		};
-
-		const dailySessionResult = await db
-			.insert(dailySessionsTable)
-			.values(insertDailySession);
-
-		const insertId =
-			Array.isArray(dailySessionResult) && dailySessionResult[0]?.insertId
-				? dailySessionResult[0].insertId
-				: 0; // Default to 0 if no ID returned, will likely fail validation later
-
-		// Se a inserção foi bem-sucedida, cria a frequência diária
-		const attendanceService = new AttendanceService();
-		if (insertId) {
-			await attendanceService.createAttendanceDaily({
-				idDailySession: insertId,
-			});
-		}
-
-		return insertId;
 	}
 
 	async validateSession(data: CreateSessionInput | UpdateSessionInput) {

@@ -1,7 +1,5 @@
 export * from "./attendance-schemas/attendances";
 export * from "./attendance-schemas/sessions";
-export * from "./attendance-schemas/daily-attendances";
-export * from "./attendance-schemas/daily-sessions";
 export * from "./discipline-schemas/achievments";
 export * from "./discipline-schemas/disciplines";
 export * from "./discipline-schemas/exams";
