@@ -10,7 +10,7 @@ services:
     tty: true
     stdin_open: true
     ports:
-      - "3000:8000"
+      - "8001:8001"
     environment:
       - DATABASE_URL=mysql://budokan:budokan@mysql:3306/budokan-db
       - DATABASE_URL_FROM_CONTAINER=mysql://budokan:budokan@mysql:3306/budokan-db
