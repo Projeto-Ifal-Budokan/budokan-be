@@ -1,4 +1,5 @@
 import type { RequestHandler } from "express";
+import { z } from "zod";
 import {
 	createDailyAbsenceSchema,
 	updateDailyAbsenceSchema,
@@ -68,6 +69,70 @@ export const countAbsenceDays: RequestHandler = async (req, res, next) => {
 		const { idMatriculation } = req.params;
 		const result = await dailyAbsenceService.countAbsenceDays(
 			Number(idMatriculation),
+		);
+		res.status(200).json(result);
+	} catch (error) {
+		next(error);
+	}
+};
+
+export const processAbsencesForDate: RequestHandler = async (
+	req,
+	res,
+	next,
+) => {
+	try {
+		const schema = z.object({
+			date: z.string().refine(
+				(date) => {
+					const timestamp = Date.parse(date);
+					return !Number.isNaN(timestamp);
+				},
+				{
+					message: "Data inválida. Utilize o formato YYYY-MM-DD",
+				},
+			),
+		});
+
+		const { date } = schema.parse(req.body);
+		const result = await dailyAbsenceService.processAbsencesForDate(date);
+		res.status(200).json(result);
+	} catch (error) {
+		next(error);
+	}
+};
+
+export const processAbsencesForDateRange: RequestHandler = async (
+	req,
+	res,
+	next,
+) => {
+	try {
+		const schema = z.object({
+			startDate: z.string().refine(
+				(date) => {
+					const timestamp = Date.parse(date);
+					return !Number.isNaN(timestamp);
+				},
+				{
+					message: "Data inicial inválida. Utilize o formato YYYY-MM-DD",
+				},
+			),
+			endDate: z.string().refine(
+				(date) => {
+					const timestamp = Date.parse(date);
+					return !Number.isNaN(timestamp);
+				},
+				{
+					message: "Data final inválida. Utilize o formato YYYY-MM-DD",
+				},
+			),
+		});
+
+		const { startDate, endDate } = schema.parse(req.body);
+		const result = await dailyAbsenceService.processAbsencesForDateRange(
+			startDate,
+			endDate,
 		);
 		res.status(200).json(result);
 	} catch (error) {

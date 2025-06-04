@@ -5,6 +5,8 @@ import {
 	deleteDailyAbsence,
 	getDailyAbsence,
 	listDailyAbsences,
+	processAbsencesForDate,
+	processAbsencesForDateRange,
 	updateDailyAbsence,
 } from "../controllers/daily-absence-controller";
 import { hasPrivilege } from "../middlewares/auth/check-privilege.middleware";
@@ -25,6 +27,18 @@ router.get(
 	"/count/:idMatriculation",
 	hasPrivilege("count_absence_days"),
 	countAbsenceDays,
+);
+
+// Rotas para processamento automático
+router.post(
+	"/process-date",
+	hasPrivilege("process_daily_absences"),
+	processAbsencesForDate,
+);
+router.post(
+	"/process-date-range",
+	hasPrivilege("process_daily_absences"),
+	processAbsencesForDateRange,
 );
 
 export default router;

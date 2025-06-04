@@ -1,4 +1,4 @@
-import { and, count, eq, sql } from "drizzle-orm";
+import { and, count, eq, inArray, sql } from "drizzle-orm";
 import { DateTime } from "luxon";
 import { db } from "../db";
 import {
@@ -165,6 +165,109 @@ export class DailyAbsenceService {
 		return {
 			registeredAbsences: registeredAbsences[0]?.count || 0,
 			totalAbsenceDays,
+		};
+	}
+
+	async processAbsencesForDate(date: string | Date) {
+		// Converter para objeto Date se for string
+		const targetDate =
+			typeof date === "string" ? DateTime.fromISO(date).toJSDate() : date;
+
+		// Buscar todas as sessões do dia
+		const sessions = await db
+			.select()
+			.from(sessionsTable)
+			.where(eq(sessionsTable.date, targetDate));
+
+		if (sessions.length === 0) {
+			return {
+				message: "Nenhuma aula encontrada para a data informada",
+				processed: 0,
+			};
+		}
+
+		// Buscar todas as matrículas que tiveram aulas neste dia
+		const sessionIds = sessions.map((session) => session.id);
+
+		const matriculationsWithSessions = await db
+			.select({
+				idMatriculation: attendancesTable.idMatriculation,
+			})
+			.from(attendancesTable)
+			.where(inArray(attendancesTable.idSession, sessionIds))
+			.groupBy(attendancesTable.idMatriculation);
+
+		// Para cada matrícula, verificar se teve pelo menos uma presença no dia
+		let absencesCreated = 0;
+
+		for (const { idMatriculation } of matriculationsWithSessions) {
+			// Verificar se já existe um registro de ausência para este aluno neste dia
+			const existingAbsence = await db.query.dailyAbsencesTable.findFirst({
+				where: and(
+					eq(dailyAbsencesTable.idMatriculation, idMatriculation),
+					eq(dailyAbsencesTable.date, targetDate),
+				),
+			});
+
+			if (existingAbsence) {
+				continue; // Já existe um registro, pular para o próximo
+			}
+
+			// Verificar se o aluno teve alguma presença neste dia
+			const presences = await db
+				.select()
+				.from(attendancesTable)
+				.where(
+					and(
+						eq(attendancesTable.idMatriculation, idMatriculation),
+						inArray(attendancesTable.idSession, sessionIds),
+						eq(attendancesTable.status, "present"),
+					),
+				);
+
+			// Se não teve nenhuma presença, criar um registro de ausência diária
+			if (presences.length === 0) {
+				await db.insert(dailyAbsencesTable).values({
+					idMatriculation,
+					date: targetDate,
+					// Sem justificativa inicialmente
+				});
+
+				absencesCreated++;
+			}
+		}
+
+		return {
+			message: `Processamento concluído. ${absencesCreated} ausências diárias registradas.`,
+			processed: absencesCreated,
+		};
+	}
+
+	async processAbsencesForDateRange(startDate: string, endDate: string) {
+		const start = DateTime.fromISO(startDate);
+		const end = DateTime.fromISO(endDate);
+
+		if (!start.isValid || !end.isValid) {
+			throw new Error("Datas inválidas");
+		}
+
+		if (end < start) {
+			throw new Error("A data final deve ser posterior à data inicial");
+		}
+
+		let current = start;
+		let totalProcessed = 0;
+
+		// Processar cada dia no intervalo
+		while (current <= end) {
+			const result = await this.processAbsencesForDate(current.toJSDate());
+			totalProcessed += result.processed;
+			current = current.plus({ days: 1 });
+		}
+
+		return {
+			message: `Processamento concluído. ${totalProcessed} ausências diárias registradas no período.`,
+			processed: totalProcessed,
 		};
 	}
 }
