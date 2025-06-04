@@ -4,19 +4,23 @@ export const createAttendanceSchema = z.object({
 	idSession: z.number().int().positive("O ID da aula é obrigatório"),
 });
 
-export const updateAttendanceSchema = z.object({
+// Schema para um único item de atualização de frequência
+export const attendanceUpdateItemSchema = z.object({
+	idMatriculation: z.number().int().positive("O ID da matrícula é obrigatório"),
+	status: z.enum(["present", "absent"], {
+		required_error: "O status é obrigatório",
+	}),
+});
+
+// Schema para a lista de atualizações de frequência
+export const updateAttendanceSchema = z
+	.array(attendanceUpdateItemSchema)
+	.min(1, "É necessário ao menos uma matrícula");
+
+// Schema antigo (mantido para compatibilidade)
+export const legacyUpdateAttendanceSchema = z.object({
 	attendances: z
-		.array(
-			z.object({
-				idMatriculation: z
-					.number()
-					.int()
-					.positive("O ID da matrícula é obrigatório"),
-				status: z.enum(["present", "absent"], {
-					required_error: "O status é obrigatório",
-				}),
-			}),
-		)
+		.array(attendanceUpdateItemSchema)
 		.min(1, "É necessário ao menos uma matrícula"),
 });
 
@@ -58,7 +62,11 @@ export const updateDailyAbsenceSchema = z.object({
 });
 
 export type CreateAttendanceInput = z.infer<typeof createAttendanceSchema>;
+export type AttendanceUpdateItem = z.infer<typeof attendanceUpdateItemSchema>;
 export type UpdateAttendanceInput = z.infer<typeof updateAttendanceSchema>;
+export type LegacyUpdateAttendanceInput = z.infer<
+	typeof legacyUpdateAttendanceSchema
+>;
 export type JustificationInput = z.infer<typeof justificationSchema>;
 export type CreateDailyAbsenceInput = z.infer<typeof createDailyAbsenceSchema>;
 export type UpdateDailyAbsenceInput = z.infer<typeof updateDailyAbsenceSchema>;

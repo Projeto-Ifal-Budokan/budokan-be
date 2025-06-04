@@ -1,32 +1,45 @@
 import type { RequestHandler } from "express";
+import type { z } from "zod";
 import { ConflictError } from "../errors/app-errors";
 import {
 	createAttendanceSchema,
+	legacyUpdateAttendanceSchema,
 	updateAttendanceSchema,
 } from "../schemas/attendance.schemas";
+import type { AttendanceFilters } from "../services/attendance-service";
 import { AttendanceService } from "../services/attendance-service";
 
 const attendanceService = new AttendanceService();
 
 export const listAttendances: RequestHandler = async (req, res, next) => {
 	try {
-		const attendances = await attendanceService.listAttendances();
-		res.status(200).json(attendances);
-	} catch (error) {
-		next(error);
-	}
-};
+		// Extrair filtros dos query params
+		const filters: AttendanceFilters = {};
 
-export const listAttendancesByMatriculation: RequestHandler = async (
-	req,
-	res,
-	next,
-) => {
-	try {
-		const { id } = req.params;
-		const attendances = await attendanceService.getAttendanceByMatriculation(
-			Number(id),
-		);
+		if (req.query.idSession) {
+			filters.idSession = Number(req.query.idSession);
+		}
+
+		if (req.query.idDiscipline) {
+			filters.idDiscipline = Number(req.query.idDiscipline);
+		}
+
+		if (req.query.idMatriculation) {
+			filters.idMatriculation = Number(req.query.idMatriculation);
+		}
+
+		if (req.query.date) {
+			filters.date = String(req.query.date);
+		}
+
+		if (
+			req.query.status &&
+			["present", "absent"].includes(String(req.query.status))
+		) {
+			filters.status = req.query.status as "present" | "absent";
+		}
+
+		const attendances = await attendanceService.listAttendances(filters);
 		res.status(200).json(attendances);
 	} catch (error) {
 		next(error);
@@ -53,7 +66,18 @@ export const createAttendance: RequestHandler = async (req, res, next) => {
 export const updateAttendance: RequestHandler = async (req, res, next) => {
 	try {
 		const { id } = req.params;
-		const validatedData = updateAttendanceSchema.parse(req.body);
+
+		// Tentar validar com ambos os schemas
+		let validatedData: z.infer<typeof updateAttendanceSchema>;
+		try {
+			// Primeiro tenta o novo formato (array direto)
+			validatedData = updateAttendanceSchema.parse(req.body);
+		} catch (error) {
+			// Se falhar, tenta o formato antigo (objeto com array)
+			const legacyData = legacyUpdateAttendanceSchema.parse(req.body);
+			validatedData = legacyData.attendances;
+		}
+
 		const result = await attendanceService.updateAttendance(
 			Number(id),
 			validatedData,

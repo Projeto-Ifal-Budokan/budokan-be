@@ -105,9 +105,7 @@ export class SessionService {
 		});
 
 		if (sessions.length === 0) {
-			throw new NotFoundError(
-				"Nenhuma aula encontrada com os filtros informados",
-			);
+			throw new NotFoundError("Nenhuma aula encontrada.");
 		}
 
 		return sessions;
@@ -242,12 +240,14 @@ export class SessionService {
 		}
 
 		const validatedData = await this.validateSession(data);
+		let disciplineChanged = false;
 
 		// Se a disciplina está sendo alterada, verificar se existem matrículas ativas
 		if (
 			validatedData.idDiscipline &&
 			validatedData.idDiscipline !== existingSession[0].idDiscipline
 		) {
+			disciplineChanged = true;
 			const activeMatriculations = await db
 				.select()
 				.from(matriculationsTable)
@@ -292,6 +292,35 @@ export class SessionService {
 				.update(sessionsTable)
 				.set(sessionData)
 				.where(eq(sessionsTable.id, id));
+		}
+
+		// Se a disciplina foi alterada, recriar as frequências para a nova disciplina
+		if (disciplineChanged && validatedData.idDiscipline) {
+			// Primeiro, excluir todas as frequências existentes para esta aula
+			await db
+				.delete(attendancesTable)
+				.where(eq(attendancesTable.idSession, id));
+
+			// Buscar todas as matrículas ativas da nova disciplina
+			const newMatriculations = await db
+				.select()
+				.from(matriculationsTable)
+				.where(
+					and(
+						eq(matriculationsTable.idDiscipline, validatedData.idDiscipline),
+						eq(matriculationsTable.status, "active"),
+					),
+				);
+
+			// Criar novos registros de frequência para cada matrícula
+			const attendanceData = newMatriculations.map((matriculation) => ({
+				idMatriculation: matriculation.id,
+				idSession: id,
+			}));
+
+			if (attendanceData.length > 0) {
+				await db.insert(attendancesTable).values(attendanceData);
+			}
 		}
 
 		return { message: "Aula atualizada com sucesso" };

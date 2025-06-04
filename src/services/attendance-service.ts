@@ -1,4 +1,5 @@
-import { and, eq } from "drizzle-orm";
+import { and, eq, inArray } from "drizzle-orm";
+import { DateTime } from "luxon";
 import { db } from "../db";
 import { attendancesTable } from "../db/schema/attendance-schemas/attendances";
 import { sessionsTable } from "../db/schema/attendance-schemas/sessions";
@@ -11,41 +12,93 @@ import type {
 } from "../schemas/attendance.schemas";
 import { DailyAbsenceService } from "./daily-absence-service";
 
+export interface AttendanceFilters {
+	idSession?: number;
+	idDiscipline?: number;
+	idMatriculation?: number;
+	date?: string;
+	status?: "present" | "absent";
+}
+
 export class AttendanceService {
-	async listAttendances() {
-		const attendances = await db.query.attendancesTable.findMany();
-		if (attendances.length === 0) {
-			throw new NotFoundError("Nenhum registro de frequência encontrado");
-		}
-		return attendances;
-	}
+	async listAttendances(filters?: AttendanceFilters) {
+		// Construir a consulta base
+		const query = db
+			.select({
+				id: attendancesTable.id,
+				idMatriculation: attendancesTable.idMatriculation,
+				idSession: attendancesTable.idSession,
+				status: attendancesTable.status,
+				createdAt: attendancesTable.createdAt,
+				updatedAt: attendancesTable.updatedAt,
+				sessionId: sessionsTable.id,
+				sessionDate: sessionsTable.date,
+				sessionStartingTime: sessionsTable.startingTime,
+				sessionEndingTime: sessionsTable.endingTime,
+				sessionIdDiscipline: sessionsTable.idDiscipline,
+			})
+			.from(attendancesTable)
+			.leftJoin(
+				sessionsTable,
+				eq(attendancesTable.idSession, sessionsTable.id),
+			);
 
-	async getAttendanceByMatriculation(id: number) {
-		const attendances = await db.query.attendancesTable.findMany({
-			where: eq(attendancesTable.idMatriculation, id),
-			with: {
-				session: {
-					with: {
-						instructorDiscipline: {
-							with: {
-								discipline: {},
-							},
-						},
-					},
-				},
-				matriculation: {
-					with: {
-						user: true,
-					},
-				},
+		// Construir as condições de filtro
+		const conditions = [];
+
+		if (filters?.idSession) {
+			conditions.push(eq(attendancesTable.idSession, filters.idSession));
+		}
+
+		if (filters?.idMatriculation) {
+			conditions.push(
+				eq(attendancesTable.idMatriculation, filters.idMatriculation),
+			);
+		}
+
+		if (filters?.status) {
+			conditions.push(eq(attendancesTable.status, filters.status));
+		}
+
+		if (filters?.idDiscipline) {
+			conditions.push(eq(sessionsTable.idDiscipline, filters.idDiscipline));
+		}
+
+		if (filters?.date) {
+			const dateObj = DateTime.fromISO(filters.date).toJSDate();
+			conditions.push(eq(sessionsTable.date, dateObj));
+		}
+
+		// Executar a consulta com os filtros
+		const result =
+			conditions.length > 0
+				? await query.where(and(...conditions))
+				: await query;
+
+		if (result.length === 0) {
+			throw new NotFoundError(
+				"Nenhum registro de frequência encontrado com os filtros informados",
+			);
+		}
+
+		// Transformar o resultado para o formato esperado
+		const formattedAttendances = result.map((item) => ({
+			id: item.id,
+			idMatriculation: item.idMatriculation,
+			idSession: item.idSession,
+			status: item.status,
+			createdAt: item.createdAt,
+			updatedAt: item.updatedAt,
+			session: {
+				id: item.sessionId,
+				date: item.sessionDate,
+				startingTime: item.sessionStartingTime,
+				endingTime: item.sessionEndingTime,
+				idDiscipline: item.sessionIdDiscipline,
 			},
-		});
+		}));
 
-		if (attendances.length === 0) {
-			throw new NotFoundError("Nenhum registro de frequência encontrado");
-		}
-
-		return attendances;
+		return formattedAttendances;
 	}
 
 	async createAttendance(data: CreateAttendanceInput) {
@@ -104,7 +157,8 @@ export class AttendanceService {
 			throw new NotFoundError("Aula não encontrada");
 		}
 
-		for (const attendanceUpdate of data.attendances) {
+		// Atualizar cada registro de frequência
+		for (const attendanceUpdate of data) {
 			await db
 				.update(attendancesTable)
 				.set(attendanceUpdate)
