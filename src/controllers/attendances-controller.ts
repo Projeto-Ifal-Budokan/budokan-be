@@ -2,7 +2,6 @@ import type { RequestHandler } from "express";
 import { ConflictError } from "../errors/app-errors";
 import {
 	createAttendanceSchema,
-	justificationAttendanceSchema,
 	updateAttendanceSchema,
 } from "../schemas/attendance.schemas";
 import { AttendanceService } from "../services/attendance-service";
@@ -56,21 +55,6 @@ export const updateAttendance: RequestHandler = async (req, res, next) => {
 		const { id } = req.params;
 		const validatedData = updateAttendanceSchema.parse(req.body);
 		const result = await attendanceService.updateAttendance(
-			Number(id),
-			validatedData,
-		);
-		res.status(200).json(result);
-	} catch (error) {
-		next(error);
-	}
-};
-
-export const justifyAttendance: RequestHandler = async (req, res, next) => {
-	try {
-		const { id } = req.params;
-		const validatedData = justificationAttendanceSchema.parse(req.body);
-
-		const result = await attendanceService.justifyAttendance(
 			Number(id),
 			validatedData,
 		);

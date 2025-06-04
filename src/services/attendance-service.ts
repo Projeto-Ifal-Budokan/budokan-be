@@ -7,7 +7,6 @@ import { matriculationsTable } from "../db/schema/practitioner-schemas/matricula
 import { ConflictError, NotFoundError } from "../errors/app-errors";
 import type {
 	CreateAttendanceInput,
-	JustificationAttendanceInput,
 	UpdateAttendanceInput,
 } from "../schemas/attendance.schemas";
 
@@ -120,31 +119,6 @@ export class AttendanceService {
 		}
 
 		return { message: "Frequência atualizada com sucesso" };
-	}
-
-	async justifyAttendance(id: number, data: JustificationAttendanceInput) {
-		const existingAttendance = await db
-			.select()
-			.from(attendancesTable)
-			.where(eq(attendancesTable.id, id));
-		if (existingAttendance.length === 0) {
-			throw new NotFoundError("Registro não encontrado");
-		}
-		if (existingAttendance[0].status !== "absent") {
-			throw new ConflictError(
-				"O registro não está ausente, não é possível justificar",
-			);
-		}
-
-		await db
-			.update(attendancesTable)
-			.set({
-				justification: data.justification,
-				justificationDescription: data.justificationDescription,
-			})
-			.where(eq(attendancesTable.id, id));
-
-		return { message: "Justificativa registrada com sucesso" };
 	}
 
 	async deleteAttendance(id: number) {

@@ -4,7 +4,6 @@ import {
 	mysqlEnum,
 	mysqlTable,
 	timestamp,
-	varchar,
 } from "drizzle-orm/mysql-core";
 import { matriculationsTable } from "../practitioner-schemas/matriculations";
 import { sessionsTable } from "./sessions";
@@ -25,21 +24,6 @@ export const attendancesTable = mysqlTable("tb_attendances", {
 	status: mysqlEnum("status", ["present", "absent"])
 		.notNull()
 		.default("absent"),
-	justification: mysqlEnum("justification", [
-		"medical",
-		"personal",
-		"professional",
-		"weather",
-		"transport",
-		"family",
-		"academic",
-		"technical",
-		"emergency",
-		"other",
-	]),
-	justificationDescription: varchar("justification_description", {
-		length: 255,
-	}),
 	createdAt: timestamp("created_at").notNull().defaultNow(),
 	updatedAt: timestamp("updated_at").$onUpdate(() => new Date()),
 });

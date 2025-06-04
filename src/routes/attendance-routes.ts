@@ -2,7 +2,6 @@ import express from "express";
 import {
 	createAttendance,
 	deleteAttendance,
-	justifyAttendance,
 	listAttendances,
 	listAttendancesByMatriculation,
 	updateAttendance,
@@ -20,11 +19,6 @@ router.get(
 );
 router.post("/", hasPrivilege("create_attendance"), createAttendance);
 router.put("/:id", hasPrivilege("update_attendance"), updateAttendance);
-router.put(
-	"/justification/:id",
-	hasPrivilege("justify_attendance"),
-	justifyAttendance,
-);
 router.delete("/:id", hasPrivilege("delete_attendance"), deleteAttendance);
 
 export default router;

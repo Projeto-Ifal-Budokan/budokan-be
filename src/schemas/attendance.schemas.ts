@@ -20,7 +20,7 @@ export const updateAttendanceSchema = z.object({
 		.min(1, "É necessário ao menos uma matrícula"),
 });
 
-export const justificationAttendanceSchema = z.object({
+export const justificationSchema = z.object({
 	justification: z.enum([
 		"medical",
 		"personal",
@@ -39,8 +39,26 @@ export const justificationAttendanceSchema = z.object({
 		.optional(),
 });
 
+export const createDailyAbsenceSchema = z.object({
+	idMatriculation: z.number().int().positive("O ID da matrícula é obrigatório"),
+	date: z.string().refine(
+		(date) => {
+			const timestamp = Date.parse(date);
+			return !Number.isNaN(timestamp);
+		},
+		{
+			message: "Data inválida. Utilize o formato YYYY-MM-DD",
+		},
+	),
+	...justificationSchema.shape,
+});
+
+export const updateDailyAbsenceSchema = z.object({
+	...justificationSchema.shape,
+});
+
 export type CreateAttendanceInput = z.infer<typeof createAttendanceSchema>;
 export type UpdateAttendanceInput = z.infer<typeof updateAttendanceSchema>;
-export type JustificationAttendanceInput = z.infer<
-	typeof justificationAttendanceSchema
->;
+export type JustificationInput = z.infer<typeof justificationSchema>;
+export type CreateDailyAbsenceInput = z.infer<typeof createDailyAbsenceSchema>;
+export type UpdateDailyAbsenceInput = z.infer<typeof updateDailyAbsenceSchema>;
