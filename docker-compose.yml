@@ -18,7 +18,7 @@ services:
       - NODE_ENV=develop
       - DEV_URL=http://localhost:3000
       - PROD_URL=http://budokanryu.com.br
-      - PORT=8000
+      - PORT=8001
       - ETHEREAL_USER=frida20@ethereal.email
       - ETHEREAL_PASS=Debt5yAYKFeQDvDQR4
       - NODE_OPTIONS=--no-warnings
