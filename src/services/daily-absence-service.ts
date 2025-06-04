@@ -1,4 +1,14 @@
-import { and, count, eq, inArray, sql } from "drizzle-orm";
+import {
+	and,
+	count,
+	desc,
+	eq,
+	gte,
+	inArray,
+	isNull,
+	lte,
+	sql,
+} from "drizzle-orm";
 import { DateTime } from "luxon";
 import { db } from "../db";
 import {
@@ -12,17 +22,66 @@ import type {
 	UpdateDailyAbsenceInput,
 } from "../schemas/attendance.schemas";
 
+export interface DailyAbsenceFilters {
+	idMatriculation?: number;
+	startDate?: string;
+	endDate?: string;
+	justification?: string;
+	hasJustification?: boolean;
+}
+
 export class DailyAbsenceService {
-	async listDailyAbsences(idMatriculation: number) {
-		const absences = await db.query.dailyAbsencesTable.findMany({
-			where: eq(dailyAbsencesTable.idMatriculation, idMatriculation),
-			orderBy: (dailyAbsences) => [dailyAbsences.date],
-		});
+	async listDailyAbsences(filters?: DailyAbsenceFilters) {
+		// Buscar os filtros
+		const whereConditions = [];
+
+		if (filters?.idMatriculation) {
+			whereConditions.push(
+				eq(dailyAbsencesTable.idMatriculation, filters.idMatriculation),
+			);
+		}
+
+		if (filters?.startDate) {
+			const startDate = DateTime.fromISO(filters.startDate).toJSDate();
+			whereConditions.push(gte(dailyAbsencesTable.date, startDate));
+		}
+
+		if (filters?.endDate) {
+			const endDate = DateTime.fromISO(filters.endDate).toJSDate();
+			whereConditions.push(lte(dailyAbsencesTable.date, endDate));
+		}
+
+		// Para justification, precisamos verificar se o valor é um tipo válido de enum
+		if (filters?.justification) {
+			// Aqui assumimos que o cliente envia valores válidos que correspondem ao enum no banco
+			whereConditions.push(
+				sql`${dailyAbsencesTable.justification} = ${filters.justification}`,
+			);
+		}
+
+		if (filters?.hasJustification !== undefined) {
+			if (filters.hasJustification) {
+				whereConditions.push(
+					sql`${dailyAbsencesTable.justification} IS NOT NULL`,
+				);
+			} else {
+				whereConditions.push(sql`${dailyAbsencesTable.justification} IS NULL`);
+			}
+		}
+
+		// Executar a consulta com os filtros
+		const absences =
+			whereConditions.length > 0
+				? await db.query.dailyAbsencesTable.findMany({
+						where: and(...whereConditions),
+						orderBy: (absences) => [desc(absences.date)],
+					})
+				: await db.query.dailyAbsencesTable.findMany({
+						orderBy: (absences) => [desc(absences.date)],
+					});
 
 		if (absences.length === 0) {
-			throw new NotFoundError(
-				"Nenhuma ausência diária encontrada para esta matrícula",
-			);
+			throw new NotFoundError("Nenhum registro de ausência diária encontrado");
 		}
 
 		return absences;

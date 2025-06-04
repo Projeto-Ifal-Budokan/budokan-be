@@ -13,31 +13,28 @@ const attendanceService = new AttendanceService();
 
 export const listAttendances: RequestHandler = async (req, res, next) => {
 	try {
-		// Extrair filtros dos query params
-		const filters: AttendanceFilters = {};
+		// Extrair filtros dos query params de forma padronizada
+		const filters: AttendanceFilters = {
+			// Usar operador ternário para cada filtro, similar ao listDailyAbsences
+			idSession: req.query.idSession ? Number(req.query.idSession) : undefined,
 
-		if (req.query.idSession) {
-			filters.idSession = Number(req.query.idSession);
-		}
+			idDiscipline: req.query.idDiscipline
+				? Number(req.query.idDiscipline)
+				: undefined,
 
-		if (req.query.idDiscipline) {
-			filters.idDiscipline = Number(req.query.idDiscipline);
-		}
+			idMatriculation: req.query.idMatriculation
+				? Number(req.query.idMatriculation)
+				: undefined,
 
-		if (req.query.idMatriculation) {
-			filters.idMatriculation = Number(req.query.idMatriculation);
-		}
+			date: req.query.date as string | undefined,
 
-		if (req.query.date) {
-			filters.date = String(req.query.date);
-		}
-
-		if (
-			req.query.status &&
-			["present", "absent"].includes(String(req.query.status))
-		) {
-			filters.status = req.query.status as "present" | "absent";
-		}
+			// Verificar se o status é válido antes de atribuir
+			status:
+				req.query.status &&
+				["present", "absent"].includes(String(req.query.status))
+					? (req.query.status as "present" | "absent")
+					: undefined,
+		};
 
 		const attendances = await attendanceService.listAttendances(filters);
 		res.status(200).json(attendances);

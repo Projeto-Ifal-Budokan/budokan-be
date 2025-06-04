@@ -1,6 +1,5 @@
 import express from "express";
 import {
-	countAbsenceDays,
 	createDailyAbsence,
 	deleteDailyAbsence,
 	getDailyAbsence,
@@ -13,19 +12,9 @@ import { hasPrivilege } from "../middlewares/auth/check-privilege.middleware";
 
 const router = express.Router();
 
-// Protected routes
-router.get(
-	"/matriculation/:idMatriculation",
-	hasPrivilege("list_daily_absences"),
-	listDailyAbsences,
-);
-
-// Rota para contar dias de ausência
-router.get(
-	"/count/:idMatriculation",
-	hasPrivilege("count_absence_days"),
-	countAbsenceDays,
-);
+// Rota principal para listar ausências diárias com filtros opcionais
+// Pode ser usada sem parâmetros ou com filtros na query string
+router.get("/", hasPrivilege("list_daily_absences"), listDailyAbsences);
 
 // Rotas para processamento automático
 router.post(

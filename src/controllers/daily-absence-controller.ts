@@ -10,10 +10,22 @@ const dailyAbsenceService = new DailyAbsenceService();
 
 export const listDailyAbsences: RequestHandler = async (req, res, next) => {
 	try {
-		const { idMatriculation } = req.params;
-		const absences = await dailyAbsenceService.listDailyAbsences(
-			Number(idMatriculation),
-		);
+		const filters = {
+			// Filtrar por matrícula, se fornecido
+			idMatriculation: req.query.idMatriculation
+				? Number(req.query.idMatriculation)
+				: undefined,
+
+			// Extrair filtros de query string
+			startDate: req.query.startDate as string | undefined,
+			endDate: req.query.endDate as string | undefined,
+			justification: req.query.justification as string | undefined,
+			hasJustification: req.query.hasJustification
+				? req.query.hasJustification === "true"
+				: undefined,
+		};
+
+		const absences = await dailyAbsenceService.listDailyAbsences(filters);
 		res.status(200).json(absences);
 	} catch (error) {
 		next(error);
@@ -58,18 +70,6 @@ export const deleteDailyAbsence: RequestHandler = async (req, res, next) => {
 	try {
 		const { id } = req.params;
 		const result = await dailyAbsenceService.deleteDailyAbsence(Number(id));
-		res.status(200).json(result);
-	} catch (error) {
-		next(error);
-	}
-};
-
-export const countAbsenceDays: RequestHandler = async (req, res, next) => {
-	try {
-		const { idMatriculation } = req.params;
-		const result = await dailyAbsenceService.countAbsenceDays(
-			Number(idMatriculation),
-		);
 		res.status(200).json(result);
 	} catch (error) {
 		next(error);
