@@ -168,16 +168,38 @@ async function seedPrivileges() {
 				description: "Atualizar frequência",
 			},
 			{
-				name: "justify_attendance",
-				description: "Atualizar frequência",
-			},
-			{
 				name: "delete_attendance",
 				description: "Exclui frequência",
 			},
+
+			// Daily Absence management
 			{
-				name: "view_matriculation_attendances",
-				description: "Lista a frequência de uma matrícula",
+				name: "list_daily_absences",
+				description: "Listar ausências diárias",
+			},
+			{
+				name: "view_daily_absence",
+				description: "Visualizar detalhes de ausência diária",
+			},
+			{
+				name: "create_daily_absence",
+				description: "Criar ausência diária",
+			},
+			{
+				name: "update_daily_absence",
+				description: "Atualizar ausência diária",
+			},
+			{
+				name: "delete_daily_absence",
+				description: "Excluir ausência diária",
+			},
+			{
+				name: "count_absence_days",
+				description: "Contar dias de ausência",
+			},
+			{
+				name: "process_daily_absences",
+				description: "Processar ausências diárias",
 			},
 
 			// Training Schedule management
@@ -328,9 +350,14 @@ async function seedRolePrivileges() {
 				"list_attendances",
 				"create_attendance",
 				"update_attendance",
-				"justify_attendance",
 				"delete_attendance",
-				"view_matriculation_attendances",
+				"list_daily_absences",
+				"view_daily_absence",
+				"create_daily_absence",
+				"update_daily_absence",
+				"delete_daily_absence",
+				"count_absence_days",
+				"process_daily_absences",
 			], // Instructor gets limited privileges
 			student: [
 				"view_user",
@@ -347,8 +374,11 @@ async function seedRolePrivileges() {
 				"delete_practitioner_contact",
 				"view_matriculation_sessions",
 				"list_attendances",
-				"justify_attendance",
-				"view_matriculation_attendances",
+				"list_daily_absences",
+				"view_daily_absence",
+				"create_daily_absence",
+				"update_daily_absence",
+				"count_absence_days",
 			], // Student gets basic privileges
 		};
 
@@ -762,7 +792,7 @@ async function assignAdminRole(adminUser: { id: number }) {
 			.from(userRolesTable)
 			.where(
 				eq(userRolesTable.idUser, adminUser.id) &&
-				eq(userRolesTable.idRole, adminRole[0].id),
+					eq(userRolesTable.idRole, adminRole[0].id),
 			);
 
 		if (existingUserRole.length === 0) {
@@ -848,7 +878,7 @@ async function seedTestUsers() {
 					.from(userRolesTable)
 					.where(
 						eq(userRolesTable.idUser, instructorUser[0].id) &&
-						eq(userRolesTable.idRole, instructorRole[0].id),
+							eq(userRolesTable.idRole, instructorRole[0].id),
 					);
 
 				if (existingRole.length === 0) {
@@ -873,7 +903,7 @@ async function seedTestUsers() {
 					.from(userRolesTable)
 					.where(
 						eq(userRolesTable.idUser, studentUser[0].id) &&
-						eq(userRolesTable.idRole, studentRole[0].id),
+							eq(userRolesTable.idRole, studentRole[0].id),
 					);
 
 				if (existingRole.length === 0) {

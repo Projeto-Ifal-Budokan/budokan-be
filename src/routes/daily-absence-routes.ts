@@ -19,10 +19,8 @@ router.get(
 	hasPrivilege("list_daily_absences"),
 	listDailyAbsences,
 );
-router.get("/:id", hasPrivilege("view_daily_absence"), getDailyAbsence);
-router.post("/", hasPrivilege("create_daily_absence"), createDailyAbsence);
-router.put("/:id", hasPrivilege("update_daily_absence"), updateDailyAbsence);
-router.delete("/:id", hasPrivilege("delete_daily_absence"), deleteDailyAbsence);
+
+// Rota para contar dias de ausência
 router.get(
 	"/count/:idMatriculation",
 	hasPrivilege("count_absence_days"),
@@ -40,5 +38,11 @@ router.post(
 	hasPrivilege("process_daily_absences"),
 	processAbsencesForDateRange,
 );
+
+// Rotas CRUD básicas
+router.post("/", hasPrivilege("create_daily_absence"), createDailyAbsence);
+router.get("/:id", hasPrivilege("view_daily_absence"), getDailyAbsence);
+router.put("/:id", hasPrivilege("update_daily_absence"), updateDailyAbsence);
+router.delete("/:id", hasPrivilege("delete_daily_absence"), deleteDailyAbsence);
 
 export default router;

@@ -55,9 +55,30 @@ export class DailyAbsenceService {
 			);
 		}
 
-		// Verificar se o aluno realmente não teve presença neste dia
 		const dateObj = DateTime.fromISO(data.date).toJSDate();
 
+		// Verificar se existem aulas na data especificada para esta matrícula
+		const sessionsOnDate = await db
+			.select()
+			.from(sessionsTable)
+			.innerJoin(
+				attendancesTable,
+				eq(attendancesTable.idSession, sessionsTable.id),
+			)
+			.where(
+				and(
+					eq(sessionsTable.date, dateObj),
+					eq(attendancesTable.idMatriculation, data.idMatriculation),
+				),
+			);
+
+		if (sessionsOnDate.length === 0) {
+			throw new ConflictError(
+				"Não existem aulas registradas para esta data. Não é possível registrar ausência.",
+			);
+		}
+
+		// Verificar se o aluno realmente não teve presença neste dia
 		const attendances = await db
 			.select()
 			.from(attendancesTable)
@@ -94,7 +115,15 @@ export class DailyAbsenceService {
 	}
 
 	async updateDailyAbsence(id: number, data: UpdateDailyAbsenceInput) {
-		const existingAbsence = await this.getDailyAbsence(id);
+		// Verificar se o registro existe
+		const existingAbsence = await db
+			.select()
+			.from(dailyAbsencesTable)
+			.where(eq(dailyAbsencesTable.id, id));
+
+		if (existingAbsence.length === 0) {
+			throw new NotFoundError("Registro de ausência diária não encontrado");
+		}
 
 		await db
 			.update(dailyAbsencesTable)
@@ -110,7 +139,15 @@ export class DailyAbsenceService {
 	}
 
 	async deleteDailyAbsence(id: number) {
-		const existingAbsence = await this.getDailyAbsence(id);
+		// Verificar se o registro existe
+		const existingAbsence = await db
+			.select()
+			.from(dailyAbsencesTable)
+			.where(eq(dailyAbsencesTable.id, id));
+
+		if (existingAbsence.length === 0) {
+			throw new NotFoundError("Registro de ausência diária não encontrado");
+		}
 
 		await db.delete(dailyAbsencesTable).where(eq(dailyAbsencesTable.id, id));
 
@@ -211,6 +248,21 @@ export class DailyAbsenceService {
 
 			if (existingAbsence) {
 				continue; // Já existe um registro, pular para o próximo
+			}
+
+			// Verificar se o aluno teve alguma aula neste dia
+			const sessionsForStudent = await db
+				.select()
+				.from(attendancesTable)
+				.where(
+					and(
+						eq(attendancesTable.idMatriculation, idMatriculation),
+						inArray(attendancesTable.idSession, sessionIds),
+					),
+				);
+
+			if (sessionsForStudent.length === 0) {
+				continue; // O aluno não teve aulas neste dia, pular para o próximo
 			}
 
 			// Verificar se o aluno teve alguma presença neste dia
