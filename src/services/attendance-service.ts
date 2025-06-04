@@ -120,12 +120,17 @@ export class AttendanceService {
 		}
 
 		// Após atualizar as frequências, processar ausências diárias para a data da aula
-		try {
-			const dailyAbsenceService = new DailyAbsenceService();
-			await dailyAbsenceService.processAbsencesForDate(existingSession[0].date);
-		} catch (error) {
-			console.error("Erro ao processar ausências diárias:", error);
-			// Não interromper o fluxo principal se houver erro no processamento de ausências
+		// apenas se for a última aula do dia
+		if (existingSession[0].isLastSessionOfDay) {
+			try {
+				const dailyAbsenceService = new DailyAbsenceService();
+				await dailyAbsenceService.processAbsencesForDate(
+					existingSession[0].date,
+				);
+			} catch (error) {
+				console.error("Erro ao processar ausências diárias:", error);
+				// Não interromper o fluxo principal se houver erro no processamento de ausências
+			}
 		}
 
 		return { message: "Frequência atualizada com sucesso" };

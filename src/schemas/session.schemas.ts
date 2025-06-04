@@ -25,6 +25,7 @@ export const createSessionSchema = z
 		endingTime: z.string().refine(validateTimeFormat, {
 			message: "Hora de término inválida. Utilize o formato HH:MM",
 		}),
+		isLastSessionOfDay: z.boolean().default(false),
 	})
 	.refine(
 		(data) => {
@@ -67,6 +68,7 @@ export const updateSessionSchema = z
 				message: "Hora de término inválida. Utilize o formato HH:MM",
 			})
 			.optional(),
+		isLastSessionOfDay: z.boolean().optional(),
 	})
 	.refine(
 		(data) => {

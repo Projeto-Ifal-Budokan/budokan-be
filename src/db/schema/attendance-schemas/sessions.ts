@@ -1,6 +1,7 @@
 import { relations } from "drizzle-orm";
 import {
 	bigint,
+	boolean,
 	date,
 	mysqlTable,
 	time,
@@ -27,6 +28,9 @@ export const sessionsTable = mysqlTable(
 		date: date("date").notNull(),
 		startingTime: time("starting_time").notNull(),
 		endingTime: time("ending_time").notNull(),
+		isLastSessionOfDay: boolean("is_last_session_of_day")
+			.notNull()
+			.default(false),
 		createdAt: timestamp("created_at").notNull().defaultNow(),
 		updatedAt: timestamp("updated_at").$onUpdate(() => new Date()),
 	},

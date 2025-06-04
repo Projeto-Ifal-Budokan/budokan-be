@@ -23,6 +23,7 @@ type SessionInsertType = {
 	idInstructorDiscipline: number;
 	startingTime: string;
 	endingTime: string;
+	isLastSessionOfDay: boolean;
 };
 
 type SessionUpdateType = {
@@ -31,6 +32,7 @@ type SessionUpdateType = {
 	idInstructorDiscipline?: number;
 	startingTime?: string;
 	endingTime?: string;
+	isLastSessionOfDay?: boolean;
 };
 
 export class SessionService {
@@ -208,6 +210,7 @@ export class SessionService {
 			date: dateObj,
 			startingTime: validatedData.startingTime,
 			endingTime: validatedData.endingTime,
+			isLastSessionOfDay: data.isLastSessionOfDay || false,
 		};
 
 		const result = await db.insert(sessionsTable).values(sessionData);
@@ -274,6 +277,8 @@ export class SessionService {
 			sessionData.startingTime = validatedData.startingTime;
 		if (validatedData.endingTime)
 			sessionData.endingTime = validatedData.endingTime;
+		if (data.isLastSessionOfDay !== undefined)
+			sessionData.isLastSessionOfDay = data.isLastSessionOfDay;
 
 		if (data.date) {
 			// Converter string para Date usando Luxon para garantir o fuso horário correto
@@ -319,6 +324,7 @@ export class SessionService {
 			startingTime?: string;
 			endingTime?: string;
 			date?: string;
+			isLastSessionOfDay?: boolean;
 		} = {};
 
 		// Verificar se a disciplina existe
@@ -372,6 +378,8 @@ export class SessionService {
 		if (data.startingTime) validatedData.startingTime = data.startingTime;
 		if (data.endingTime) validatedData.endingTime = data.endingTime;
 		if (data.date) validatedData.date = data.date;
+		if ("isLastSessionOfDay" in data)
+			validatedData.isLastSessionOfDay = data.isLastSessionOfDay;
 
 		// Verificar se já existe uma aula ativa para este dia e horario
 		if (
