@@ -5,6 +5,7 @@ import { ranksTable } from "../db/schema/discipline-schemas/ranks";
 import { matriculationsTable } from "../db/schema/practitioner-schemas/matriculations";
 import { practitionersTable } from "../db/schema/practitioner-schemas/practitioners";
 import { studentsTable } from "../db/schema/practitioner-schemas/students";
+import { ConflictError, NotFoundError } from "../errors/app-errors";
 import type {
 	CreateMatriculationInput,
 	UpdateMatriculationInput,
@@ -48,7 +49,7 @@ export class MatriculationService {
 			.where(eq(matriculationsTable.id, id));
 
 		if (matriculation.length === 0) {
-			throw new Error("Matrícula não encontrada");
+			throw new NotFoundError("Matrícula não encontrada");
 		}
 
 		return matriculation[0];
@@ -82,7 +83,7 @@ export class MatriculationService {
 			.where(eq(practitionersTable.idUser, data.idStudent));
 
 		if (practitioner.length === 0) {
-			throw new Error("Usuário não encontrado como praticante");
+			throw new NotFoundError("Usuário não encontrado como praticante");
 		}
 
 		// Verificar se o praticante já está registrado como estudante, se não, criar
@@ -107,7 +108,7 @@ export class MatriculationService {
 				.where(eq(studentsTable.idPractitioner, data.idStudent));
 
 			if (student.length === 0) {
-				throw new Error("Falha ao criar registro de estudante");
+				throw new NotFoundError("Falha ao criar registro de estudante");
 			}
 		}
 
@@ -118,7 +119,7 @@ export class MatriculationService {
 			.where(eq(disciplinesTable.id, data.idDiscipline));
 
 		if (discipline.length === 0) {
-			throw new Error("Disciplina não encontrada");
+			throw new NotFoundError("Disciplina não encontrada");
 		}
 
 		// Verificar se a graduação existe e pertence à disciplina selecionada
@@ -133,7 +134,7 @@ export class MatriculationService {
 			);
 
 		if (rank.length === 0) {
-			throw new Error(
+			throw new NotFoundError(
 				"Graduação não encontrada ou não pertence à disciplina selecionada",
 			);
 		}
@@ -150,7 +151,7 @@ export class MatriculationService {
 			);
 
 		if (existingMatriculation.length > 0) {
-			throw new Error(
+			throw new ConflictError(
 				"Este estudante já possui uma matrícula nesta disciplina",
 			);
 		}
@@ -166,7 +167,7 @@ export class MatriculationService {
 			.where(eq(matriculationsTable.id, id));
 
 		if (existingMatriculation.length === 0) {
-			throw new Error("Matrícula não encontrada");
+			throw new NotFoundError("Matrícula não encontrada");
 		}
 
 		// Verificar se a graduação existe e pertence à disciplina da matrícula
@@ -184,7 +185,7 @@ export class MatriculationService {
 				);
 
 			if (rank.length === 0) {
-				throw new Error(
+				throw new NotFoundError(
 					"Graduação não encontrada ou não pertence à disciplina da matrícula",
 				);
 			}
@@ -205,7 +206,7 @@ export class MatriculationService {
 			.where(eq(matriculationsTable.id, id));
 
 		if (existingMatriculation.length === 0) {
-			throw new Error("Matrícula não encontrada");
+			throw new NotFoundError("Matrícula não encontrada");
 		}
 
 		await db.delete(matriculationsTable).where(eq(matriculationsTable.id, id));

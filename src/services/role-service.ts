@@ -1,6 +1,7 @@
 import { eq } from "drizzle-orm";
 import { db } from "../db";
 import { rolesTable } from "../db/schema/user-schemas/roles";
+import { ConflictError, NotFoundError } from "../errors/app-errors";
 import type { CreateRoleInput, UpdateRoleInput } from "../schemas/role.schemas";
 
 export class RoleService {
@@ -31,7 +32,7 @@ export class RoleService {
 			.where(eq(rolesTable.id, id));
 
 		if (role.length === 0) {
-			throw new Error("Papel não encontrado");
+			throw new NotFoundError("Papel não encontrado");
 		}
 
 		return role[0];
@@ -44,7 +45,7 @@ export class RoleService {
 			.where(eq(rolesTable.name, data.name));
 
 		if (existingRole.length > 0) {
-			throw new Error("Já existe um papel com este nome");
+			throw new ConflictError("Já existe um papel com este nome");
 		}
 
 		await db.insert(rolesTable).values(data);
@@ -58,7 +59,7 @@ export class RoleService {
 			.where(eq(rolesTable.id, id));
 
 		if (existingRole.length === 0) {
-			throw new Error("Papel não encontrado");
+			throw new NotFoundError("Papel não encontrado");
 		}
 
 		if (data.name) {
@@ -68,7 +69,7 @@ export class RoleService {
 				.where(eq(rolesTable.name, data.name));
 
 			if (roleWithSameName.length > 0 && roleWithSameName[0].id !== id) {
-				throw new Error("Já existe um papel com este nome");
+				throw new ConflictError("Já existe um papel com este nome");
 			}
 		}
 
@@ -84,7 +85,7 @@ export class RoleService {
 			.where(eq(rolesTable.id, id));
 
 		if (existingRole.length === 0) {
-			throw new Error("Papel não encontrado");
+			throw new NotFoundError("Papel não encontrado");
 		}
 
 		await db.delete(rolesTable).where(eq(rolesTable.id, id));

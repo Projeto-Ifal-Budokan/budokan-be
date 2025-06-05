@@ -1,6 +1,6 @@
 import type { NextFunction, Request, Response } from "express";
-import { CustomError } from "../utils/custom-error.ts";
+import { NotFoundError } from "../errors/app-errors";
 
-export function notFound(req: Request, res: Response, next: NextFunction) {
-	return next(new CustomError("Route not found", 404));
-}
+export const notFound = (req: Request, res: Response, next: NextFunction) => {
+	next(new NotFoundError(`Rota não encontrada: ${req.method} ${req.path}`));
+};

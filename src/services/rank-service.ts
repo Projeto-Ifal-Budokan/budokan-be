@@ -2,6 +2,7 @@ import { and, eq } from "drizzle-orm";
 import { db } from "../db";
 import { disciplinesTable } from "../db/schema/discipline-schemas/disciplines";
 import { ranksTable } from "../db/schema/discipline-schemas/ranks";
+import { ConflictError, NotFoundError } from "../errors/app-errors";
 import type { CreateRankInput, UpdateRankInput } from "../schemas/rank.schemas";
 
 export class RankService {
@@ -50,7 +51,7 @@ export class RankService {
 			.where(eq(ranksTable.id, id));
 
 		if (rank.length === 0) {
-			throw new Error("Rank não encontrado");
+			throw new NotFoundError("Rank não encontrado");
 		}
 
 		return rank[0];
@@ -64,7 +65,7 @@ export class RankService {
 			.where(eq(disciplinesTable.id, data.idDiscipline));
 
 		if (discipline.length === 0) {
-			throw new Error("Disciplina não encontrada");
+			throw new NotFoundError("Disciplina não encontrada");
 		}
 
 		// Check if rank with same name already exists in the discipline
@@ -79,7 +80,9 @@ export class RankService {
 			);
 
 		if (existingRank.length > 0) {
-			throw new Error("Já existe um rank com este nome nesta disciplina");
+			throw new ConflictError(
+				"Já existe um rank com este nome nesta disciplina",
+			);
 		}
 
 		await db.insert(ranksTable).values(data);
@@ -93,7 +96,7 @@ export class RankService {
 			.where(eq(ranksTable.id, id));
 
 		if (existingRank.length === 0) {
-			throw new Error("Rank não encontrado");
+			throw new NotFoundError("Rank não encontrado");
 		}
 
 		if (data.idDiscipline) {
@@ -104,7 +107,7 @@ export class RankService {
 				.where(eq(disciplinesTable.id, data.idDiscipline));
 
 			if (discipline.length === 0) {
-				throw new Error("Disciplina não encontrada");
+				throw new NotFoundError("Disciplina não encontrada");
 			}
 		}
 
@@ -121,7 +124,9 @@ export class RankService {
 				);
 
 			if (rankWithSameName.length > 0 && rankWithSameName[0].id !== id) {
-				throw new Error("Já existe um rank com este nome nesta disciplina");
+				throw new ConflictError(
+					"Já existe um rank com este nome nesta disciplina",
+				);
 			}
 		}
 
@@ -137,7 +142,7 @@ export class RankService {
 			.where(eq(ranksTable.id, id));
 
 		if (existingRank.length === 0) {
-			throw new Error("Rank não encontrado");
+			throw new NotFoundError("Rank não encontrado");
 		}
 
 		await db.delete(ranksTable).where(eq(ranksTable.id, id));
