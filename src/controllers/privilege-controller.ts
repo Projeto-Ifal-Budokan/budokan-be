@@ -3,24 +3,31 @@ import {
 	createPrivilegeSchema,
 	updatePrivilegeSchema,
 } from "../schemas/privilege.schemas";
-import { PrivilegeService } from "../services/privilege-service";
+import {
+	type PrivilegeFilters,
+	PrivilegeService,
+} from "../services/privilege-service";
 
 const privilegeService = new PrivilegeService();
 
 export const listPrivileges: RequestHandler = async (req, res, next) => {
 	try {
-		const privileges = await privilegeService.listPrivileges();
-		res.status(200).json(privileges);
-	} catch (error) {
-		next(error);
-	}
-};
+		const filters: PrivilegeFilters = {};
 
-export const getPrivilegeById: RequestHandler = async (req, res, next) => {
-	try {
-		const { id } = req.params;
-		const privilege = await privilegeService.getPrivilegeById(Number(id));
-		res.status(200).json(privilege);
+		if (req.query.idUser) {
+			filters.idUser = Number(req.query.idUser);
+		}
+
+		if (req.query.idPrivilege) {
+			filters.idPrivilege = Number(req.query.idPrivilege);
+		}
+
+		if (req.query.description) {
+			filters.description = String(req.query.description);
+		}
+
+		const privileges = await privilegeService.listPrivileges(filters);
+		res.status(200).json(privileges);
 	} catch (error) {
 		next(error);
 	}
