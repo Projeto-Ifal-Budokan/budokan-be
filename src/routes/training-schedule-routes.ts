@@ -19,7 +19,7 @@ router.get(
 	getTrainingScheduleById,
 );
 router.get(
-	"/discipline/:disciplineId",
+	"/discipline/:id",
 	hasPrivilege("view_training_schedule"),
 	getTrainingSchedulesByDiscipline,
 );

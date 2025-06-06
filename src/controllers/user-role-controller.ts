@@ -2,13 +2,15 @@ import type { RequestHandler } from "express";
 import { ValidationError } from "../errors/app-errors";
 import { assignUserRoleSchema } from "../schemas/user-role-schema";
 import { UserRoleService } from "../services/user-role-service";
+import type { User } from "../types/auth.types";
 
 const userRoleService = new UserRoleService();
 
 export const assignRole: RequestHandler = async (req, res, next) => {
 	try {
 		const validatedData = assignUserRoleSchema.parse(req.body);
-		const result = await userRoleService.assignRole(validatedData);
+		const currentUser = req.user as User | undefined;
+		const result = await userRoleService.assignRole(validatedData, currentUser);
 		res.status(200).json(result);
 	} catch (error) {
 		next(error);
@@ -18,7 +20,8 @@ export const assignRole: RequestHandler = async (req, res, next) => {
 export const removeRole: RequestHandler = async (req, res, next) => {
 	try {
 		const validatedData = assignUserRoleSchema.parse(req.body);
-		const result = await userRoleService.removeRole(validatedData);
+		const currentUser = req.user as User | undefined;
+		const result = await userRoleService.removeRole(validatedData, currentUser);
 		res.status(200).json(result);
 	} catch (error) {
 		next(error);

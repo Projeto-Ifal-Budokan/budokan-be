@@ -4,7 +4,7 @@ import {
 	deleteSession,
 	listSessions,
 	updateSession,
-	viewMatriculationSessions
+	viewMatriculationSessions,
 } from "../controllers/session-controller";
 import { hasPrivilege } from "../middlewares/auth/check-privilege.middleware";
 
@@ -15,6 +15,10 @@ router.get("/", hasPrivilege("list_sessions"), listSessions);
 router.post("/", hasPrivilege("create_session"), createSession);
 router.put("/:id", hasPrivilege("update_session"), updateSession);
 router.delete("/:id", hasPrivilege("delete_session"), deleteSession);
-router.get("/matriculation/:idMatriculation", hasPrivilege("view_matriculation_sessions"), viewMatriculationSessions);
+router.get(
+	"/matriculation/:id",
+	hasPrivilege("view_matriculation_sessions"),
+	viewMatriculationSessions,
+);
 
 export default router;

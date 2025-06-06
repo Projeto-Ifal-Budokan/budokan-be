@@ -26,9 +26,7 @@ export const getAllByPractitionerId: RequestHandler = async (
 ) => {
 	try {
 		const user = req.user as User | undefined;
-		const practitionerId = req.params.practitionerId
-			? Number(req.params.practitionerId)
-			: user?.id;
+		const practitionerId = req.params.id ? Number(req.params.id) : user?.id;
 
 		if (practitionerId) {
 			const contacts =
@@ -59,7 +57,7 @@ export const getById: RequestHandler = async (req, res, next) => {
 export const create: RequestHandler = async (req, res, next) => {
 	try {
 		const user = req.user as User | undefined;
-		const practitionerId = Number(req.params.practitionerId || user?.id);
+		const practitionerId = Number(req.params.id || user?.id);
 
 		if (!practitionerId) {
 			throw new ValidationError("ID do praticante não encontrado");
@@ -112,8 +110,6 @@ export const deleteContact: RequestHandler = async (req, res, next) => {
 		}
 
 		const contactId = result.data.id;
-		const user = req.user as User | undefined;
-		const practitionerId = user?.id;
 
 		const deleteResult = await practitionerContactService.delete(contactId);
 		res.json(deleteResult);

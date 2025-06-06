@@ -3,14 +3,61 @@ import { db } from "../db";
 import { rolesTable } from "../db/schema/user-schemas/roles";
 import { userRolesTable } from "../db/schema/user-schemas/user-roles";
 import { usersTable } from "../db/schema/user-schemas/users";
-import { ConflictError, NotFoundError } from "../errors/app-errors";
+import {
+	ConflictError,
+	ForbiddenError,
+	NotFoundError,
+	UnauthorizedError,
+} from "../errors/app-errors";
 import type {
 	AssignUserRoleInput,
 	RemoveUserRoleInput,
 } from "../schemas/user-role-schema";
+import type { User } from "../types/auth.types";
 
 export class UserRoleService {
-	async assignRole({ idUser, idRole }: AssignUserRoleInput) {
+	async assignRole(
+		{ idUser, idRole }: AssignUserRoleInput,
+		currentUser?: User,
+	) {
+		// Check if user is authenticated
+		if (!currentUser) {
+			throw new UnauthorizedError("Não autenticado");
+		}
+
+		// Check if user is owner or has admin privilege
+		if (currentUser.id !== idUser) {
+			// User is trying to modify another user's roles, check for admin privilege
+			const userRoles = await db.query.userRolesTable.findMany({
+				where: eq(userRolesTable.idUser, currentUser.id),
+				with: {
+					role: {
+						with: {
+							rolePrivileges: {
+								with: {
+									privilege: true,
+								},
+							},
+						},
+					},
+				},
+			});
+
+			// Extract all user privileges
+			const userPrivileges = userRoles.flatMap((userRole) =>
+				userRole.role.rolePrivileges.map((rp) => rp.privilege.name),
+			);
+
+			// Check if user has admin privilege
+			const hasAdminPrivilege = userPrivileges.includes("admin");
+
+			if (!hasAdminPrivilege) {
+				throw new ForbiddenError(
+					"Você não tem permissão para modificar papéis de outros usuários",
+				);
+			}
+		}
+
 		// Check if user exists
 		const user = await db
 			.select()
@@ -55,7 +102,48 @@ export class UserRoleService {
 		return { message: "Papel atribuído com sucesso" };
 	}
 
-	async removeRole({ idUser, idRole }: RemoveUserRoleInput) {
+	async removeRole(
+		{ idUser, idRole }: RemoveUserRoleInput,
+		currentUser?: User,
+	) {
+		// Check if user is authenticated
+		if (!currentUser) {
+			throw new UnauthorizedError("Não autenticado");
+		}
+
+		// Check if user is owner or has admin privilege
+		if (currentUser.id !== idUser) {
+			// User is trying to modify another user's roles, check for admin privilege
+			const userRoles = await db.query.userRolesTable.findMany({
+				where: eq(userRolesTable.idUser, currentUser.id),
+				with: {
+					role: {
+						with: {
+							rolePrivileges: {
+								with: {
+									privilege: true,
+								},
+							},
+						},
+					},
+				},
+			});
+
+			// Extract all user privileges
+			const userPrivileges = userRoles.flatMap((userRole) =>
+				userRole.role.rolePrivileges.map((rp) => rp.privilege.name),
+			);
+
+			// Check if user has admin privilege
+			const hasAdminPrivilege = userPrivileges.includes("admin");
+
+			if (!hasAdminPrivilege) {
+				throw new ForbiddenError(
+					"Você não tem permissão para modificar papéis de outros usuários",
+				);
+			}
+		}
+
 		// Check if user-role relationship exists
 		const existingUserRole = await db
 			.select()
