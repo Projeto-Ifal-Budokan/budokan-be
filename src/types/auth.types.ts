@@ -18,8 +18,6 @@ export interface User {
 	firstName: string;
 	surname: string;
 	status: string;
-	roles?: Role[];
-	privileges?: Privilege[];
 }
 
 export interface AuthenticatedRequest extends Request {
