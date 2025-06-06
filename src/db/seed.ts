@@ -37,6 +37,13 @@ async function seedPrivileges() {
 
 		// Define all privileges that should exist
 		const privileges = [
+			// Super privilege
+			{
+				name: "admin",
+				description:
+					"Super privilégio que concede acesso a ações mais específicas",
+			},
+
 			// User privileges
 			{ name: "list_users", description: "Listar todos os usuários" },
 			{ name: "view_user", description: "Visualizar detalhes do usuário" },
