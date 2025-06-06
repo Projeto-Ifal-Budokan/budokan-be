@@ -18,6 +18,8 @@ export interface User {
 	firstName: string;
 	surname: string;
 	status: string;
+	phone: string;
+	birthDate: Date;
 }
 
 export interface AuthenticatedRequest extends Request {

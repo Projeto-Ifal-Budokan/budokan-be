@@ -28,8 +28,12 @@ passport.use(new JwtStrategy(options, async (jwt_payload, done) => {
       email: usersTable.email,
       firstName: usersTable.firstName,
       surname: usersTable.surname,
-      status: usersTable.status,
-    }).from(usersTable).where(eq(usersTable.id, jwt_payload.id));
+				status: usersTable.status,
+				birthDate: usersTable.birthDate,
+				phone: usersTable.phone,
+			})
+			.from(usersTable)
+			.where(eq(usersTable.id, jwt_payload.id));
 
     if (userResult.length === 0) {
       return done(null, false);

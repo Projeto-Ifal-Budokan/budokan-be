@@ -14,10 +14,6 @@ export const listPrivileges: RequestHandler = async (req, res, next) => {
 	try {
 		const filters: PrivilegeFilters = {};
 
-		if (req.query.idUser) {
-			filters.idUser = Number(req.query.idUser);
-		}
-
 		if (req.query.idPrivilege) {
 			filters.idPrivilege = Number(req.query.idPrivilege);
 		}
@@ -27,6 +23,23 @@ export const listPrivileges: RequestHandler = async (req, res, next) => {
 		}
 
 		const privileges = await privilegeService.listPrivileges(filters);
+		res.status(200).json(privileges);
+	} catch (error) {
+		next(error);
+	}
+};
+
+export const listUserPrivileges: RequestHandler = async (req, res, next) => {
+	try {
+		const userId = req.params.id;
+		const description = req.query.description
+			? String(req.query.description)
+			: undefined;
+
+		const privileges = await privilegeService.listUserPrivileges(
+			Number(userId),
+			description,
+		);
 		res.status(200).json(privileges);
 	} catch (error) {
 		next(error);

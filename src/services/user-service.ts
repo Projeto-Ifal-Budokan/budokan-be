@@ -52,13 +52,22 @@ export class UserService {
 			throw new NotFoundError("Usuário não encontrado");
 		}
 
-		await db
-			.update(usersTable)
-			.set({
-				...data,
-				birthDate: new Date(data.birthDate),
-			})
-			.where(eq(usersTable.id, id));
+		// Cria um objeto com os dados a serem atualizados
+		const updateData: Record<string, unknown> = {};
+
+		// Adiciona apenas os campos que foram informados
+		if (data.firstName !== undefined) updateData.firstName = data.firstName;
+		if (data.surname !== undefined) updateData.surname = data.surname;
+		if (data.email !== undefined) updateData.email = data.email;
+		if (data.phone !== undefined) updateData.phone = data.phone;
+		if (data.status !== undefined) updateData.status = data.status;
+
+		// Converte a data de nascimento para Date apenas se ela for informada
+		if (data.birthDate !== undefined) {
+			updateData.birthDate = new Date(data.birthDate);
+		}
+
+		await db.update(usersTable).set(updateData).where(eq(usersTable.id, id));
 
 		return { message: "Usuário atualizado com sucesso" };
 	}

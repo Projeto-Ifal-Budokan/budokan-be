@@ -9,7 +9,6 @@ import type {
 } from "../schemas/privilege.schemas";
 
 export interface PrivilegeFilters {
-	idUser?: number;
 	idPrivilege?: number;
 	description?: string;
 }
@@ -34,53 +33,6 @@ export class PrivilegeService {
 			}
 
 			return privilege;
-		}
-
-		// Handle user-specific privileges
-		if (filters?.idUser) {
-			// Get user's privileges through their roles
-			const userRoles = await db.query.userRolesTable.findMany({
-				where: eq(userRolesTable.idUser, filters.idUser),
-				with: {
-					role: {
-						with: {
-							rolePrivileges: {
-								with: {
-									privilege: true,
-								},
-							},
-						},
-					},
-				},
-			});
-
-			// Extract all unique privileges from user's roles
-			const uniquePrivileges = new Map();
-			for (const userRole of userRoles) {
-				for (const rolePrivilege of userRole.role.rolePrivileges) {
-					const privilege = rolePrivilege.privilege;
-					uniquePrivileges.set(privilege.id, {
-						id: privilege.id,
-						name: privilege.name,
-						description: privilege.description,
-						createdAt: privilege.createdAt,
-						updatedAt: privilege.updatedAt,
-					});
-				}
-			}
-
-			// Convert to array and apply description filter if needed
-			let privileges = Array.from(uniquePrivileges.values());
-
-			if (filters.description) {
-				privileges = privileges.filter((privilege) =>
-					privilege.description
-						.toLowerCase()
-						.includes(filters.description?.toLowerCase() || ""),
-				);
-			}
-
-			return privileges;
 		}
 
 		// Handle all privileges with possible description filter
@@ -113,6 +65,50 @@ export class PrivilegeService {
 							updatedAt: privilegesTable.updatedAt,
 						})
 						.from(privilegesTable);
+
+		return privileges;
+	}
+
+	async listUserPrivileges(userId: number, description?: string) {
+		// Get user's privileges through their roles
+		const userRoles = await db.query.userRolesTable.findMany({
+			where: eq(userRolesTable.idUser, userId),
+			with: {
+				role: {
+					with: {
+						rolePrivileges: {
+							with: {
+								privilege: true,
+							},
+						},
+					},
+				},
+			},
+		});
+
+		// Extract all unique privileges from user's roles
+		const uniquePrivileges = new Map();
+		for (const userRole of userRoles) {
+			for (const rolePrivilege of userRole.role.rolePrivileges) {
+				const privilege = rolePrivilege.privilege;
+				uniquePrivileges.set(privilege.id, {
+					id: privilege.id,
+					name: privilege.name,
+					description: privilege.description,
+					createdAt: privilege.createdAt,
+					updatedAt: privilege.updatedAt,
+				});
+			}
+		}
+
+		// Convert to array and apply description filter if needed
+		let privileges = Array.from(uniquePrivileges.values());
+
+		if (description) {
+			privileges = privileges.filter((privilege) =>
+				privilege.description.toLowerCase().includes(description.toLowerCase()),
+			);
+		}
 
 		return privileges;
 	}
