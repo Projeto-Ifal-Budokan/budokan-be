@@ -5,7 +5,11 @@ import { userRolesTable } from "../../db/schema/user-schemas/user-roles";
 import { ForbiddenError, UnauthorizedError } from "../../errors/app-errors";
 import type { User } from "../../types/auth.types";
 
-export const hasPrivilege = (requiredPrivilege: string) => {
+export const hasPrivilege = (requiredPrivileges: string | string[]) => {
+	const privileges = Array.isArray(requiredPrivileges)
+		? requiredPrivileges
+		: [requiredPrivileges];
+
 	return async (
 		req: Request,
 		res: Response,
@@ -36,11 +40,14 @@ export const hasPrivilege = (requiredPrivilege: string) => {
 				},
 			});
 
-			// Verifica se algum dos roles do usuário tem o privilégio necessário
-			const hasRequiredPrivilege = userRoles.some((userRole) =>
-				userRole.role.rolePrivileges.some(
-					(rp) => rp.privilege.name === requiredPrivilege,
-				),
+			// Extrai todos os privilégios do usuário
+			const userPrivileges = userRoles.flatMap((userRole) =>
+				userRole.role.rolePrivileges.map((rp) => rp.privilege.name),
+			);
+
+			// Verifica se o usuário tem pelo menos um dos privilégios requeridos
+			const hasRequiredPrivilege = privileges.some((privilege) =>
+				userPrivileges.includes(privilege),
 			);
 
 			if (!hasRequiredPrivilege) {
