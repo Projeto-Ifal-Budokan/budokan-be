@@ -252,6 +252,28 @@ async function seedPrivileges() {
 				name: "delete_practitioner_contact",
 				description: "Excluir contato de emergência",
 			},
+
+			// Pix Keys management
+			{
+				name: "list_pix_keys",
+				description: "Listar todas as chaves pixs",
+			},
+			{
+				name: "view_pix_keys",
+				description: "Visualizar as chaves pixs",
+			},
+			{
+				name: "create_pix_keys",
+				description: "Criar chave pix",
+			},
+			{
+				name: "update_pix_keys",
+				description: "Atualizar chave pix",
+			},
+			{
+				name: "delete_pix_keys",
+				description: "Excluir chave pix",
+			}
 		];
 
 		// Find privileges that don't exist yet
@@ -364,7 +386,12 @@ async function seedRolePrivileges() {
 				"update_daily_absence",
 				"delete_daily_absence",
 				"count_absence_days",
-				"process_daily_absences",
+				"process_daily_absences",	
+				"list_pix_keys",
+				"view_pix_key",
+				"create_pix_key",
+				"update_pix_key",
+				"delete_pix_key",
 			], // Instructor gets limited privileges
 			student: [
 				"view_user",
@@ -386,6 +413,7 @@ async function seedRolePrivileges() {
 				"create_daily_absence",
 				"update_daily_absence",
 				"count_absence_days",
+				"view_pix_key",
 			], // Student gets basic privileges
 		};
 

@@ -16,6 +16,7 @@ import sessionRoutes from "./session-routes.ts";
 import trainingScheduleRoutes from "./training-schedule-routes.ts";
 import userRoleRoutes from "./user-role-routes.ts";
 import userRoutes from "./user-routes.ts";
+import pixKeyRoutes from "./pix-key-routes.ts";
 
 const router = Router();
 
@@ -91,4 +92,9 @@ router.use(
 	passport.authenticate("jwt", { session: false }),
 	dailyAbsenceRoutes,
 );
+router.use(
+	"/pix-keys",
+	passport.authenticate("jwt", { session: false }),
+	pixKeyRoutes,
+)
 export default router;
