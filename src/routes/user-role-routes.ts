@@ -4,7 +4,7 @@ import {
 	listUserRoles,
 	removeRole,
 } from "../controllers/user-role-controller";
-import { isOwnerOrHasPrivilege } from "../middlewares/auth/check-owner-or-admin.middleware";
+import { isOwnerOrHasPrivileges } from "../middlewares/auth/check-owner-or-privileges.middleware";
 import { hasPrivilege } from "../middlewares/auth/check-privilege.middleware";
 
 const router = Router();
@@ -13,7 +13,7 @@ router.post("/remove", hasPrivilege("update_user_roles"), removeRole);
 router.get(
 	"/:id",
 	hasPrivilege("view_user_roles"),
-	isOwnerOrHasPrivilege(),
+	isOwnerOrHasPrivileges(),
 	listUserRoles,
 );
 

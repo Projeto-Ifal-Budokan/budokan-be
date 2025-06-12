@@ -6,7 +6,7 @@ import {
 	listUserPrivileges,
 	updatePrivilege,
 } from "../controllers/privilege-controller";
-import { isOwnerOrHasPrivilege } from "../middlewares/auth/check-owner-or-admin.middleware";
+import { isOwnerOrHasPrivileges } from "../middlewares/auth/check-owner-or-privileges.middleware";
 import { hasPrivilege } from "../middlewares/auth/check-privilege.middleware";
 
 const router = Router();
@@ -14,7 +14,7 @@ router.get("/", hasPrivilege("list_privileges"), listPrivileges);
 router.get(
 	"/user/:id",
 	hasPrivilege("list_privileges"),
-	isOwnerOrHasPrivilege(),
+	isOwnerOrHasPrivileges(),
 	listUserPrivileges,
 );
 router.post("/", hasPrivilege("create_privilege"), createPrivilege);
