@@ -10,3 +10,9 @@ export const updateUserSchema = z.object({
 });
 
 export type UpdateUserInput = z.infer<typeof updateUserSchema>;
+
+export const toggleUserStatusSchema = z.object({
+	status: z.enum(["active", "inactive", "suspended"]),
+});
+
+export type ToggleUserStatusInput = z.infer<typeof toggleUserStatusSchema>;

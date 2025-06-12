@@ -3,6 +3,7 @@ import {
 	deleteUser,
 	getUserById,
 	listUsers,
+	toggleUserStatus,
 	updateUser,
 } from "../controllers/user-controller";
 import { isOwnerOrHasPrivileges } from "../middlewares/auth/check-owner-or-privileges.middleware";
@@ -29,5 +30,8 @@ router.delete(
 	isOwnerOrHasPrivileges(),
 	deleteUser,
 );
+
+// New route for activating/deactivating users - admin only
+router.patch("/:id/status", hasPrivilege("admin"), toggleUserStatus);
 
 export default router;
