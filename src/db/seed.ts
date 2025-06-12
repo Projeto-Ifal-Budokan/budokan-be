@@ -259,21 +259,21 @@ async function seedPrivileges() {
 				description: "Listar todas as chaves pixs",
 			},
 			{
-				name: "view_pix_keys",
+				name: "view_pix_key",
 				description: "Visualizar as chaves pixs",
 			},
 			{
-				name: "create_pix_keys",
+				name: "create_pix_key",
 				description: "Criar chave pix",
 			},
 			{
-				name: "update_pix_keys",
+				name: "update_pix_key",
 				description: "Atualizar chave pix",
 			},
 			{
-				name: "delete_pix_keys",
+				name: "delete_pix_key",
 				description: "Excluir chave pix",
-			}
+			},
 		];
 
 		// Find privileges that don't exist yet
@@ -386,7 +386,7 @@ async function seedRolePrivileges() {
 				"update_daily_absence",
 				"delete_daily_absence",
 				"count_absence_days",
-				"process_daily_absences",	
+				"process_daily_absences",
 				"list_pix_keys",
 				"view_pix_key",
 				"create_pix_key",
