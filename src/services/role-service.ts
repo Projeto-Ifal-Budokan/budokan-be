@@ -8,7 +8,11 @@ export class RoleService {
 	async listRoles() {
 		const roles = await db.query.rolesTable.findMany({
 			with: {
-				rolePrivileges: true,
+				rolePrivileges: {
+					with: {
+						privilege: true,
+					},
+				},
 			},
 		});
 

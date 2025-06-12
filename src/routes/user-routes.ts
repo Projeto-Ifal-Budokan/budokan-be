@@ -19,7 +19,7 @@ router.get(
 );
 router.put(
 	"/:id",
-	hasPrivilege("update_user"),
+	// hasPrivilege("update_user"),
 	isOwnerOrHasPrivilege(),
 	updateUser,
 );
