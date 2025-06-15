@@ -6,15 +6,15 @@ import type { CreateRoleInput, UpdateRoleInput } from "../schemas/role.schemas";
 
 export class RoleService {
 	async listRoles() {
-		const roles = await db
-			.select({
-				id: rolesTable.id,
-				name: rolesTable.name,
-				description: rolesTable.description,
-				createdAt: rolesTable.createdAt,
-				updatedAt: rolesTable.updatedAt,
-			})
-			.from(rolesTable);
+		const roles = await db.query.rolesTable.findMany({
+			with: {
+				rolePrivileges: {
+					with: {
+						privilege: true,
+					},
+				},
+			},
+		});
 
 		return roles;
 	}

@@ -23,7 +23,7 @@ router.get(
 	getInstructorDisciplineById,
 );
 router.get(
-	"/instructor/:instructorId",
+	"/instructor/:id",
 	hasPrivilege("view_instructor_discipline"),
 	getInstructorDisciplinesByInstructor,
 );

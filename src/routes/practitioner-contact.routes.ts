@@ -16,7 +16,7 @@ router.get("/", hasPrivilege("list_practitioner_contacts"), listAllContacts);
 
 // Rotas para gerenciar contatos de emergência de um praticante
 router.get(
-	"/practitioner/:practitionerId",
+	"/practitioner/:id",
 	hasPrivilege("view_practitioner_contact"),
 	getAllByPractitionerId,
 );
@@ -24,7 +24,7 @@ router.get(
 router.get("/:id", hasPrivilege("view_practitioner_contact"), getById);
 
 router.post(
-	"/practitioner/:practitionerId",
+	"/practitioner/:id",
 	hasPrivilege("create_practitioner_contact"),
 	create,
 );

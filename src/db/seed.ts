@@ -37,6 +37,13 @@ async function seedPrivileges() {
 
 		// Define all privileges that should exist
 		const privileges = [
+			// Super privilege
+			{
+				name: "admin",
+				description:
+					"Super privilégio que concede acesso a ações mais específicas",
+			},
+
 			// User privileges
 			{ name: "list_users", description: "Listar todos os usuários" },
 			{ name: "view_user", description: "Visualizar detalhes do usuário" },
@@ -245,6 +252,28 @@ async function seedPrivileges() {
 				name: "delete_practitioner_contact",
 				description: "Excluir contato de emergência",
 			},
+
+			// Pix Keys management
+			{
+				name: "list_pix_keys",
+				description: "Listar todas as chaves pixs",
+			},
+			{
+				name: "view_pix_key",
+				description: "Visualizar as chaves pixs",
+			},
+			{
+				name: "create_pix_key",
+				description: "Criar chave pix",
+			},
+			{
+				name: "update_pix_key",
+				description: "Atualizar chave pix",
+			},
+			{
+				name: "delete_pix_key",
+				description: "Excluir chave pix",
+			},
 		];
 
 		// Find privileges that don't exist yet
@@ -358,6 +387,11 @@ async function seedRolePrivileges() {
 				"delete_daily_absence",
 				"count_absence_days",
 				"process_daily_absences",
+				"list_pix_keys",
+				"view_pix_key",
+				"create_pix_key",
+				"update_pix_key",
+				"delete_pix_key",
 			], // Instructor gets limited privileges
 			student: [
 				"view_user",
@@ -379,6 +413,7 @@ async function seedRolePrivileges() {
 				"create_daily_absence",
 				"update_daily_absence",
 				"count_absence_days",
+				"view_pix_key",
 			], // Student gets basic privileges
 		};
 

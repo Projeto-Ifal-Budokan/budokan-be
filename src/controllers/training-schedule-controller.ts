@@ -38,7 +38,7 @@ export const getTrainingSchedulesByDiscipline: RequestHandler = async (
 	next,
 ) => {
 	try {
-		const { disciplineId } = req.params;
+		const disciplineId = req.params.id;
 		const trainingSchedules =
 			await trainingScheduleService.getTrainingSchedulesByDiscipline(
 				Number(disciplineId),

@@ -5,10 +5,20 @@ import { userRolesTable } from "../../db/schema/user-schemas/user-roles";
 import { ForbiddenError, UnauthorizedError } from "../../errors/app-errors";
 import type { User } from "../../types/auth.types";
 
-export const hasPrivilege = (requiredPrivileges: string | string[]) => {
-	const privileges = Array.isArray(requiredPrivileges)
-		? requiredPrivileges
-		: [requiredPrivileges];
+/**
+ * Middleware que verifica se o usuário é o proprietário do recurso (ID igual ao ID do usuário logado)
+ * ou se possui pelo menos um dos privilégios especificados.
+ *
+ * @param privileges Array de privilégios, onde qualquer um deles permite acesso ao recurso de outro usuário
+ * @returns Middleware Express
+ */
+export const isOwnerOrHasPrivileges = (
+	privileges: string | string[] = ["admin"],
+) => {
+	// Converte para array se for uma string
+	const requiredPrivileges = Array.isArray(privileges)
+		? privileges
+		: [privileges];
 
 	return async (
 		req: Request,
@@ -17,14 +27,22 @@ export const hasPrivilege = (requiredPrivileges: string | string[]) => {
 	): Promise<void> => {
 		const user = req.user as User | undefined;
 		const userId = user?.id;
+		const requestedId = Number(req.params.id);
 
+		// Verifica se o usuário está autenticado
 		if (!userId) {
 			next(new UnauthorizedError("Não autenticado"));
 			return;
 		}
 
+		// Se o ID solicitado é o mesmo do usuário logado, permite o acesso
+		if (userId === requestedId) {
+			next();
+			return;
+		}
+
 		try {
-			// Primeiro, pegamos todos os roles do usuário
+			// Caso contrário, verifica se o usuário tem pelo menos um dos privilégios necessários
 			const userRoles = await db.query.userRolesTable.findMany({
 				where: eq(userRolesTable.idUser, userId),
 				with: {
@@ -45,15 +63,15 @@ export const hasPrivilege = (requiredPrivileges: string | string[]) => {
 				userRole.role.rolePrivileges.map((rp) => rp.privilege.name),
 			);
 
-			// Verifica se o usuário tem pelo menos um dos privilégios requeridos
-			const hasRequiredPrivilege = privileges.some((privilege) =>
+			// Verifica se o usuário tem pelo menos um dos privilégios necessários
+			const hasRequiredPrivilege = requiredPrivileges.some((privilege) =>
 				userPrivileges.includes(privilege),
 			);
 
 			if (!hasRequiredPrivilege) {
 				next(
 					new ForbiddenError(
-						"Você não tem permissão para acessar este recurso",
+						"Você não tem permissão para modificar ou acessar recursos de outros usuários",
 					),
 				);
 				return;

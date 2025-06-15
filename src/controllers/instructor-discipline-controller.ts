@@ -43,7 +43,7 @@ export const getInstructorDisciplinesByInstructor: RequestHandler = async (
 	next,
 ) => {
 	try {
-		const { instructorId } = req.params;
+		const instructorId = req.params.id;
 		const instructorDisciplines =
 			await instructorDisciplineService.getInstructorDisciplinesByInstructor(
 				Number(instructorId),

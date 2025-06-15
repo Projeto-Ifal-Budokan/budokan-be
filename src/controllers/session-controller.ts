@@ -25,7 +25,7 @@ export const viewMatriculationSessions: RequestHandler = async (
 	next,
 ) => {
 	try {
-		const { idMatriculation } = req.params;
+		const idMatriculation = req.params.id;
 		const validatedData = viewMatriculationSessionsSchema.parse(req.query);
 		const sessions = await sessionService.viewMatriculationSessions(
 			Number(idMatriculation),

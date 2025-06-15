@@ -1,5 +1,8 @@
 import type { RequestHandler } from "express";
-import { updateUserSchema } from "../schemas/user.schemas";
+import {
+	toggleUserStatusSchema,
+	updateUserSchema,
+} from "../schemas/user.schemas";
 import { UserService } from "../services/user-service";
 
 const userService = new UserService();
@@ -38,6 +41,20 @@ export const deleteUser: RequestHandler = async (req, res, next) => {
 	try {
 		const { id } = req.params;
 		const result = await userService.deleteUser(Number(id));
+		res.status(200).json(result);
+	} catch (error) {
+		next(error);
+	}
+};
+
+export const toggleUserStatus: RequestHandler = async (req, res, next) => {
+	try {
+		const { id } = req.params;
+		const validatedData = toggleUserStatusSchema.parse(req.body);
+		const result = await userService.toggleUserStatus(
+			Number(id),
+			validatedData.status,
+		);
 		res.status(200).json(result);
 	} catch (error) {
 		next(error);

@@ -52,15 +52,29 @@ export class UserService {
 			throw new NotFoundError("Usuário não encontrado");
 		}
 
-		await db
-			.update(usersTable)
-			.set({
-				...data,
-				birthDate: new Date(data.birthDate),
-			})
-			.where(eq(usersTable.id, id));
+		// Cria um objeto com os dados a serem atualizados
+		const updateData: Record<string, unknown> = {};
 
-		return { message: "Usuário atualizado com sucesso" };
+		// Adiciona apenas os campos que foram informados
+		if (data.firstName !== undefined) updateData.firstName = data.firstName;
+		if (data.surname !== undefined) updateData.surname = data.surname;
+		if (data.email !== undefined) updateData.email = data.email;
+		if (data.phone !== undefined) updateData.phone = data.phone;
+
+		// Converte a data de nascimento para Date apenas se ela for informada
+		if (data.birthDate !== undefined) {
+			updateData.birthDate = new Date(data.birthDate);
+		}
+
+		await db.update(usersTable).set(updateData).where(eq(usersTable.id, id));
+
+		return data.status !== undefined
+			? {
+					message:
+						"Usuário atualizado com sucesso, mas o status não pôde ser alterado",
+					status: data.status,
+				}
+			: { message: "Usuário atualizado com sucesso" };
 	}
 
 	async deleteUser(id: number) {
@@ -75,5 +89,26 @@ export class UserService {
 
 		await db.delete(usersTable).where(eq(usersTable.id, id));
 		return { message: "Usuário excluído com sucesso" };
+	}
+
+	async toggleUserStatus(
+		id: number,
+		status: "active" | "inactive" | "suspended",
+	) {
+		const existingUser = await db
+			.select()
+			.from(usersTable)
+			.where(eq(usersTable.id, id));
+
+		if (existingUser.length === 0) {
+			throw new NotFoundError("Usuário não encontrado");
+		}
+
+		await db.update(usersTable).set({ status }).where(eq(usersTable.id, id));
+
+		return {
+			message: "Status do usuário alterado com sucesso",
+			status,
+		};
 	}
 }

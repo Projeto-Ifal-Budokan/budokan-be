@@ -28,52 +28,19 @@ passport.use(new JwtStrategy(options, async (jwt_payload, done) => {
       email: usersTable.email,
       firstName: usersTable.firstName,
       surname: usersTable.surname,
-      status: usersTable.status,
-    }).from(usersTable).where(eq(usersTable.id, jwt_payload.id));
+				status: usersTable.status,
+				birthDate: usersTable.birthDate,
+				phone: usersTable.phone,
+			})
+			.from(usersTable)
+			.where(eq(usersTable.id, jwt_payload.id));
 
     if (userResult.length === 0) {
       return done(null, false);
     }
 
     const user: User = userResult[0];
-
-    // Buscar roles do usuário
-    const userRoles = await db
-      .select({
-        id: rolesTable.id,
-        name: rolesTable.name,
-        description: rolesTable.description,
-      })
-      .from(userRolesTable)
-      .innerJoin(rolesTable, eq(userRolesTable.idRole, rolesTable.id))
-      .where(eq(userRolesTable.idUser, user.id));
-
-    user.roles = userRoles as Role[];
-
-    // Buscar privileges associados às roles do usuário
-    if (user.roles.length > 0) {
-      const roleIds = user.roles.map(role => role.id);
-      
-      const userPrivileges = await db
-        .select({
-          id: privilegesTable.id,
-          name: privilegesTable.name,
-          description: privilegesTable.description,
-        })
-        .from(rolePrivilegesTable)
-        .innerJoin(privilegesTable, eq(rolePrivilegesTable.idPrivilege, privilegesTable.id))
-        .where(inArray(rolePrivilegesTable.idRole, roleIds));
-
-      // Remove duplicados (caso o usuário tenha a mesma privilege em diferentes roles)
-      const uniquePrivileges = Array.from(
-        new Map(userPrivileges.map(item => [item.id, item])).values()
-      );
-      
-      user.privileges = uniquePrivileges as Privilege[];
-    } else {
-      user.privileges = [];
-    }
-
+    
     return done(null, user);
   } catch (error) {
     return done(error, false);
