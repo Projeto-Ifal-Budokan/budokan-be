@@ -1,4 +1,5 @@
 import express from "express";
+import passport from "passport";
 import {
 	createTrainingSchedule,
 	deleteTrainingSchedule,
@@ -12,29 +13,24 @@ import { hasPrivilege } from "../middlewares/auth/check-privilege.middleware";
 const router = express.Router();
 
 // Protected routes
-router.get("/", hasPrivilege("list_training_schedules"), listTrainingSchedules);
-router.get(
-	"/:id",
-	hasPrivilege("view_training_schedule"),
-	getTrainingScheduleById,
-);
-router.get(
-	"/discipline/:id",
-	hasPrivilege("view_training_schedule"),
-	getTrainingSchedulesByDiscipline,
-);
+router.get("/", listTrainingSchedules);
+router.get("/:id", getTrainingScheduleById);
+router.get("/discipline/:id", getTrainingSchedulesByDiscipline);
 router.post(
 	"/",
+	passport.authenticate("jwt", { session: false }),
 	hasPrivilege("create_training_schedule"),
 	createTrainingSchedule,
 );
 router.put(
 	"/:id",
+	passport.authenticate("jwt", { session: false }),
 	hasPrivilege("update_training_schedule"),
 	updateTrainingSchedule,
 );
 router.delete(
 	"/:id",
+	passport.authenticate("jwt", { session: false }),
 	hasPrivilege("delete_training_schedule"),
 	deleteTrainingSchedule,
 );
