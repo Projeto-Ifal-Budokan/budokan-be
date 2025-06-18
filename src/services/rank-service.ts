@@ -51,7 +51,7 @@ export class RankService {
 			.where(eq(ranksTable.id, id));
 
 		if (rank.length === 0) {
-			throw new NotFoundError("Rank não encontrado");
+			throw new NotFoundError("Ranque não encontrado");
 		}
 
 		return rank[0];
@@ -81,12 +81,12 @@ export class RankService {
 
 		if (existingRank.length > 0) {
 			throw new ConflictError(
-				"Já existe um rank com este nome nesta disciplina",
+				"Já existe um ranque com este nome nesta disciplina",
 			);
 		}
 
 		await db.insert(ranksTable).values(data);
-		return { message: "Rank criado com sucesso" };
+		return { message: "Ranque criado com sucesso" };
 	}
 
 	async updateRank(id: number, data: UpdateRankInput) {
@@ -96,7 +96,7 @@ export class RankService {
 			.where(eq(ranksTable.id, id));
 
 		if (existingRank.length === 0) {
-			throw new NotFoundError("Rank não encontrado");
+			throw new NotFoundError("Ranque não encontrado");
 		}
 
 		if (data.idDiscipline) {
@@ -125,14 +125,14 @@ export class RankService {
 
 			if (rankWithSameName.length > 0 && rankWithSameName[0].id !== id) {
 				throw new ConflictError(
-					"Já existe um rank com este nome nesta disciplina",
+					"Já existe um ranque com este nome nesta disciplina",
 				);
 			}
 		}
 
 		await db.update(ranksTable).set(data).where(eq(ranksTable.id, id));
 
-		return { message: "Rank atualizado com sucesso" };
+		return { message: "Ranque atualizado com sucesso" };
 	}
 
 	async deleteRank(id: number) {
@@ -142,11 +142,11 @@ export class RankService {
 			.where(eq(ranksTable.id, id));
 
 		if (existingRank.length === 0) {
-			throw new NotFoundError("Rank não encontrado");
+			throw new NotFoundError("Ranque não encontrado");
 		}
 
 		await db.delete(ranksTable).where(eq(ranksTable.id, id));
 
-		return { message: "Rank excluído com sucesso" };
+		return { message: "Ranque excluído com sucesso" };
 	}
 }

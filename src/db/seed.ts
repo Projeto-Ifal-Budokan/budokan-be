@@ -98,11 +98,11 @@ async function seedPrivileges() {
 			{ name: "delete_discipline", description: "Excluir disciplina" },
 
 			// Rank management
-			{ name: "list_ranks", description: "Listar todos os ranks" },
-			{ name: "view_rank", description: "Visualizar detalhes do rank" },
-			{ name: "create_rank", description: "Criar novo rank" },
-			{ name: "update_rank", description: "Atualizar rank" },
-			{ name: "delete_rank", description: "Excluir rank" },
+			{ name: "list_ranks", description: "Listar todos os ranques" },
+			{ name: "view_rank", description: "Visualizar detalhes do ranque" },
+			{ name: "create_rank", description: "Criar novo ranque" },
+			{ name: "update_rank", description: "Atualizar ranque" },
+			{ name: "delete_rank", description: "Excluir ranque" },
 
 			// Matriculation management
 			{
@@ -509,7 +509,7 @@ async function seedRanks() {
 		// Get existing disciplines
 		const disciplines = await db.select().from(disciplinesTable);
 		if (disciplines.length === 0) {
-			console.log("Nenhuma disciplina encontrada para adicionar ranks");
+			console.log("Nenhuma disciplina encontrada para adicionar ranques");
 			return [];
 		}
 
@@ -553,7 +553,7 @@ async function seedRanks() {
 
 			if (!ranksForDiscipline) {
 				console.log(
-					`Nenhum rank definido para a disciplina ${discipline.name}`,
+					`Nenhum ranque definido para a disciplina ${discipline.name}`,
 				);
 				continue;
 			}
@@ -576,7 +576,7 @@ async function seedRanks() {
 
 			if (newRanks.length === 0) {
 				console.log(
-					`Nenhum novo rank para adicionar à disciplina ${discipline.name}`,
+					`Nenhum novo ranque para adicionar à disciplina ${discipline.name}`,
 				);
 				continue;
 			}
@@ -585,14 +585,14 @@ async function seedRanks() {
 			await db.insert(ranksTable).values(newRanks);
 			addedRanksCount += newRanks.length;
 			console.log(
-				`${newRanks.length} novos ranks adicionados à disciplina ${discipline.name}`,
+				`${newRanks.length} novos ranques adicionados à disciplina ${discipline.name}`,
 			);
 		}
 
-		console.log(`Total de ${addedRanksCount} novos ranks criados`);
+		console.log(`Total de ${addedRanksCount} novos ranques criados`);
 		return await db.select().from(ranksTable);
 	} catch (error) {
-		console.error("Erro ao criar ranks:", error);
+		console.error("Erro ao criar ranques:", error);
 		throw error;
 	}
 }
