@@ -21,14 +21,40 @@ import type {
 
 const JWT_SECRET = process.env.JWT_SECRET || "seuSegredoAqui";
 
-// Transporter para ambiente de desenvolvimento (Ethereal)
-const transporter = nodemailer.createTransport({
-	host: "smtp.ethereal.email",
-	port: 587,
-	auth: {
-		user: process.env.ETHEREAL_USER,
-		pass: process.env.ETHEREAL_PASS,
-	},
+// Configuração do transporter baseada no ambiente
+const transporter = nodemailer.createTransport(
+	process.env.NODE_ENV === "production"
+		? {
+				// Configuração para produção (Gmail)
+				service: "gmail",
+				auth: {
+					user: process.env.GMAIL_USER,
+					pass: process.env.GMAIL_APP_PASSWORD,
+				},
+			}
+		: {
+				// Configuração para desenvolvimento (Ethereal)
+				host: "smtp.ethereal.email",
+				port: 587,
+				auth: {
+					user: process.env.ETHEREAL_USER,
+					pass: process.env.ETHEREAL_PASS,
+				},
+			},
+);
+
+// Verificar a configuração do transporter
+transporter.verify((error, success) => {
+	if (error) {
+		console.error("Erro na configuração do transporter:", error);
+	} else {
+		console.log("Servidor de email pronto para enviar mensagens");
+		console.log("Ambiente:", process.env.NODE_ENV);
+		console.log(
+			"Configuração:",
+			process.env.NODE_ENV === "production" ? "Gmail" : "Ethereal",
+		);
+	}
 });
 
 export class AuthService {
@@ -164,7 +190,10 @@ export class AuthService {
 				: `${process.env.PROD_URL}/reset-password?token=${token}`;
 
 		const mailOptions = {
-			from: '"Budokan" <no-reply@budokan.local>',
+			from:
+				process.env.NODE_ENV === "production"
+					? process.env.GMAIL_USER
+					: '"Budokan" <no-reply@budokan.local>',
 			to: email,
 			subject: "Budokan - Recuperação de Senha",
 			html: `
@@ -208,8 +237,14 @@ export class AuthService {
             `,
 		};
 
-		const info = await transporter.sendMail(mailOptions);
-		console.log("Email enviado:", nodemailer.getTestMessageUrl(info));
+		try {
+			const info = await transporter.sendMail(mailOptions);
+			console.log("Email enviado:", nodemailer.getTestMessageUrl(info));
+			console.log("Detalhes do envio:", info);
+		} catch (error) {
+			console.error("Erro ao enviar email:", error);
+			throw new Error("Falha ao enviar email de recuperação de senha");
+		}
 
 		return {
 			msg: "Se o e-mail estiver registrado, uma instrução foi enviada.",
