@@ -1,7 +1,7 @@
-import { eq } from "drizzle-orm";
+import { and, eq, ne } from "drizzle-orm";
 import { db } from "../db";
 import { usersTable } from "../db/schema/user-schemas/users";
-import { NotFoundError } from "../errors/app-errors";
+import { ConflictError, NotFoundError } from "../errors/app-errors";
 import type { UpdateUserInput } from "../schemas/user.schemas";
 
 export class UserService {
@@ -50,6 +50,18 @@ export class UserService {
 
 		if (existingUser.length === 0) {
 			throw new NotFoundError("Usuário não encontrado");
+		}
+
+		// Verifica se o email já está em uso por outro usuário
+		if (data.email !== undefined) {
+			const emailExists = await db
+				.select()
+				.from(usersTable)
+				.where(and(eq(usersTable.email, data.email), ne(usersTable.id, id)));
+
+			if (emailExists.length > 0) {
+				throw new ConflictError("Este email já está em uso por outro usuário");
+			}
 		}
 
 		// Cria um objeto com os dados a serem atualizados
