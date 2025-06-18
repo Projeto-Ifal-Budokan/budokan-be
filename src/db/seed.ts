@@ -51,11 +51,11 @@ async function seedPrivileges() {
 			{ name: "delete_user", description: "Excluir usuário" },
 
 			// Role privileges
-			{ name: "list_roles", description: "Listar todos os papéis" },
-			{ name: "view_role", description: "Visualizar detalhes do papel" },
-			{ name: "create_role", description: "Criar novo papel" },
-			{ name: "update_role", description: "Atualizar papel" },
-			{ name: "delete_role", description: "Excluir papel" },
+			{ name: "list_roles", description: "Listar todos os cargos" },
+			{ name: "view_role", description: "Visualizar detalhes do cargo" },
+			{ name: "create_role", description: "Criar novo cargo" },
+			{ name: "update_role", description: "Atualizar cargo" },
+			{ name: "delete_role", description: "Excluir cargo" },
 
 			// Privilege management
 			{ name: "list_privileges", description: "Listar todos os privilégios" },
@@ -70,21 +70,21 @@ async function seedPrivileges() {
 			// User Roles management
 			{
 				name: "update_user_roles",
-				description: "Atualizer papéis de um usuário",
+				description: "Atualizer cargos de um usuário",
 			},
 			{
 				name: "view_user_roles",
-				description: "Visualizar papéis de um usuário",
+				description: "Visualizar cargos de um usuário",
 			},
 
 			// Role privileges management
 			{
 				name: "update_role_privileges",
-				description: "Atualizer privilégios de um papel",
+				description: "Atualizer privilégios de um cargo",
 			},
 			{
 				name: "view_role_privileges",
-				description: "Visualizar privilégios de um papel",
+				description: "Visualizar privilégios de um cargo",
 			},
 
 			// Discipline management
@@ -328,19 +328,19 @@ async function seedRoles() {
 		const newRoles = roles.filter((r) => !existingRoleNames.includes(r.name));
 
 		if (newRoles.length === 0) {
-			console.log("Nenhum novo papel para adicionar");
+			console.log("Nenhum novo cargo para adicionar");
 			return existingRoles;
 		}
 
 		// Add only new roles
 		await db.insert(rolesTable).values(newRoles);
-		console.log(`${newRoles.length} novos papéis criados com sucesso`);
+		console.log(`${newRoles.length} novos cargos criados com sucesso`);
 
 		// Return all roles (existing + new)
 		const allRoles = await db.select().from(rolesTable);
 		return allRoles;
 	} catch (error) {
-		console.error("Erro ao criar papéis:", error);
+		console.error("Erro ao criar cargos:", error);
 		throw error;
 	}
 }
@@ -443,16 +443,16 @@ async function seedRolePrivileges() {
 			if (privilegesToAdd.length > 0) {
 				await db.insert(rolePrivilegesTable).values(privilegesToAdd);
 				console.log(
-					`${privilegesToAdd.length} novos privilégios atribuídos ao papel ${role.name}`,
+					`${privilegesToAdd.length} novos privilégios atribuídos ao cargo ${role.name}`,
 				);
 			} else {
 				console.log(
-					`Nenhum novo privilégio para atribuir ao papel ${role.name}`,
+					`Nenhum novo privilégio para atribuir ao cargo ${role.name}`,
 				);
 			}
 		}
 	} catch (error) {
-		console.error("Erro ao mapear privilégios dos papéis:", error);
+		console.error("Erro ao mapear privilégios dos cargos:", error);
 		throw error;
 	}
 }
@@ -817,7 +817,7 @@ async function assignAdminRole(adminUser: { id: number }) {
 			.where(eq(rolesTable.name, "admin"));
 
 		if (adminRole.length === 0) {
-			console.log("Papel admin não encontrado");
+			console.log("Cargo admin não encontrado");
 			return;
 		}
 
@@ -836,12 +836,12 @@ async function assignAdminRole(adminUser: { id: number }) {
 				idUser: adminUser.id,
 				idRole: adminRole[0].id,
 			});
-			console.log("Papel admin atribuído ao usuário admin");
+			console.log("Cargo admin atribuído ao usuário admin");
 		} else {
-			console.log("Papel admin já atribuído ao usuário admin");
+			console.log("Cargo admin já atribuído ao usuário admin");
 		}
 	} catch (error) {
-		console.error("Erro ao atribuir papel admin:", error);
+		console.error("Erro ao atribuir cargo admin:", error);
 		throw error;
 	}
 }
@@ -921,7 +921,7 @@ async function seedTestUsers() {
 						idUser: instructorUser[0].id,
 						idRole: instructorRole[0].id,
 					});
-					console.log("Papel instrutor atribuído ao usuário instrutor");
+					console.log("Cargo instrutor atribuído ao usuário instrutor");
 				}
 			}
 		}
@@ -946,7 +946,7 @@ async function seedTestUsers() {
 						idUser: studentUser[0].id,
 						idRole: studentRole[0].id,
 					});
-					console.log("Papel estudante atribuído ao usuário estudante");
+					console.log("Cargo estudante atribuído ao usuário estudante");
 				}
 			}
 		}

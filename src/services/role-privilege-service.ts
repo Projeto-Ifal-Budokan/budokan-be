@@ -18,7 +18,7 @@ export class RolePrivilegeService {
 			.where(eq(rolesTable.id, idRole));
 
 		if (role.length === 0) {
-			throw new NotFoundError("Papel não encontrado");
+			throw new NotFoundError("Cargo não encontrado");
 		}
 
 		// Check if privilege exists
@@ -43,7 +43,7 @@ export class RolePrivilegeService {
 			);
 
 		if (existingRolePrivilege.length > 0) {
-			throw new ConflictError("Papel já possui este privilégio");
+			throw new ConflictError("Cargo já possui este privilégio");
 		}
 
 		// Assign privilege to role
@@ -68,7 +68,7 @@ export class RolePrivilegeService {
 			);
 
 		if (existingRolePrivilege.length === 0) {
-			throw new NotFoundError("Papel não possui este privilégio");
+			throw new NotFoundError("Cargo não possui este privilégio");
 		}
 
 		// Remove privilege from role
@@ -92,7 +92,7 @@ export class RolePrivilegeService {
 			.where(eq(rolesTable.id, roleId));
 
 		if (role.length === 0) {
-			throw new NotFoundError("Papel não encontrado");
+			throw new NotFoundError("Cargo não encontrado");
 		}
 
 		// Get role privileges with privilege details

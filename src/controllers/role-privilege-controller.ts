@@ -29,7 +29,7 @@ export const listRolePrivileges: RequestHandler = async (req, res, next) => {
 	try {
 		const roleId = Number(req.params.id);
 		if (Number.isNaN(roleId)) {
-			throw new ValidationError("ID do papel inválido");
+			throw new ValidationError("ID do cargo inválido");
 		}
 
 		const privileges = await rolePrivilegeService.listRolePrivileges(roleId);

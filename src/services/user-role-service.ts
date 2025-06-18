@@ -53,7 +53,7 @@ export class UserRoleService {
 
 			if (!hasAdminPrivilege) {
 				throw new ForbiddenError(
-					"Você não tem permissão para modificar papéis de outros usuários",
+					"Você não tem permissão para modificar cargos de outros usuários",
 				);
 			}
 		}
@@ -75,7 +75,7 @@ export class UserRoleService {
 			.where(eq(rolesTable.id, idRole));
 
 		if (role.length === 0) {
-			throw new NotFoundError("Papel não encontrado");
+			throw new NotFoundError("Cargo não encontrado");
 		}
 
 		// Check if user already has this role
@@ -90,7 +90,7 @@ export class UserRoleService {
 			);
 
 		if (existingUserRole.length > 0) {
-			throw new ConflictError("Usuário já possui este papel");
+			throw new ConflictError("Usuário já possui este cargo");
 		}
 
 		// Assign role to user
@@ -99,7 +99,7 @@ export class UserRoleService {
 			idRole,
 		});
 
-		return { message: "Papel atribuído com sucesso" };
+		return { message: "Cargo atribuído com sucesso" };
 	}
 
 	async removeRole(
@@ -139,7 +139,7 @@ export class UserRoleService {
 
 			if (!hasAdminPrivilege) {
 				throw new ForbiddenError(
-					"Você não tem permissão para modificar papéis de outros usuários",
+					"Você não tem permissão para modificar cargos de outros usuários",
 				);
 			}
 		}
@@ -156,7 +156,7 @@ export class UserRoleService {
 			);
 
 		if (existingUserRole.length === 0) {
-			throw new NotFoundError("Usuário não possui este papel");
+			throw new NotFoundError("Usuário não possui este cargo");
 		}
 
 		// Remove role from user
@@ -169,7 +169,7 @@ export class UserRoleService {
 				),
 			);
 
-		return { message: "Papel removido com sucesso" };
+		return { message: "Cargo removido com sucesso" };
 	}
 
 	async listUserRoles(userId: number) {

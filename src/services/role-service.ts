@@ -32,7 +32,7 @@ export class RoleService {
 			.where(eq(rolesTable.id, id));
 
 		if (role.length === 0) {
-			throw new NotFoundError("Papel não encontrado");
+			throw new NotFoundError("Cargo não encontrado");
 		}
 
 		return role[0];
@@ -45,11 +45,11 @@ export class RoleService {
 			.where(eq(rolesTable.name, data.name));
 
 		if (existingRole.length > 0) {
-			throw new ConflictError("Já existe um papel com este nome");
+			throw new ConflictError("Já existe um cargo com este nome");
 		}
 
 		await db.insert(rolesTable).values(data);
-		return { message: "Papel criado com sucesso" };
+		return { message: "Cargo criado com sucesso" };
 	}
 
 	async updateRole(id: number, data: UpdateRoleInput) {
@@ -59,7 +59,7 @@ export class RoleService {
 			.where(eq(rolesTable.id, id));
 
 		if (existingRole.length === 0) {
-			throw new NotFoundError("Papel não encontrado");
+			throw new NotFoundError("Cargo não encontrado");
 		}
 
 		if (data.name) {
@@ -69,13 +69,13 @@ export class RoleService {
 				.where(eq(rolesTable.name, data.name));
 
 			if (roleWithSameName.length > 0 && roleWithSameName[0].id !== id) {
-				throw new ConflictError("Já existe um papel com este nome");
+				throw new ConflictError("Já existe um cargo com este nome");
 			}
 		}
 
 		await db.update(rolesTable).set(data).where(eq(rolesTable.id, id));
 
-		return { message: "Papel atualizado com sucesso" };
+		return { message: "Cargo atualizado com sucesso" };
 	}
 
 	async deleteRole(id: number) {
@@ -85,10 +85,10 @@ export class RoleService {
 			.where(eq(rolesTable.id, id));
 
 		if (existingRole.length === 0) {
-			throw new NotFoundError("Papel não encontrado");
+			throw new NotFoundError("Cargo não encontrado");
 		}
 
 		await db.delete(rolesTable).where(eq(rolesTable.id, id));
-		return { message: "Papel excluído com sucesso" };
+		return { message: "Cargo excluído com sucesso" };
 	}
 }
