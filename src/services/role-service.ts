@@ -1,22 +1,29 @@
-import { eq } from "drizzle-orm";
+import { count, eq } from "drizzle-orm";
 import { db } from "../db";
 import { rolesTable } from "../db/schema/user-schemas/roles";
 import { ConflictError, NotFoundError } from "../errors/app-errors";
 import type { CreateRoleInput, UpdateRoleInput } from "../schemas/role.schemas";
 
 export class RoleService {
-	async listRoles() {
-		const roles = await db.query.rolesTable.findMany({
-			with: {
-				rolePrivileges: {
-					with: {
-						privilege: true,
+	async listRoles(pagination?: { limit: number; offset: number }) {
+		const { limit, offset } = pagination || { limit: 10, offset: 0 };
+
+		const [roles, [{ count: total }]] = await Promise.all([
+			db.query.rolesTable.findMany({
+				with: {
+					rolePrivileges: {
+						with: {
+							privilege: true,
+						},
 					},
 				},
-			},
-		});
+				limit,
+				offset,
+			}),
+			db.select({ count: count() }).from(rolesTable),
+		]);
 
-		return roles;
+		return { items: roles, count: Number(total) };
 	}
 
 	async getRoleById(id: number) {
