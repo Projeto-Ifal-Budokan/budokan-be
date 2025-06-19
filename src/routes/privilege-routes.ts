@@ -13,7 +13,7 @@ const router = Router();
 router.get("/", hasPrivilege("list_privileges"), listPrivileges);
 router.get(
 	"/user/:id",
-	hasPrivilege("list_privileges"),
+	// hasPrivilege("list_privileges"), // desabilitado pois o sistema precisa sempre ter acesso aos privilegios do usuario logado
 	isOwnerOrHasPrivileges(),
 	listUserPrivileges,
 );
