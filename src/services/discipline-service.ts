@@ -1,4 +1,4 @@
-import { eq } from "drizzle-orm";
+import { count, eq } from "drizzle-orm";
 import { db } from "../db";
 import { disciplinesTable } from "../db/schema/discipline-schemas/disciplines";
 import { ConflictError, NotFoundError } from "../errors/app-errors";
@@ -8,19 +8,26 @@ import type {
 } from "../schemas/discipline.schemas";
 
 export class DisciplineService {
-	async listDisciplines() {
-		const disciplines = await db
-			.select({
-				id: disciplinesTable.id,
-				name: disciplinesTable.name,
-				description: disciplinesTable.description,
-				status: disciplinesTable.status,
-				createdAt: disciplinesTable.createdAt,
-				updatedAt: disciplinesTable.updatedAt,
-			})
-			.from(disciplinesTable);
+	async listDisciplines(pagination?: { limit: number; offset: number }) {
+		const { limit, offset } = pagination || { limit: 10, offset: 0 };
 
-		return disciplines;
+		const [disciplines, [{ count: total }]] = await Promise.all([
+			db
+				.select({
+					id: disciplinesTable.id,
+					name: disciplinesTable.name,
+					description: disciplinesTable.description,
+					status: disciplinesTable.status,
+					createdAt: disciplinesTable.createdAt,
+					updatedAt: disciplinesTable.updatedAt,
+				})
+				.from(disciplinesTable)
+				.limit(limit)
+				.offset(offset),
+			db.select({ count: count() }).from(disciplinesTable),
+		]);
+
+		return { items: disciplines, count: Number(total) };
 	}
 
 	async getDisciplineById(id: number) {

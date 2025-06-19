@@ -4,13 +4,18 @@ import {
 	updateDisciplineSchema,
 } from "../schemas/discipline.schemas";
 import { DisciplineService } from "../services/discipline-service";
+import { getPaginationParams } from "../utils/pagination";
 
 const disciplineService = new DisciplineService();
 
 export const listDisciplines: RequestHandler = async (req, res, next) => {
 	try {
-		const Disciplines = await disciplineService.listDisciplines();
-		res.status(200).json(Disciplines);
+		const { page_size, page, offset } = getPaginationParams(req.query);
+		const { items, count } = await disciplineService.listDisciplines({
+			limit: page_size,
+			offset,
+		});
+		res.status(200).json({ page_size, page, count, items });
 	} catch (error) {
 		next(error);
 	}
