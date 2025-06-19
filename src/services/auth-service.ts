@@ -186,8 +186,8 @@ export class AuthService {
 		const token = jwt.sign({ id: user.id }, JWT_SECRET, { expiresIn: "15m" });
 		const resetUrl =
 			process.env.NODE_ENV === "develop"
-				? `${process.env.DEV_URL}/reset-password?token=${token}`
-				: `${process.env.PROD_URL}/reset-password?token=${token}`;
+				? `${process.env.DEV_URL}/forgot-password?token=${token}`
+				: `${process.env.PROD_URL}/forgot-password?token=${token}`;
 
 		const mailOptions = {
 			from:
