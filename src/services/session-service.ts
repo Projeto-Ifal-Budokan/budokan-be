@@ -1,4 +1,15 @@
-import { SQL, and, desc, eq, gt, gte, inArray, lt, lte, or } from "drizzle-orm";
+import {
+	and,
+	count,
+	desc,
+	eq,
+	gt,
+	gte,
+	inArray,
+	lt,
+	lte,
+	or,
+} from "drizzle-orm";
 import { DateTime } from "luxon";
 import { db } from "../db";
 import { attendancesTable } from "../db/schema";
@@ -36,129 +47,154 @@ type SessionUpdateType = {
 };
 
 export class SessionService {
-	async listSessions(filters: ListSessionInput) {
-		// busca os IDs de das disciplinas que o usuario é instrutor, se informada uma disciplina busca apenas o id dessa disciplina.
-		const instructorDisciplineID = await db
-			.select({
-				id: instructorDisciplinesTable.id,
-			})
-			.from(instructorDisciplinesTable)
-			.where(
-				and(
-					filters.idInstructor
-						? eq(instructorDisciplinesTable.idInstructor, filters.idInstructor)
-						: undefined,
-					filters.idDiscipline
-						? eq(instructorDisciplinesTable.idDiscipline, filters.idDiscipline)
-						: undefined,
-				),
-			);
+	async listSessions(
+		filters: ListSessionInput,
+		pagination?: { limit: number; offset: number },
+	) {
+		const { limit, offset } = pagination || { limit: 10, offset: 0 };
 
-		// Buscar sessões ministradas por um instrutor específico
-		const sessions = await db.query.sessionsTable.findMany({
-			where: (session) => {
-				const conditions = [
-					filters.idDiscipline
-						? eq(session.idDiscipline, filters.idDiscipline)
-						: undefined,
-					instructorDisciplineID.length > 0
-						? inArray(
-								session.idInstructorDiscipline,
-								instructorDisciplineID.map((id) => id.id),
-							)
-						: undefined,
-					filters.initialDate
-						? gte(
-								sessionsTable.date,
-								DateTime.fromISO(filters.initialDate).toJSDate(),
-							)
-						: undefined,
-					filters.finalDate
-						? lte(
-								sessionsTable.date,
-								DateTime.fromISO(filters.finalDate).toJSDate(),
-							)
-						: undefined,
-				].filter(Boolean);
-				return and(...conditions);
-			},
-			columns: {
-				id: true,
-				idDiscipline: true,
-				idInstructorDiscipline: true,
-				date: true,
-				startingTime: true,
-				endingTime: true,
-			},
-			with: {
-				attendances: {
-					columns: {
-						id: true,
-						idMatriculation: true,
-						idSession: true,
-						status: true,
+		// busca os IDs de das disciplinas que o usuario é instrutor
+		let instructorDisciplineIDs: { id: number }[] = [];
+		if (filters.idInstructor) {
+			instructorDisciplineIDs = await db
+				.select({
+					id: instructorDisciplinesTable.id,
+				})
+				.from(instructorDisciplinesTable)
+				.where(
+					and(
+						eq(instructorDisciplinesTable.idInstructor, filters.idInstructor),
+						filters.idDiscipline
+							? eq(
+									instructorDisciplinesTable.idDiscipline,
+									filters.idDiscipline,
+								)
+							: undefined,
+					),
+				);
+		}
+
+		const conditions = [
+			filters.idDiscipline
+				? eq(sessionsTable.idDiscipline, filters.idDiscipline)
+				: undefined,
+			filters.idInstructor
+				? instructorDisciplineIDs.length > 0
+					? inArray(
+							sessionsTable.idInstructorDiscipline,
+							instructorDisciplineIDs.map((id) => id.id),
+						)
+					: eq(sessionsTable.id, -1) // força retornar vazio quando não encontra instructor_disciplines
+				: undefined,
+			filters.initialDate
+				? gte(
+						sessionsTable.date,
+						DateTime.fromISO(filters.initialDate).toJSDate(),
+					)
+				: undefined,
+			filters.finalDate
+				? lte(
+						sessionsTable.date,
+						DateTime.fromISO(filters.finalDate).toJSDate(),
+					)
+				: undefined,
+		].filter(Boolean);
+
+		const [sessions, [{ count: total }]] = await Promise.all([
+			db.query.sessionsTable.findMany({
+				where:
+					conditions.length > 0 ? (session) => and(...conditions) : undefined,
+				columns: {
+					id: true,
+					idDiscipline: true,
+					idInstructorDiscipline: true,
+					date: true,
+					startingTime: true,
+					endingTime: true,
+				},
+				with: {
+					attendances: {
+						columns: {
+							id: true,
+							idMatriculation: true,
+							idSession: true,
+							status: true,
+						},
 					},
 				},
-			},
-			orderBy: desc(sessionsTable.date),
-			limit: filters.limit || 100, // Limite padrão de 100 sessões
-		});
+				orderBy: desc(sessionsTable.date),
+				limit,
+				offset,
+			}),
+			db
+				.select({ count: count() })
+				.from(sessionsTable)
+				.where(conditions.length > 0 ? and(...conditions) : undefined),
+		]);
 
 		if (sessions.length === 0) {
 			throw new NotFoundError("Nenhuma aula encontrada.");
 		}
 
-		return sessions;
+		return { items: sessions, count: Number(total) };
 	}
 
 	async viewMatriculationSessions(
 		idMatriculation: number,
 		data: ViewMatriculationSessionsInput,
+		pagination?: { limit: number; offset: number },
 	) {
-		const sessions = await db
-			.select({
-				idSession: attendancesTable.idSession,
-				idAttendance: attendancesTable.id,
-				status: attendancesTable.status,
-				date: sessionsTable.date,
-				startingTime: sessionsTable.startingTime,
-				endingTime: sessionsTable.endingTime,
-				idDiscipline: sessionsTable.idDiscipline,
-				idInstructorDiscipline: sessionsTable.idInstructorDiscipline,
-			})
-			.from(attendancesTable)
-			.innerJoin(
-				sessionsTable,
-				eq(attendancesTable.idSession, sessionsTable.id),
-			)
-			.where(
-				and(
-					eq(attendancesTable.idMatriculation, idMatriculation),
-					data.idDiscipline
-						? eq(sessionsTable.idDiscipline, data.idDiscipline)
-						: undefined,
-					// Adicionar filtros de data se fornecidos
-					data.initialDate
-						? gte(
-								sessionsTable.date,
-								DateTime.fromISO(data.initialDate).toJSDate(),
-							)
-						: undefined,
-					data.finalDate
-						? lte(
-								sessionsTable.date,
-								DateTime.fromISO(data.finalDate).toJSDate(),
-							)
-						: undefined,
-				),
-			)
-			.orderBy(desc(sessionsTable.date));
+		const { limit, offset } = pagination || { limit: 10, offset: 0 };
+
+		const conditions = [
+			eq(attendancesTable.idMatriculation, idMatriculation),
+			data.idDiscipline
+				? eq(sessionsTable.idDiscipline, data.idDiscipline)
+				: undefined,
+			data.initialDate
+				? gte(sessionsTable.date, DateTime.fromISO(data.initialDate).toJSDate())
+				: undefined,
+			data.finalDate
+				? lte(sessionsTable.date, DateTime.fromISO(data.finalDate).toJSDate())
+				: undefined,
+		].filter(Boolean);
+
+		const [sessions, [{ count: total }]] = await Promise.all([
+			db
+				.select({
+					idSession: attendancesTable.idSession,
+					idAttendance: attendancesTable.id,
+					status: attendancesTable.status,
+					date: sessionsTable.date,
+					startingTime: sessionsTable.startingTime,
+					endingTime: sessionsTable.endingTime,
+					idDiscipline: sessionsTable.idDiscipline,
+					idInstructorDiscipline: sessionsTable.idInstructorDiscipline,
+				})
+				.from(attendancesTable)
+				.innerJoin(
+					sessionsTable,
+					eq(attendancesTable.idSession, sessionsTable.id),
+				)
+				.where(and(...conditions))
+				.orderBy(desc(sessionsTable.date))
+				.limit(limit)
+				.offset(offset),
+			db
+				.select({ count: count() })
+				.from(attendancesTable)
+				.innerJoin(
+					sessionsTable,
+					eq(attendancesTable.idSession, sessionsTable.id),
+				)
+				.where(and(...conditions)),
+		]);
 
 		if (sessions.length === 0) {
 			throw new NotFoundError("Nenhuma sessão encontrada para esta matrícula");
 		}
 
-		return sessions;
+		return { items: sessions, count: Number(total) };
 	}
 
 	async createSession(data: CreateSessionInput) {

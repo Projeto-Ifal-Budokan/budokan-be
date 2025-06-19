@@ -6,14 +6,19 @@ import {
 	viewMatriculationSessionsSchema,
 } from "../schemas/session.schemas";
 import { SessionService } from "../services/session-service";
+import { getPaginationParams } from "../utils/pagination";
 
 const sessionService = new SessionService();
 
 export const listSessions: RequestHandler = async (req, res, next) => {
 	try {
 		const validatedData = listSessionSchema.parse(req.query);
-		const sessions = await sessionService.listSessions(validatedData);
-		res.status(200).json(sessions);
+		const { page_size, page, offset } = getPaginationParams(req.query);
+		const { items, count } = await sessionService.listSessions(validatedData, {
+			limit: page_size,
+			offset,
+		});
+		res.status(200).json({ page_size, page, count, items });
 	} catch (error) {
 		next(error);
 	}
@@ -27,11 +32,13 @@ export const viewMatriculationSessions: RequestHandler = async (
 	try {
 		const idMatriculation = req.params.id;
 		const validatedData = viewMatriculationSessionsSchema.parse(req.query);
-		const sessions = await sessionService.viewMatriculationSessions(
+		const { page_size, page, offset } = getPaginationParams(req.query);
+		const { items, count } = await sessionService.viewMatriculationSessions(
 			Number(idMatriculation),
 			validatedData,
+			{ limit: page_size, offset },
 		);
-		res.status(200).json(sessions);
+		res.status(200).json({ page_size, page, count, items });
 	} catch (error) {
 		next(error);
 	}
