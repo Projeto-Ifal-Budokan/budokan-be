@@ -8,11 +8,13 @@ import {
 } from "../schemas/attendance.schemas";
 import type { AttendanceFilters } from "../services/attendance-service";
 import { AttendanceService } from "../services/attendance-service";
+import { getPaginationParams } from "../utils/pagination";
 
 const attendanceService = new AttendanceService();
 
 export const listAttendances: RequestHandler = async (req, res, next) => {
 	try {
+		const { page_size, page, offset } = getPaginationParams(req.query);
 		// Extrair filtros dos query params de forma padronizada
 		const filters: AttendanceFilters = {
 			// Usar operador ternário para cada filtro, similar ao listDailyAbsences
@@ -36,8 +38,11 @@ export const listAttendances: RequestHandler = async (req, res, next) => {
 					: undefined,
 		};
 
-		const attendances = await attendanceService.listAttendances(filters);
-		res.status(200).json(attendances);
+		const { items, count } = await attendanceService.listAttendances(filters, {
+			limit: page_size,
+			offset,
+		});
+		res.status(200).json({ page_size, page, count, items });
 	} catch (error) {
 		next(error);
 	}

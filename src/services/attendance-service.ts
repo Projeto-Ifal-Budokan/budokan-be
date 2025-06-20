@@ -1,4 +1,4 @@
-import { and, eq, inArray } from "drizzle-orm";
+import { and, count, eq, inArray } from "drizzle-orm";
 import { DateTime } from "luxon";
 import { db } from "../db";
 import { attendancesTable } from "../db/schema/attendance-schemas/attendances";
@@ -21,9 +21,14 @@ export interface AttendanceFilters {
 }
 
 export class AttendanceService {
-	async listAttendances(filters?: AttendanceFilters) {
+	async listAttendances(
+		filters?: AttendanceFilters,
+		pagination?: { limit: number; offset: number },
+	) {
+		const { limit, offset } = pagination || { limit: 10, offset: 0 };
+
 		// Construir a consulta base
-		const query = db
+		const baseQuery = db
 			.select({
 				id: attendancesTable.id,
 				idMatriculation: attendancesTable.idMatriculation,
@@ -69,11 +74,20 @@ export class AttendanceService {
 			conditions.push(eq(sessionsTable.date, dateObj));
 		}
 
-		// Executar a consulta com os filtros
-		const result =
-			conditions.length > 0
-				? await query.where(and(...conditions))
-				: await query;
+		const where = conditions.length > 0 ? and(...conditions) : undefined;
+
+		// Executar as consultas de contagem e de dados em paralelo
+		const [result, [{ count: total }]] = await Promise.all([
+			baseQuery.where(where).limit(limit).offset(offset),
+			db
+				.select({ count: count() })
+				.from(attendancesTable)
+				.leftJoin(
+					sessionsTable,
+					eq(attendancesTable.idSession, sessionsTable.id),
+				)
+				.where(where),
+		]);
 
 		if (result.length === 0) {
 			throw new NotFoundError(
@@ -98,7 +112,7 @@ export class AttendanceService {
 			},
 		}));
 
-		return formattedAttendances;
+		return { items: formattedAttendances, count: Number(total) };
 	}
 
 	async createAttendance(data: CreateAttendanceInput) {
