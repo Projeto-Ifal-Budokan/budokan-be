@@ -132,10 +132,6 @@ export class SessionService {
 				.where(conditions.length > 0 ? and(...conditions) : undefined),
 		]);
 
-		if (sessions.length === 0) {
-			throw new NotFoundError("Nenhuma aula encontrada.");
-		}
-
 		return { items: sessions, count: Number(total) };
 	}
 
@@ -189,10 +185,6 @@ export class SessionService {
 				)
 				.where(and(...conditions)),
 		]);
-
-		if (sessions.length === 0) {
-			throw new NotFoundError("Nenhuma sessão encontrada para esta matrícula");
-		}
 
 		return { items: sessions, count: Number(total) };
 	}

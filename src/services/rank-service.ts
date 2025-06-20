@@ -1,4 +1,4 @@
-import { and, eq } from "drizzle-orm";
+import { and, count, eq } from "drizzle-orm";
 import { db } from "../db";
 import { disciplinesTable } from "../db/schema/discipline-schemas/disciplines";
 import { ranksTable } from "../db/schema/discipline-schemas/ranks";
@@ -6,30 +6,39 @@ import { ConflictError, NotFoundError } from "../errors/app-errors";
 import type { CreateRankInput, UpdateRankInput } from "../schemas/rank.schemas";
 
 export class RankService {
-	async listRanks(disciplineId?: number) {
-		// Build base query
-		const baseQuery = db
-			.select({
-				id: ranksTable.id,
-				idDiscipline: ranksTable.idDiscipline,
-				name: ranksTable.name,
-				description: ranksTable.description,
-				createdAt: ranksTable.createdAt,
-				updatedAt: ranksTable.updatedAt,
-				disciplineName: disciplinesTable.name,
-			})
-			.from(ranksTable)
-			.leftJoin(
-				disciplinesTable,
-				eq(ranksTable.idDiscipline, disciplinesTable.id),
-			);
+	async listRanks(
+		disciplineId?: number,
+		pagination?: { limit: number; offset: number },
+	) {
+		const { limit, offset } = pagination || { limit: 10, offset: 0 };
 
-		// Apply filter if discipline ID is provided
-		if (disciplineId) {
-			return await baseQuery.where(eq(ranksTable.idDiscipline, disciplineId));
-		}
+		const where = disciplineId
+			? eq(ranksTable.idDiscipline, disciplineId)
+			: undefined;
 
-		return await baseQuery;
+		const [ranks, [{ count: total }]] = await Promise.all([
+			db
+				.select({
+					id: ranksTable.id,
+					idDiscipline: ranksTable.idDiscipline,
+					name: ranksTable.name,
+					description: ranksTable.description,
+					createdAt: ranksTable.createdAt,
+					updatedAt: ranksTable.updatedAt,
+					disciplineName: disciplinesTable.name,
+				})
+				.from(ranksTable)
+				.leftJoin(
+					disciplinesTable,
+					eq(ranksTable.idDiscipline, disciplinesTable.id),
+				)
+				.where(where)
+				.limit(limit)
+				.offset(offset),
+			db.select({ count: count() }).from(ranksTable).where(where),
+		]);
+
+		return { items: ranks, count: Number(total) };
 	}
 
 	async getRankById(id: number) {

@@ -89,12 +89,6 @@ export class AttendanceService {
 				.where(where),
 		]);
 
-		if (result.length === 0) {
-			throw new NotFoundError(
-				"Nenhum registro de frequência encontrado com os filtros informados",
-			);
-		}
-
 		// Transformar o resultado para o formato esperado
 		const formattedAttendances = result.map((item) => ({
 			id: item.id,

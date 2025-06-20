@@ -93,10 +93,6 @@ export class DailyAbsenceService {
 			db.select({ count: count() }).from(dailyAbsencesTable).where(where),
 		]);
 
-		if (absences.length === 0) {
-			throw new NotFoundError("Nenhum registro de ausência diária encontrado");
-		}
-
 		return { items: absences, count: Number(total) };
 	}
 
