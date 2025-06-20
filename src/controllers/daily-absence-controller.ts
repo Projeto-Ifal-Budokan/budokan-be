@@ -5,12 +5,16 @@ import {
 	updateDailyAbsenceSchema,
 } from "../schemas/attendance.schemas";
 import { DailyAbsenceService } from "../services/daily-absence-service";
+import type { DailyAbsenceFilters } from "../services/daily-absence-service";
+import { getPaginationParams } from "../utils/pagination";
 
 const dailyAbsenceService = new DailyAbsenceService();
 
 export const listDailyAbsences: RequestHandler = async (req, res, next) => {
 	try {
-		const filters = {
+		const { page_size, page, offset } = getPaginationParams(req.query);
+
+		const filters: DailyAbsenceFilters = {
 			// Filtrar por matrícula, se fornecido
 			idMatriculation: req.query.idMatriculation
 				? Number(req.query.idMatriculation)
@@ -19,14 +23,18 @@ export const listDailyAbsences: RequestHandler = async (req, res, next) => {
 			// Extrair filtros de query string
 			startDate: req.query.startDate as string | undefined,
 			endDate: req.query.endDate as string | undefined,
-			justification: req.query.justification as string | undefined,
+			justification: req.query
+				.justification as DailyAbsenceFilters["justification"],
 			hasJustification: req.query.hasJustification
 				? req.query.hasJustification === "true"
 				: undefined,
 		};
 
-		const absences = await dailyAbsenceService.listDailyAbsences(filters);
-		res.status(200).json(absences);
+		const { items, count } = await dailyAbsenceService.listDailyAbsences(
+			filters,
+			{ limit: page_size, offset },
+		);
+		res.status(200).json({ page_size, page, count, items });
 	} catch (error) {
 		next(error);
 	}
