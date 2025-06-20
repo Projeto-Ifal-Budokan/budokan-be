@@ -9,21 +9,39 @@ import type {
 } from "../schemas/practitioner-contact.schemas";
 
 export class PractitionerContactService {
-	// Listar todos os contatos
-	async listAll() {
-		const contacts = await db
-			.select({
-				id: practitionerContactsTable.id,
-				idPractitioner: practitionerContactsTable.idPractitioner,
-				phone: practitionerContactsTable.phone,
-				relationship: practitionerContactsTable.relationship,
-				createdAt: practitionerContactsTable.createdAt,
-				updatedAt: practitionerContactsTable.updatedAt,
-			})
-			.from(practitionerContactsTable)
-			.orderBy(practitionerContactsTable.idPractitioner);
+	// Listar todos os contatos com filtro e paginação
+	async list(
+		filters?: { idPractitioner?: number },
+		pagination?: { limit: number; offset: number },
+	) {
+		const { limit, offset } = pagination || { limit: 10, offset: 0 };
 
-		return contacts;
+		const where = filters?.idPractitioner
+			? eq(practitionerContactsTable.idPractitioner, filters.idPractitioner)
+			: undefined;
+
+		const [contacts, [{ count: total }]] = await Promise.all([
+			db
+				.select({
+					id: practitionerContactsTable.id,
+					idPractitioner: practitionerContactsTable.idPractitioner,
+					phone: practitionerContactsTable.phone,
+					relationship: practitionerContactsTable.relationship,
+					createdAt: practitionerContactsTable.createdAt,
+					updatedAt: practitionerContactsTable.updatedAt,
+				})
+				.from(practitionerContactsTable)
+				.where(where)
+				.orderBy(practitionerContactsTable.idPractitioner)
+				.limit(limit)
+				.offset(offset),
+			db
+				.select({ count: count() })
+				.from(practitionerContactsTable)
+				.where(where),
+		]);
+
+		return { items: contacts, count: Number(total) };
 	}
 
 	// Verificar se um praticante tem contatos suficientes

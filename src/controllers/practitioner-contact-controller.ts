@@ -7,13 +7,23 @@ import {
 } from "../schemas/practitioner-contact.schemas";
 import { PractitionerContactService } from "../services/practitioner-contact-service";
 import type { User } from "../types/auth.types";
+import { getPaginationParams } from "../utils/pagination";
 
 const practitionerContactService = new PractitionerContactService();
 
-export const listAllContacts: RequestHandler = async (req, res, next) => {
+export const listContacts: RequestHandler = async (req, res, next) => {
 	try {
-		const contacts = await practitionerContactService.listAll();
-		res.json(contacts);
+		const { page_size, page, offset } = getPaginationParams(req.query);
+
+		const idPractitioner = req.query.idPractitioner
+			? Number(req.query.idPractitioner)
+			: undefined;
+
+		const { items, count } = await practitionerContactService.list(
+			{ idPractitioner },
+			{ limit: page_size, offset },
+		);
+		res.status(200).json({ page_size, page, count, items });
 	} catch (error) {
 		next(error);
 	}
