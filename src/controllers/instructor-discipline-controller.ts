@@ -1,10 +1,10 @@
 import type { RequestHandler } from "express";
-import { ZodError } from "zod";
 import {
 	createInstructorDisciplineSchema,
 	updateInstructorDisciplineSchema,
 } from "../schemas/instructor-discipline.schemas";
 import { InstructorDisciplineService } from "../services/instructor-discipline-service";
+import { getPaginationParams } from "../utils/pagination";
 
 const instructorDisciplineService = new InstructorDisciplineService();
 
@@ -14,9 +14,17 @@ export const listInstructorDisciplines: RequestHandler = async (
 	next,
 ) => {
 	try {
-		const instructorDisciplines =
-			await instructorDisciplineService.listInstructorDisciplines();
-		res.status(200).json(instructorDisciplines);
+		const { page_size, page, offset } = getPaginationParams(req.query);
+
+		const idInstructor = req.query.idInstructor
+			? Number(req.query.idInstructor)
+			: undefined;
+
+		const { items, count } = await instructorDisciplineService.list(
+			{ idInstructor },
+			{ limit: page_size, offset },
+		);
+		res.status(200).json({ page_size, page, count, items });
 	} catch (error) {
 		next(error);
 	}
@@ -32,23 +40,6 @@ export const getInstructorDisciplineById: RequestHandler = async (
 		const instructorDiscipline =
 			await instructorDisciplineService.getInstructorDisciplineById(Number(id));
 		res.status(200).json(instructorDiscipline);
-	} catch (error) {
-		next(error);
-	}
-};
-
-export const getInstructorDisciplinesByInstructor: RequestHandler = async (
-	req,
-	res,
-	next,
-) => {
-	try {
-		const instructorId = req.params.id;
-		const instructorDisciplines =
-			await instructorDisciplineService.getInstructorDisciplinesByInstructor(
-				Number(instructorId),
-			);
-		res.status(200).json(instructorDisciplines);
 	} catch (error) {
 		next(error);
 	}

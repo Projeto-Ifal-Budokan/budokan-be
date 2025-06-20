@@ -1,10 +1,11 @@
-import { and, eq } from "drizzle-orm";
+import { and, count, eq, sql } from "drizzle-orm";
 import { db } from "../db";
 import { disciplinesTable } from "../db/schema/discipline-schemas/disciplines";
 import { ranksTable } from "../db/schema/discipline-schemas/ranks";
 import { instructorDisciplinesTable } from "../db/schema/practitioner-schemas/instructor-disciplines";
 import { instructorsTable } from "../db/schema/practitioner-schemas/instructors";
 import { practitionersTable } from "../db/schema/practitioner-schemas/practitioners";
+import { usersTable } from "../db/schema/user-schemas/users";
 import { ConflictError, NotFoundError } from "../errors/app-errors";
 import type {
 	CreateInstructorDisciplineInput,
@@ -12,22 +13,59 @@ import type {
 } from "../schemas/instructor-discipline.schemas";
 
 export class InstructorDisciplineService {
-	async listInstructorDisciplines() {
-		const instructorDisciplines = await db
-			.select({
-				id: instructorDisciplinesTable.id,
-				idInstructor: instructorDisciplinesTable.idInstructor,
-				idDiscipline: instructorDisciplinesTable.idDiscipline,
-				idRank: instructorDisciplinesTable.idRank,
-				status: instructorDisciplinesTable.status,
-				activatedBy: instructorDisciplinesTable.activatedBy,
-				inactivatedBy: instructorDisciplinesTable.inactivatedBy,
-				createdAt: instructorDisciplinesTable.createdAt,
-				updatedAt: instructorDisciplinesTable.updatedAt,
-			})
-			.from(instructorDisciplinesTable);
+	async list(
+		filters?: { idInstructor?: number },
+		pagination?: { limit: number; offset: number },
+	) {
+		const { limit, offset } = pagination || { limit: 10, offset: 0 };
 
-		return instructorDisciplines;
+		const where = filters?.idInstructor
+			? eq(instructorDisciplinesTable.idInstructor, filters.idInstructor)
+			: undefined;
+
+		const [instructorDisciplines, [{ count: total }]] = await Promise.all([
+			db
+				.select({
+					id: instructorDisciplinesTable.id,
+					idInstructor: instructorDisciplinesTable.idInstructor,
+					instructorName: sql<string>`concat(${usersTable.firstName}, ' ', ${usersTable.surname})`,
+					idDiscipline: instructorDisciplinesTable.idDiscipline,
+					disciplineName: disciplinesTable.name,
+					idRank: instructorDisciplinesTable.idRank,
+					rankName: ranksTable.name,
+					status: instructorDisciplinesTable.status,
+					activatedBy: instructorDisciplinesTable.activatedBy,
+					inactivatedBy: instructorDisciplinesTable.inactivatedBy,
+					createdAt: instructorDisciplinesTable.createdAt,
+					updatedAt: instructorDisciplinesTable.updatedAt,
+				})
+				.from(instructorDisciplinesTable)
+				.leftJoin(
+					disciplinesTable,
+					eq(instructorDisciplinesTable.idDiscipline, disciplinesTable.id),
+				)
+				.leftJoin(
+					ranksTable,
+					eq(instructorDisciplinesTable.idRank, ranksTable.id),
+				)
+				.leftJoin(
+					practitionersTable,
+					eq(
+						instructorDisciplinesTable.idInstructor,
+						practitionersTable.idUser,
+					),
+				)
+				.leftJoin(usersTable, eq(practitionersTable.idUser, usersTable.id))
+				.where(where)
+				.limit(limit)
+				.offset(offset),
+			db
+				.select({ count: count() })
+				.from(instructorDisciplinesTable)
+				.where(where),
+		]);
+
+		return { items: instructorDisciplines, count: Number(total) };
 	}
 
 	async getInstructorDisciplineById(id: number) {
@@ -51,25 +89,6 @@ export class InstructorDisciplineService {
 		}
 
 		return instructorDiscipline[0];
-	}
-
-	async getInstructorDisciplinesByInstructor(idInstructor: number) {
-		const instructorDisciplines = await db
-			.select({
-				id: instructorDisciplinesTable.id,
-				idInstructor: instructorDisciplinesTable.idInstructor,
-				idDiscipline: instructorDisciplinesTable.idDiscipline,
-				idRank: instructorDisciplinesTable.idRank,
-				status: instructorDisciplinesTable.status,
-				activatedBy: instructorDisciplinesTable.activatedBy,
-				inactivatedBy: instructorDisciplinesTable.inactivatedBy,
-				createdAt: instructorDisciplinesTable.createdAt,
-				updatedAt: instructorDisciplinesTable.updatedAt,
-			})
-			.from(instructorDisciplinesTable)
-			.where(eq(instructorDisciplinesTable.idInstructor, idInstructor));
-
-		return instructorDisciplines;
 	}
 
 	async createInstructorDiscipline(data: CreateInstructorDisciplineInput) {

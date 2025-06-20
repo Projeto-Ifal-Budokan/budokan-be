@@ -3,7 +3,6 @@ import {
 	createInstructorDiscipline,
 	deleteInstructorDiscipline,
 	getInstructorDisciplineById,
-	getInstructorDisciplinesByInstructor,
 	listInstructorDisciplines,
 	updateInstructorDiscipline,
 } from "../controllers/instructor-discipline-controller";
@@ -21,11 +20,6 @@ router.get(
 	"/:id",
 	hasPrivilege("view_instructor_discipline"),
 	getInstructorDisciplineById,
-);
-router.get(
-	"/instructor/:id",
-	hasPrivilege("view_instructor_discipline"),
-	getInstructorDisciplinesByInstructor,
 );
 router.post(
 	"/",
