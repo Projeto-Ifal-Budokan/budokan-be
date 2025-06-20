@@ -9,20 +9,11 @@ RUN corepack enable && \
     corepack prepare pnpm@9.15.4 --activate && \
     pnpm --version
 
-# Estágio para instalar as dependências de produção
-FROM base AS prod-deps
-WORKDIR /app
-COPY package.json pnpm-lock.yaml ./
-RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --prod --frozen-lockfile
-
-# Estágio para instalar todas as dependências e construir o projeto
-FROM base AS build
+# Estágio para instalar todas as dependências
+FROM base AS deps
 WORKDIR /app
 COPY package.json pnpm-lock.yaml ./
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
-COPY . .
-# Se você tiver um script de build, descomente a próxima linha
-# RUN pnpm run build
 
 # Estágio final
 FROM base
@@ -31,14 +22,18 @@ WORKDIR /app
 # Garantir que o tsx esteja disponível globalmente
 RUN npm install -g tsx
 
-# Copiar das etapas anteriores
-COPY --from=prod-deps /app/node_modules /app/node_modules
-# Se você tiver um diretório de build, descomente a próxima linha
-# COPY --from=build /app/dist /app/dist
+# Instalar netcat para verificar conectividade com o banco
+RUN apt-get update && apt-get install -y netcat-openbsd && rm -rf /var/lib/apt/lists/*
+
+# Copiar todas as dependências (incluindo devDependencies para drizzle-kit)
+COPY --from=deps /app/node_modules /app/node_modules
 COPY . .
+
+# Tornar o script executável
+RUN chmod +x /app/start.sh
 
 # Expõe a porta que a aplicação usa
 EXPOSE 8000
 
-# Comando para iniciar a aplicação - usando tsx diretamente
-CMD ["tsx", "src/index.ts"] 
+# Comando para iniciar a aplicação com o script de inicialização
+CMD ["/app/start.sh"] 
