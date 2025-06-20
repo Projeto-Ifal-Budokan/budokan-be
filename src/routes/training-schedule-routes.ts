@@ -4,7 +4,6 @@ import {
 	createTrainingSchedule,
 	deleteTrainingSchedule,
 	getTrainingScheduleById,
-	getTrainingSchedulesByDiscipline,
 	listTrainingSchedules,
 	updateTrainingSchedule,
 } from "../controllers/training-schedule-controller";
@@ -15,7 +14,6 @@ const router = express.Router();
 // Protected routes
 router.get("/", listTrainingSchedules);
 router.get("/:id", getTrainingScheduleById);
-router.get("/discipline/:id", getTrainingSchedulesByDiscipline);
 router.post(
 	"/",
 	passport.authenticate("jwt", { session: false }),

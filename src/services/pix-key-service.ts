@@ -1,4 +1,4 @@
-import { eq } from "drizzle-orm";
+import { and, count, eq } from "drizzle-orm";
 import { db } from "../db";
 import { instructorsTable } from "../db/schema/practitioner-schemas/instructors";
 import { pixKeysTable } from "../db/schema/practitioner-schemas/pix-keys";
@@ -10,20 +10,42 @@ import type {
 } from "../schemas/pix-key.schemas";
 
 export class PixKeyService {
-	async listPixKeys() {
-		const pixKeys = await db
-			.select({
-				id: pixKeysTable.id,
-				idInstructor: pixKeysTable.idInstructor,
-				type: pixKeysTable.type,
-				key: pixKeysTable.key,
-				description: pixKeysTable.description,
-				createdAt: pixKeysTable.createdAt,
-				updatedAt: pixKeysTable.updatedAt,
-			})
-			.from(pixKeysTable);
+	async listPixKeys(
+		filters?: { idInstructor?: number },
+		pagination?: { limit: number; offset: number },
+	) {
+		const { limit, offset } = pagination || { limit: 10, offset: 0 };
 
-		return pixKeys;
+		const [pixKeys, [{ count: total }]] = await Promise.all([
+			db
+				.select({
+					id: pixKeysTable.id,
+					idInstructor: pixKeysTable.idInstructor,
+					type: pixKeysTable.type,
+					key: pixKeysTable.key,
+					description: pixKeysTable.description,
+					createdAt: pixKeysTable.createdAt,
+					updatedAt: pixKeysTable.updatedAt,
+				})
+				.from(pixKeysTable)
+				.where(
+					filters?.idInstructor
+						? eq(pixKeysTable.idInstructor, filters.idInstructor)
+						: undefined,
+				)
+				.limit(limit)
+				.offset(offset),
+			db
+				.select({ count: count() })
+				.from(pixKeysTable)
+				.where(
+					filters?.idInstructor
+						? eq(pixKeysTable.idInstructor, filters.idInstructor)
+						: undefined,
+				),
+		]);
+
+		return { items: pixKeys, count: Number(total) };
 	}
 
 	async getPixKeyById(id: number) {
@@ -45,27 +67,6 @@ export class PixKeyService {
 		}
 
 		return pixKey[0];
-	}
-
-	async getPixKeyByIdInstructor(id: number) {
-		const pixKeys = await db
-			.select({
-				id: pixKeysTable.id,
-				idInstructor: pixKeysTable.idInstructor,
-				type: pixKeysTable.type,
-				key: pixKeysTable.key,
-				description: pixKeysTable.description,
-				createdAt: pixKeysTable.createdAt,
-				updatedAt: pixKeysTable.updatedAt,
-			})
-			.from(pixKeysTable)
-			.where(eq(pixKeysTable.idInstructor, id));
-
-		if (pixKeys.length === 0) {
-			throw new NotFoundError("Nenhuma chave pix encontrada deste instrutor");
-		}
-
-		return pixKeys;
 	}
 
 	async createPixKey(data: CreatePixKeyInput) {

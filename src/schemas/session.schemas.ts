@@ -106,9 +106,8 @@ export const listSessionSchema = z
 				message: "Data final inválida. Utilize o formato YYYY-MM-DD",
 			})
 			.optional(),
-		idInstructor: z.number().int().positive().optional(),
-		idDiscipline: z.number().int().positive().optional(),
-		limit: z.number().int().positive().optional(),
+		idInstructor: z.coerce.number().int().positive().optional(),
+		idDiscipline: z.coerce.number().int().positive().optional(),
 	})
 	.refine(
 		(data) => {

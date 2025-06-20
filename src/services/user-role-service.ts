@@ -1,4 +1,4 @@
-import { and, eq } from "drizzle-orm";
+import { and, count, eq } from "drizzle-orm";
 import { db } from "../db";
 import { rolesTable } from "../db/schema/user-schemas/roles";
 import { userRolesTable } from "../db/schema/user-schemas/user-roles";
@@ -172,7 +172,10 @@ export class UserRoleService {
 		return { message: "Cargo removido com sucesso" };
 	}
 
-	async listUserRoles(userId: number) {
+	async listUserRoles(
+		userId: number,
+		pagination?: { limit: number; offset: number },
+	) {
 		// Check if user exists
 		const user = await db
 			.select()
@@ -183,17 +186,27 @@ export class UserRoleService {
 			throw new NotFoundError("Usuário não encontrado");
 		}
 
-		// Get user roles with role details
-		const userRoles = await db
-			.select({
-				id: rolesTable.id,
-				name: rolesTable.name,
-				description: rolesTable.description,
-			})
-			.from(userRolesTable)
-			.innerJoin(rolesTable, eq(userRolesTable.idRole, rolesTable.id))
-			.where(eq(userRolesTable.idUser, userId));
+		const { limit, offset } = pagination || { limit: 10, offset: 0 };
 
-		return userRoles;
+		// Get user roles with role details (paginated)
+		const [userRoles, [{ count: total }]] = await Promise.all([
+			db
+				.select({
+					id: rolesTable.id,
+					name: rolesTable.name,
+					description: rolesTable.description,
+				})
+				.from(userRolesTable)
+				.innerJoin(rolesTable, eq(userRolesTable.idRole, rolesTable.id))
+				.where(eq(userRolesTable.idUser, userId))
+				.limit(limit)
+				.offset(offset),
+			db
+				.select({ count: count() })
+				.from(userRolesTable)
+				.where(eq(userRolesTable.idUser, userId)),
+		]);
+
+		return { items: userRoles, count: Number(total) };
 	}
 }

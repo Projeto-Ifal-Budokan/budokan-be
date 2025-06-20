@@ -2,6 +2,7 @@ import type { RequestHandler } from "express";
 import { ValidationError } from "../errors/app-errors";
 import { assignRolePrivilegeSchema } from "../schemas/role-privilege-schema";
 import { RolePrivilegeService } from "../services/role-privilege-service";
+import { getPaginationParams } from "../utils/pagination";
 
 const rolePrivilegeService = new RolePrivilegeService();
 
@@ -32,8 +33,12 @@ export const listRolePrivileges: RequestHandler = async (req, res, next) => {
 			throw new ValidationError("ID do cargo inválido");
 		}
 
-		const privileges = await rolePrivilegeService.listRolePrivileges(roleId);
-		res.status(200).json(privileges);
+		const { page_size, page, offset } = getPaginationParams(req.query);
+		const { items, count } = await rolePrivilegeService.listRolePrivileges(
+			roleId,
+			{ limit: page_size, offset },
+		);
+		res.status(200).json({ page_size, page, count, items });
 	} catch (error) {
 		next(error);
 	}

@@ -2,24 +2,16 @@ import { Router } from "express";
 import {
 	create,
 	deleteContact,
-	getAllByPractitionerId,
 	getById,
-	listAllContacts,
+	listContacts,
 	update,
 } from "../controllers/practitioner-contact-controller";
 import { hasPrivilege } from "../middlewares/auth/check-privilege.middleware";
 
 const router = Router();
 
-// Rota para listar todos os contatos (restrito a administradores)
-router.get("/", hasPrivilege("list_practitioner_contacts"), listAllContacts);
-
-// Rotas para gerenciar contatos de emergência de um praticante
-router.get(
-	"/practitioner/:id",
-	hasPrivilege("view_practitioner_contact"),
-	getAllByPractitionerId,
-);
+// Rota para listar contatos (com filtro opcional por practitionerId)
+router.get("/", hasPrivilege("list_practitioner_contacts"), listContacts);
 
 router.get("/:id", hasPrivilege("view_practitioner_contact"), getById);
 

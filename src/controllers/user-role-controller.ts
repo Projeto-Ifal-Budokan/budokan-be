@@ -3,6 +3,7 @@ import { ValidationError } from "../errors/app-errors";
 import { assignUserRoleSchema } from "../schemas/user-role-schema";
 import { UserRoleService } from "../services/user-role-service";
 import type { User } from "../types/auth.types";
+import { getPaginationParams } from "../utils/pagination";
 
 const userRoleService = new UserRoleService();
 
@@ -35,8 +36,12 @@ export const listUserRoles: RequestHandler = async (req, res, next) => {
 			throw new ValidationError("ID do usuário inválido");
 		}
 
-		const roles = await userRoleService.listUserRoles(userId);
-		res.status(200).json(roles);
+		const { page_size, page, offset } = getPaginationParams(req.query);
+		const { items, count } = await userRoleService.listUserRoles(userId, {
+			limit: page_size,
+			offset,
+		});
+		res.status(200).json({ page_size, page, count, items });
 	} catch (error) {
 		next(error);
 	}

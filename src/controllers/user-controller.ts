@@ -4,13 +4,21 @@ import {
 	updateUserSchema,
 } from "../schemas/user.schemas";
 import { UserService } from "../services/user-service";
+import { getPaginationParams } from "../utils/pagination";
 
 const userService = new UserService();
 
 export const listUsers: RequestHandler = async (req, res, next) => {
 	try {
-		const users = await userService.listUsers();
-		res.status(200).json(users);
+		const { page_size, page, offset } = getPaginationParams(req.query);
+
+		const status = req.query.status as "active" | "inactive" | "suspended";
+
+		const { items, count } = await userService.list(
+			{ status },
+			{ limit: page_size, offset },
+		);
+		res.status(200).json({ page_size, page, count, items });
 	} catch (error) {
 		next(error);
 	}

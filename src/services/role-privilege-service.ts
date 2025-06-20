@@ -1,4 +1,4 @@
-import { and, eq } from "drizzle-orm";
+import { and, count, eq } from "drizzle-orm";
 import { db } from "../db";
 import { privilegesTable } from "../db/schema/user-schemas/privileges";
 import { rolePrivilegesTable } from "../db/schema/user-schemas/role-privileges";
@@ -84,7 +84,10 @@ export class RolePrivilegeService {
 		return { message: "Privilégio removido com sucesso" };
 	}
 
-	async listRolePrivileges(roleId: number) {
+	async listRolePrivileges(
+		roleId: number,
+		pagination?: { limit: number; offset: number },
+	) {
 		// Check if role exists
 		const role = await db
 			.select()
@@ -95,20 +98,30 @@ export class RolePrivilegeService {
 			throw new NotFoundError("Cargo não encontrado");
 		}
 
-		// Get role privileges with privilege details
-		const rolePrivileges = await db
-			.select({
-				id: privilegesTable.id,
-				name: privilegesTable.name,
-				description: privilegesTable.description,
-			})
-			.from(rolePrivilegesTable)
-			.innerJoin(
-				privilegesTable,
-				eq(rolePrivilegesTable.idPrivilege, privilegesTable.id),
-			)
-			.where(eq(rolePrivilegesTable.idRole, roleId));
+		const { limit, offset } = pagination || { limit: 10, offset: 0 };
 
-		return rolePrivileges;
+		// Get role privileges with privilege details (paginated)
+		const [rolePrivileges, [{ count: total }]] = await Promise.all([
+			db
+				.select({
+					id: privilegesTable.id,
+					name: privilegesTable.name,
+					description: privilegesTable.description,
+				})
+				.from(rolePrivilegesTable)
+				.innerJoin(
+					privilegesTable,
+					eq(rolePrivilegesTable.idPrivilege, privilegesTable.id),
+				)
+				.where(eq(rolePrivilegesTable.idRole, roleId))
+				.limit(limit)
+				.offset(offset),
+			db
+				.select({ count: count() })
+				.from(rolePrivilegesTable)
+				.where(eq(rolePrivilegesTable.idRole, roleId)),
+		]);
+
+		return { items: rolePrivileges, count: Number(total) };
 	}
 }

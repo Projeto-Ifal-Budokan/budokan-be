@@ -1,4 +1,4 @@
-import { and, eq } from "drizzle-orm";
+import { and, count, eq } from "drizzle-orm";
 import { db } from "../db";
 import { disciplinesTable } from "../db/schema/discipline-schemas/disciplines";
 import { trainingSchedulesTable } from "../db/schema/discipline-schemas/training-schedules";
@@ -9,29 +9,40 @@ import type {
 } from "../schemas/training-schedule.schemas";
 
 export class TrainingScheduleService {
-	async listTrainingSchedules() {
-		const trainingSchedules = await db
-			.select({
-				id: trainingSchedulesTable.id,
-				idDiscipline: trainingSchedulesTable.idDiscipline,
-				disciplineName: disciplinesTable.name,
-				weekday: trainingSchedulesTable.weekday,
-				startTime: trainingSchedulesTable.startTime,
-				endTime: trainingSchedulesTable.endTime,
-				createdAt: trainingSchedulesTable.createdAt,
-				updatedAt: trainingSchedulesTable.updatedAt,
-			})
-			.from(trainingSchedulesTable)
-			.leftJoin(
-				disciplinesTable,
-				eq(trainingSchedulesTable.idDiscipline, disciplinesTable.id),
-			);
+	async list(
+		filters?: { idDiscipline?: number },
+		pagination?: { limit: number; offset: number },
+	) {
+		const { limit, offset } = pagination || { limit: 10, offset: 0 };
 
-		if (trainingSchedules.length === 0) {
-			return { message: "Nenhum horário de treino encontrado" };
-		}
+		const where = filters?.idDiscipline
+			? eq(trainingSchedulesTable.idDiscipline, filters.idDiscipline)
+			: undefined;
 
-		return trainingSchedules;
+		const [trainingSchedules, [{ count: total }]] = await Promise.all([
+			db
+				.select({
+					id: trainingSchedulesTable.id,
+					idDiscipline: trainingSchedulesTable.idDiscipline,
+					disciplineName: disciplinesTable.name,
+					weekday: trainingSchedulesTable.weekday,
+					startTime: trainingSchedulesTable.startTime,
+					endTime: trainingSchedulesTable.endTime,
+					createdAt: trainingSchedulesTable.createdAt,
+					updatedAt: trainingSchedulesTable.updatedAt,
+				})
+				.from(trainingSchedulesTable)
+				.leftJoin(
+					disciplinesTable,
+					eq(trainingSchedulesTable.idDiscipline, disciplinesTable.id),
+				)
+				.where(where)
+				.limit(limit)
+				.offset(offset),
+			db.select({ count: count() }).from(trainingSchedulesTable).where(where),
+		]);
+
+		return { items: trainingSchedules, count: Number(total) };
 	}
 
 	async getTrainingScheduleById(id: number) {
@@ -58,44 +69,6 @@ export class TrainingScheduleService {
 		}
 
 		return trainingSchedule[0];
-	}
-
-	async getTrainingSchedulesByDiscipline(disciplineId: number) {
-		// Verificar se a disciplina existe
-		const discipline = await db
-			.select()
-			.from(disciplinesTable)
-			.where(eq(disciplinesTable.id, disciplineId));
-
-		if (discipline.length === 0) {
-			throw new NotFoundError("Disciplina não encontrada");
-		}
-
-		const trainingSchedules = await db
-			.select({
-				id: trainingSchedulesTable.id,
-				idDiscipline: trainingSchedulesTable.idDiscipline,
-				disciplineName: disciplinesTable.name,
-				weekday: trainingSchedulesTable.weekday,
-				startTime: trainingSchedulesTable.startTime,
-				endTime: trainingSchedulesTable.endTime,
-				createdAt: trainingSchedulesTable.createdAt,
-				updatedAt: trainingSchedulesTable.updatedAt,
-			})
-			.from(trainingSchedulesTable)
-			.leftJoin(
-				disciplinesTable,
-				eq(trainingSchedulesTable.idDiscipline, disciplinesTable.id),
-			)
-			.where(eq(trainingSchedulesTable.idDiscipline, disciplineId));
-
-		if (trainingSchedules.length === 0) {
-			return {
-				message: "Nenhum horário de treino encontrado para esta disciplina",
-			};
-		}
-
-		return trainingSchedules;
 	}
 
 	async createTrainingSchedule(data: CreateTrainingScheduleInput) {

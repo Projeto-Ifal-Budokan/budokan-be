@@ -1,24 +1,39 @@
-import { and, eq, ne } from "drizzle-orm";
+import { and, count, eq, ne } from "drizzle-orm";
 import { db } from "../db";
 import { usersTable } from "../db/schema/user-schemas/users";
 import { ConflictError, NotFoundError } from "../errors/app-errors";
 import type { UpdateUserInput } from "../schemas/user.schemas";
 
 export class UserService {
-	async listUsers() {
-		const users = await db
-			.select({
-				id: usersTable.id,
-				firstName: usersTable.firstName,
-				surname: usersTable.surname,
-				email: usersTable.email,
-				phone: usersTable.phone,
-				birthDate: usersTable.birthDate,
-				status: usersTable.status,
-			})
-			.from(usersTable);
+	async list(
+		filters?: { status?: "active" | "inactive" | "suspended" },
+		pagination?: { limit: number; offset: number },
+	) {
+		const { limit, offset } = pagination || { limit: 10, offset: 0 };
 
-		return users;
+		const where = filters?.status
+			? eq(usersTable.status, filters.status)
+			: undefined;
+
+		const [users, [{ count: total }]] = await Promise.all([
+			db
+				.select({
+					id: usersTable.id,
+					firstName: usersTable.firstName,
+					surname: usersTable.surname,
+					email: usersTable.email,
+					phone: usersTable.phone,
+					birthDate: usersTable.birthDate,
+					status: usersTable.status,
+				})
+				.from(usersTable)
+				.where(where)
+				.limit(limit)
+				.offset(offset),
+			db.select({ count: count() }).from(usersTable).where(where),
+		]);
+
+		return { items: users, count: Number(total) };
 	}
 
 	async getUserById(id: number) {

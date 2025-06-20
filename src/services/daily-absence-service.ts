@@ -5,9 +5,9 @@ import {
 	eq,
 	gte,
 	inArray,
+	isNotNull,
 	isNull,
 	lte,
-	sql,
 } from "drizzle-orm";
 import { DateTime } from "luxon";
 import { db } from "../db";
@@ -26,12 +26,27 @@ export interface DailyAbsenceFilters {
 	idMatriculation?: number;
 	startDate?: string;
 	endDate?: string;
-	justification?: string;
+	justification?:
+		| "medical"
+		| "personal"
+		| "professional"
+		| "weather"
+		| "transport"
+		| "family"
+		| "academic"
+		| "technical"
+		| "emergency"
+		| "other";
 	hasJustification?: boolean;
 }
 
 export class DailyAbsenceService {
-	async listDailyAbsences(filters?: DailyAbsenceFilters) {
+	async listDailyAbsences(
+		filters?: DailyAbsenceFilters,
+		pagination?: { limit: number; offset: number },
+	) {
+		const { limit, offset } = pagination || { limit: 10, offset: 0 };
+
 		// Buscar os filtros
 		const whereConditions = [];
 
@@ -51,40 +66,34 @@ export class DailyAbsenceService {
 			whereConditions.push(lte(dailyAbsencesTable.date, endDate));
 		}
 
-		// Para justification, precisamos verificar se o valor é um tipo válido de enum
 		if (filters?.justification) {
-			// Aqui assumimos que o cliente envia valores válidos que correspondem ao enum no banco
 			whereConditions.push(
-				sql`${dailyAbsencesTable.justification} = ${filters.justification}`,
+				eq(dailyAbsencesTable.justification, filters.justification),
 			);
 		}
 
 		if (filters?.hasJustification !== undefined) {
 			if (filters.hasJustification) {
-				whereConditions.push(
-					sql`${dailyAbsencesTable.justification} IS NOT NULL`,
-				);
+				whereConditions.push(isNotNull(dailyAbsencesTable.justification));
 			} else {
-				whereConditions.push(sql`${dailyAbsencesTable.justification} IS NULL`);
+				whereConditions.push(isNull(dailyAbsencesTable.justification));
 			}
 		}
 
-		// Executar a consulta com os filtros
-		const absences =
-			whereConditions.length > 0
-				? await db.query.dailyAbsencesTable.findMany({
-						where: and(...whereConditions),
-						orderBy: (absences) => [desc(absences.date)],
-					})
-				: await db.query.dailyAbsencesTable.findMany({
-						orderBy: (absences) => [desc(absences.date)],
-					});
+		const where =
+			whereConditions.length > 0 ? and(...whereConditions) : undefined;
 
-		if (absences.length === 0) {
-			throw new NotFoundError("Nenhum registro de ausência diária encontrado");
-		}
+		const [absences, [{ count: total }]] = await Promise.all([
+			db.query.dailyAbsencesTable.findMany({
+				where,
+				orderBy: (absences) => [desc(absences.date)],
+				limit,
+				offset,
+			}),
+			db.select({ count: count() }).from(dailyAbsencesTable).where(where),
+		]);
 
-		return absences;
+		return { items: absences, count: Number(total) };
 	}
 
 	async getDailyAbsence(id: number) {

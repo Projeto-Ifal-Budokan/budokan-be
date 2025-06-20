@@ -1,17 +1,23 @@
 import type { RequestHandler } from "express";
 import { createRankSchema, updateRankSchema } from "../schemas/rank.schemas";
 import { RankService } from "../services/rank-service";
+import { getPaginationParams } from "../utils/pagination";
 
 const rankService = new RankService();
 
 export const listRanks: RequestHandler = async (req, res, next) => {
 	try {
+		const { page_size, page, offset } = getPaginationParams(req.query);
+
 		const disciplineId = req.query.disciplineId
 			? Number(req.query.disciplineId)
 			: undefined;
 
-		const ranks = await rankService.listRanks(disciplineId);
-		res.status(200).json(ranks);
+		const { items, count } = await rankService.listRanks(disciplineId, {
+			limit: page_size,
+			offset,
+		});
+		res.status(200).json({ page_size, page, count, items });
 	} catch (error) {
 		next(error);
 	}

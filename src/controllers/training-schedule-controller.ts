@@ -4,14 +4,23 @@ import {
 	updateTrainingScheduleSchema,
 } from "../schemas/training-schedule.schemas";
 import { TrainingScheduleService } from "../services/training-schedule-service";
+import { getPaginationParams } from "../utils/pagination";
 
 const trainingScheduleService = new TrainingScheduleService();
 
 export const listTrainingSchedules: RequestHandler = async (req, res, next) => {
 	try {
-		const trainingSchedules =
-			await trainingScheduleService.listTrainingSchedules();
-		res.status(200).json(trainingSchedules);
+		const { page_size, page, offset } = getPaginationParams(req.query);
+
+		const idDiscipline = req.query.idDiscipline
+			? Number(req.query.idDiscipline)
+			: undefined;
+
+		const { items, count } = await trainingScheduleService.list(
+			{ idDiscipline },
+			{ limit: page_size, offset },
+		);
+		res.status(200).json({ page_size, page, count, items });
 	} catch (error) {
 		next(error);
 	}
@@ -27,23 +36,6 @@ export const getTrainingScheduleById: RequestHandler = async (
 		const trainingSchedule =
 			await trainingScheduleService.getTrainingScheduleById(Number(id));
 		res.status(200).json(trainingSchedule);
-	} catch (error) {
-		next(error);
-	}
-};
-
-export const getTrainingSchedulesByDiscipline: RequestHandler = async (
-	req,
-	res,
-	next,
-) => {
-	try {
-		const disciplineId = req.params.id;
-		const trainingSchedules =
-			await trainingScheduleService.getTrainingSchedulesByDiscipline(
-				Number(disciplineId),
-			);
-		res.status(200).json(trainingSchedules);
 	} catch (error) {
 		next(error);
 	}

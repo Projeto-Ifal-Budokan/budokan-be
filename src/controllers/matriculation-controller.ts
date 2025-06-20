@@ -4,13 +4,23 @@ import {
 	updateMatriculationSchema,
 } from "../schemas/matriculation.schemas";
 import { MatriculationService } from "../services/matriculation-service";
+import { getPaginationParams } from "../utils/pagination";
 
 const matriculationService = new MatriculationService();
 
 export const listMatriculations: RequestHandler = async (req, res, next) => {
 	try {
-		const matriculations = await matriculationService.listMatriculations();
-		res.status(200).json(matriculations);
+		const { page_size, page, offset } = getPaginationParams(req.query);
+
+		const idStudent = req.query.idStudent
+			? Number(req.query.idStudent)
+			: undefined;
+
+		const { items, count } = await matriculationService.listMatriculations(
+			{ idStudent },
+			{ limit: page_size, offset },
+		);
+		res.status(200).json({ page_size, page, count, items });
 	} catch (error) {
 		next(error);
 	}
@@ -23,21 +33,6 @@ export const getMatriculationById: RequestHandler = async (req, res, next) => {
 			Number(id),
 		);
 		res.status(200).json(matriculation);
-	} catch (error) {
-		next(error);
-	}
-};
-
-export const getMatriculationsByStudent: RequestHandler = async (
-	req,
-	res,
-	next,
-) => {
-	try {
-		const { studentId } = req.params;
-		const matriculations =
-			await matriculationService.getMatriculationsByStudent(Number(studentId));
-		res.status(200).json(matriculations);
 	} catch (error) {
 		next(error);
 	}
