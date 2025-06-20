@@ -1,4 +1,4 @@
-import { and, eq } from "drizzle-orm";
+import { and, count, eq } from "drizzle-orm";
 import { db } from "../db";
 import { disciplinesTable } from "../db/schema/discipline-schemas/disciplines";
 import { ranksTable } from "../db/schema/discipline-schemas/ranks";
@@ -12,23 +12,38 @@ import type {
 } from "../schemas/matriculation.schemas";
 
 export class MatriculationService {
-	async listMatriculations() {
-		const matriculations = await db
-			.select({
-				id: matriculationsTable.id,
-				idStudent: matriculationsTable.idStudent,
-				idDiscipline: matriculationsTable.idDiscipline,
-				idRank: matriculationsTable.idRank,
-				status: matriculationsTable.status,
-				isPaymentExempt: matriculationsTable.isPaymentExempt,
-				activatedBy: matriculationsTable.activatedBy,
-				inactivatedBy: matriculationsTable.inactivatedBy,
-				createdAt: matriculationsTable.createdAt,
-				updatedAt: matriculationsTable.updatedAt,
-			})
-			.from(matriculationsTable);
+	async listMatriculations(
+		filters?: { idStudent?: number },
+		pagination?: { limit: number; offset: number },
+	) {
+		const { limit, offset } = pagination || { limit: 10, offset: 0 };
 
-		return matriculations;
+		const where = filters?.idStudent
+			? eq(matriculationsTable.idStudent, filters.idStudent)
+			: undefined;
+
+		const [matriculations, [{ count: total }]] = await Promise.all([
+			db
+				.select({
+					id: matriculationsTable.id,
+					idStudent: matriculationsTable.idStudent,
+					idDiscipline: matriculationsTable.idDiscipline,
+					idRank: matriculationsTable.idRank,
+					status: matriculationsTable.status,
+					isPaymentExempt: matriculationsTable.isPaymentExempt,
+					activatedBy: matriculationsTable.activatedBy,
+					inactivatedBy: matriculationsTable.inactivatedBy,
+					createdAt: matriculationsTable.createdAt,
+					updatedAt: matriculationsTable.updatedAt,
+				})
+				.from(matriculationsTable)
+				.where(where)
+				.limit(limit)
+				.offset(offset),
+			db.select({ count: count() }).from(matriculationsTable).where(where),
+		]);
+
+		return { items: matriculations, count: Number(total) };
 	}
 
 	async getMatriculationById(id: number) {
@@ -53,26 +68,6 @@ export class MatriculationService {
 		}
 
 		return matriculation[0];
-	}
-
-	async getMatriculationsByStudent(idStudent: number) {
-		const matriculations = await db
-			.select({
-				id: matriculationsTable.id,
-				idStudent: matriculationsTable.idStudent,
-				idDiscipline: matriculationsTable.idDiscipline,
-				idRank: matriculationsTable.idRank,
-				status: matriculationsTable.status,
-				isPaymentExempt: matriculationsTable.isPaymentExempt,
-				activatedBy: matriculationsTable.activatedBy,
-				inactivatedBy: matriculationsTable.inactivatedBy,
-				createdAt: matriculationsTable.createdAt,
-				updatedAt: matriculationsTable.updatedAt,
-			})
-			.from(matriculationsTable)
-			.where(eq(matriculationsTable.idStudent, idStudent));
-
-		return matriculations;
 	}
 
 	async createMatriculation(data: CreateMatriculationInput) {
