@@ -7,11 +7,14 @@ import {
 	type PrivilegeFilters,
 	PrivilegeService,
 } from "../services/privilege-service";
+import { getPaginationParams } from "../utils/pagination";
 
 const privilegeService = new PrivilegeService();
 
 export const listPrivileges: RequestHandler = async (req, res, next) => {
 	try {
+		const { page_size, page, offset } = getPaginationParams(req.query);
+
 		const filters: PrivilegeFilters = {};
 
 		if (req.query.idPrivilege) {
@@ -22,25 +25,20 @@ export const listPrivileges: RequestHandler = async (req, res, next) => {
 			filters.description = String(req.query.description);
 		}
 
-		const privileges = await privilegeService.listPrivileges(filters);
-		res.status(200).json(privileges);
-	} catch (error) {
-		next(error);
-	}
-};
+		const userIdFromParams = req.params.id;
+		const userIdFromQuery = req.query.idUser;
 
-export const listUserPrivileges: RequestHandler = async (req, res, next) => {
-	try {
-		const userId = req.params.id;
-		const description = req.query.description
-			? String(req.query.description)
-			: undefined;
+		const userId = userIdFromParams || userIdFromQuery;
 
-		const privileges = await privilegeService.listUserPrivileges(
-			Number(userId),
-			description,
-		);
-		res.status(200).json(privileges);
+		if (userId) {
+			filters.idUser = Number(userId);
+		}
+
+		const { items, count } = await privilegeService.listPrivileges(filters, {
+			limit: page_size,
+			offset,
+		});
+		res.status(200).json({ page_size, page, count, items });
 	} catch (error) {
 		next(error);
 	}

@@ -3,7 +3,6 @@ import {
 	createPrivilege,
 	deletePrivilege,
 	listPrivileges,
-	listUserPrivileges,
 	updatePrivilege,
 } from "../controllers/privilege-controller";
 import { isOwnerOrHasPrivileges } from "../middlewares/auth/check-owner-or-privileges.middleware";
@@ -15,7 +14,7 @@ router.get(
 	"/user/:id",
 	// hasPrivilege("list_privileges"), // desabilitado pois o sistema precisa sempre ter acesso aos privilegios do usuario logado
 	isOwnerOrHasPrivileges(),
-	listUserPrivileges,
+	listPrivileges,
 );
 router.post("/", hasPrivilege("create_privilege"), createPrivilege);
 router.put("/:id", hasPrivilege("update_privilege"), updatePrivilege);

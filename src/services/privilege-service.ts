@@ -1,4 +1,4 @@
-import { and, eq, like } from "drizzle-orm";
+import { and, count, eq, like } from "drizzle-orm";
 import { db } from "../db";
 import { privilegesTable } from "../db/schema/user-schemas/privileges";
 import { userRolesTable } from "../db/schema/user-schemas/user-roles";
@@ -11,10 +11,22 @@ import type {
 export interface PrivilegeFilters {
 	idPrivilege?: number;
 	description?: string;
+	idUser?: number;
 }
 
 export class PrivilegeService {
-	async listPrivileges(filters?: PrivilegeFilters) {
+	async listPrivileges(
+		filters?: PrivilegeFilters,
+		pagination?: { limit: number; offset: number },
+	) {
+		if (filters?.idUser) {
+			return this.listUserPrivileges(
+				filters.idUser,
+				pagination,
+				filters.description,
+			);
+		}
+		const { limit, offset } = pagination || { limit: 10, offset: 0 };
 		// Special case: if idPrivilege is provided, return only that privilege
 		if (filters?.idPrivilege) {
 			const privilege = await db
@@ -32,7 +44,7 @@ export class PrivilegeService {
 				throw new NotFoundError("Privilégio não encontrado");
 			}
 
-			return privilege;
+			return { items: privilege, count: 1 };
 		}
 
 		// Handle all privileges with possible description filter
@@ -43,33 +55,39 @@ export class PrivilegeService {
 				like(privilegesTable.description, `%${filters.description}%`),
 			);
 		}
+		const query = db
+			.select()
+			.from(privilegesTable)
+			.where(and(...whereConditions));
 
-		const privileges =
-			whereConditions.length > 0
-				? await db
-						.select({
-							id: privilegesTable.id,
-							name: privilegesTable.name,
-							description: privilegesTable.description,
-							createdAt: privilegesTable.createdAt,
-							updatedAt: privilegesTable.updatedAt,
-						})
-						.from(privilegesTable)
-						.where(and(...whereConditions))
-				: await db
-						.select({
-							id: privilegesTable.id,
-							name: privilegesTable.name,
-							description: privilegesTable.description,
-							createdAt: privilegesTable.createdAt,
-							updatedAt: privilegesTable.updatedAt,
-						})
-						.from(privilegesTable);
+		const [privileges, [{ count: total }]] = await Promise.all([
+			db
+				.select({
+					id: privilegesTable.id,
+					name: privilegesTable.name,
+					description: privilegesTable.description,
+					createdAt: privilegesTable.createdAt,
+					updatedAt: privilegesTable.updatedAt,
+				})
+				.from(privilegesTable)
+				.where(and(...whereConditions))
+				.limit(limit)
+				.offset(offset),
+			db
+				.select({ count: count() })
+				.from(privilegesTable)
+				.where(and(...whereConditions)),
+		]);
 
-		return privileges;
+		return { items: privileges, count: Number(total) };
 	}
 
-	async listUserPrivileges(userId: number, description?: string) {
+	async listUserPrivileges(
+		userId: number,
+		pagination?: { limit: number; offset: number },
+		description?: string,
+	) {
+		const { limit, offset } = pagination || { limit: 10, offset: 0 };
 		// Get user's privileges through their roles
 		const userRoles = await db.query.userRolesTable.findMany({
 			where: eq(userRolesTable.idUser, userId),
@@ -103,6 +121,7 @@ export class PrivilegeService {
 
 		// Convert to array and apply description filter if needed
 		let privileges = Array.from(uniquePrivileges.values());
+		const total = privileges.length;
 
 		if (description) {
 			privileges = privileges.filter((privilege) =>
@@ -110,7 +129,9 @@ export class PrivilegeService {
 			);
 		}
 
-		return privileges;
+		const paginatedPrivileges = privileges.slice(offset, offset + limit);
+
+		return { items: paginatedPrivileges, count: total };
 	}
 
 	async createPrivilege(data: CreatePrivilegeInput) {
