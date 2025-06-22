@@ -1,15 +1,67 @@
-import { count, eq } from "drizzle-orm";
+import { count, eq, like, and, inArray } from "drizzle-orm";
 import { db } from "../db";
 import { rolesTable } from "../db/schema/user-schemas/roles";
+import { privilegesTable } from "../db/schema/user-schemas/privileges";
+import { rolePrivilegesTable } from "../db/schema/user-schemas/role-privileges";
 import { ConflictError, NotFoundError } from "../errors/app-errors";
-import type { CreateRoleInput, UpdateRoleInput } from "../schemas/role.schemas";
+import type { CreateRoleInput, UpdateRoleInput, ListRoleInput } from "../schemas/role.schemas";
 
 export class RoleService {
-	async listRoles(pagination?: { limit: number; offset: number }) {
+	async listRoles(
+		filters: ListRoleInput,
+		pagination?: { limit: number; offset: number }) {
 		const { limit, offset } = pagination || { limit: 10, offset: 0 };
+
+		const conditions = [
+			filters.name ? like(rolesTable.name, "%" + filters.name + "%") : undefined,
+			filters.description ? like(rolesTable.description, "%" + filters.description + "%") : undefined,
+		];
+
+		if (filters.idPrivilege) {
+
+			const rolePrivilegesIds = await db
+				.select({ idRole: rolePrivilegesTable.idRole })
+				.from(rolePrivilegesTable)
+				.where(eq(rolePrivilegesTable.idPrivilege, filters.idPrivilege));
+
+			if (rolePrivilegesIds.length === 0) {
+				throw new NotFoundError("Este privilégio não está associado a nenhum cargo");
+			}
+
+			conditions.push(
+				inArray(
+					rolesTable.id,
+					rolePrivilegesIds.map((RolePrivilegesTable) => RolePrivilegesTable.idRole)
+				),
+			);
+		}
+
+		if (filters.namePrivilege) {
+			const privilegeIds = await db
+				.select({ idRole: rolePrivilegesTable.idRole })
+				.from(privilegesTable)
+				.innerJoin(
+					rolePrivilegesTable,
+					eq(rolePrivilegesTable.idPrivilege, privilegesTable.id)
+				)
+				.where(eq(privilegesTable.name, filters.namePrivilege));
+
+			if (privilegeIds.length === 0) {
+				throw new NotFoundError("Nenhum privilégio encontrado com este nome");
+			}
+
+			conditions.push(
+				inArray(
+					rolesTable.id,
+					privilegeIds.map((privilege) => privilege.idRole),
+				),
+			);
+		}
 
 		const [roles, [{ count: total }]] = await Promise.all([
 			db.query.rolesTable.findMany({
+				where:
+					conditions.length > 0 ? (role) => and(...conditions) : undefined,
 				with: {
 					rolePrivileges: {
 						with: {
