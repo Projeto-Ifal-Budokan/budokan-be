@@ -2,6 +2,7 @@ import type { RequestHandler } from "express";
 import {
 	toggleUserStatusSchema,
 	updateUserSchema,
+	listUserSchema,
 } from "../schemas/user.schemas";
 import { UserService } from "../services/user-service";
 import { getPaginationParams } from "../utils/pagination";
@@ -12,10 +13,11 @@ export const listUsers: RequestHandler = async (req, res, next) => {
 	try {
 		const { page_size, page, offset } = getPaginationParams(req.query);
 
-		const status = req.query.status as "active" | "inactive" | "suspended";
+		// const status = req.query.status as "active" | "inactive" | "suspended";
+		const filters = listUserSchema.parse(req.query);
 
 		const { items, count } = await userService.list(
-			{ status },
+			filters,
 			{ limit: page_size, offset },
 		);
 		res.status(200).json({ page_size, page, count, items });

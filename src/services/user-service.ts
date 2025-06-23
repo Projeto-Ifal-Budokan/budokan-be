@@ -1,19 +1,30 @@
-import { and, count, eq, ne } from "drizzle-orm";
+import { and, count, eq, ne, like } from "drizzle-orm";
 import { db } from "../db";
 import { usersTable } from "../db/schema/user-schemas/users";
 import { ConflictError, NotFoundError } from "../errors/app-errors";
-import type { UpdateUserInput } from "../schemas/user.schemas";
+import type { UpdateUserInput, ListUserInput } from "../schemas/user.schemas";
 
 export class UserService {
 	async list(
-		filters?: { status?: "active" | "inactive" | "suspended" },
+		filters?: ListUserInput,
 		pagination?: { limit: number; offset: number },
 	) {
 		const { limit, offset } = pagination || { limit: 10, offset: 0 };
 
-		const where = filters?.status
+		const where = [
+			filters?.status
 			? eq(usersTable.status, filters.status)
-			: undefined;
+			: undefined,
+			filters?.firstName
+			? like(usersTable.firstName, `%${filters.firstName}%`)
+			: undefined,
+			filters?.surname
+			? like(usersTable.surname, `%${filters.surname}%`)
+			: undefined,
+			filters?.email
+			? like(usersTable.email, `%${filters.email}%`)
+			: undefined,
+		]
 
 		const [users, [{ count: total }]] = await Promise.all([
 			db
@@ -27,10 +38,10 @@ export class UserService {
 					status: usersTable.status,
 				})
 				.from(usersTable)
-				.where(where)
+				.where(and(...where))
 				.limit(limit)
 				.offset(offset),
-			db.select({ count: count() }).from(usersTable).where(where),
+			db.select({ count: count() }).from(usersTable).where(and(...where)),
 		]);
 
 		return { items: users, count: Number(total) };
