@@ -1,15 +1,23 @@
-import { count, eq } from "drizzle-orm";
+import { count, eq, and } from "drizzle-orm";
 import { db } from "../db";
 import { disciplinesTable } from "../db/schema/discipline-schemas/disciplines";
 import { ConflictError, NotFoundError } from "../errors/app-errors";
 import type {
 	CreateDisciplineInput,
 	UpdateDisciplineInput,
+	ListDisciplineInput,
 } from "../schemas/discipline.schemas";
 
 export class DisciplineService {
-	async listDisciplines(pagination?: { limit: number; offset: number }) {
+	async listDisciplines(
+		filters: ListDisciplineInput,
+		pagination?: { limit: number; offset: number }
+	) {
 		const { limit, offset } = pagination || { limit: 10, offset: 0 };
+
+		const conditions = [
+			filters.status ? eq(disciplinesTable.status, filters.status) : undefined,
+		];
 
 		const [disciplines, [{ count: total }]] = await Promise.all([
 			db
@@ -22,9 +30,10 @@ export class DisciplineService {
 					updatedAt: disciplinesTable.updatedAt,
 				})
 				.from(disciplinesTable)
+				.where(and(...conditions))
 				.limit(limit)
 				.offset(offset),
-			db.select({ count: count() }).from(disciplinesTable),
+			db.select({ count: count() }).from(disciplinesTable).where(and(...conditions)),
 		]);
 
 		return { items: disciplines, count: Number(total) };

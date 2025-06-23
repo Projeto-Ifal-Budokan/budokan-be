@@ -2,6 +2,7 @@ import type { RequestHandler } from "express";
 import {
 	createDisciplineSchema,
 	updateDisciplineSchema,
+	listDisciplineSchema,
 } from "../schemas/discipline.schemas";
 import { DisciplineService } from "../services/discipline-service";
 import { getPaginationParams } from "../utils/pagination";
@@ -10,8 +11,9 @@ const disciplineService = new DisciplineService();
 
 export const listDisciplines: RequestHandler = async (req, res, next) => {
 	try {
+		const filtersData = listDisciplineSchema.parse(req.query);
 		const { page_size, page, offset } = getPaginationParams(req.query);
-		const { items, count } = await disciplineService.listDisciplines({
+		const { items, count } = await disciplineService.listDisciplines(filtersData, {
 			limit: page_size,
 			offset,
 		});
