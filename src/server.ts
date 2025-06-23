@@ -36,6 +36,9 @@ app.use(
 	}),
 );
 
+// Expor a pasta uploads como estática
+app.use("/uploads", express.static("uploads"));
+
 /* ROUTES */
 app.use(routes);
 

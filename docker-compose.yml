@@ -23,6 +23,9 @@ services:
       - ETHEREAL_PASS=Debt5yAYKFeQDvDQR4
       - NODE_OPTIONS=--no-warnings
       - DOCKER_BUILDKIT=1
+      # Cloudflare Configuration (para produção)
+      - CLOUDFLARE_DOMAIN=budokanryu.com.br
+      - BASE_URL=http://localhost:8001
     depends_on:
       mysql:
         condition: service_healthy

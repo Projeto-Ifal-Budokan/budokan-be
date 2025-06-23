@@ -5,9 +5,11 @@ import {
 	listUsers,
 	toggleUserStatus,
 	updateUser,
+	uploadProfileImageHandler,
 } from "../controllers/user-controller";
 import { isOwnerOrHasPrivileges } from "../middlewares/auth/check-owner-or-privileges.middleware";
 import { hasPrivilege } from "../middlewares/auth/check-privilege.middleware";
+import { uploadProfileImage } from "../utils/file-upload";
 
 const router = Router();
 
@@ -33,5 +35,14 @@ router.delete(
 
 // New route for activating/deactivating users - admin only
 router.patch("/:id/status", hasPrivilege("admin"), toggleUserStatus);
+
+// Rota para upload de foto de perfil
+router.patch(
+	"/:id/profile-image",
+	hasPrivilege("update_user"),
+	isOwnerOrHasPrivileges(["update_user", "admin"]),
+	uploadProfileImage.single("profileImage"),
+	uploadProfileImageHandler,
+);
 
 export default router;
