@@ -72,7 +72,9 @@ export class RoleService {
 				limit,
 				offset,
 			}),
-			db.select({ count: count() }).from(rolesTable),
+			db.select({ count: count() }).from(rolesTable).where(
+				conditions.length > 0 ? and(...conditions) : undefined
+			),
 		]);
 
 		return { items: roles, count: Number(total) };
