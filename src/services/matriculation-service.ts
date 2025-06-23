@@ -9,18 +9,27 @@ import { ConflictError, NotFoundError } from "../errors/app-errors";
 import type {
 	CreateMatriculationInput,
 	UpdateMatriculationInput,
+	ListMatriculationInput,
 } from "../schemas/matriculation.schemas";
 
 export class MatriculationService {
 	async listMatriculations(
-		filters?: { idStudent?: number },
+		filters: ListMatriculationInput,
 		pagination?: { limit: number; offset: number },
 	) {
 		const { limit, offset } = pagination || { limit: 10, offset: 0 };
 
-		const where = filters?.idStudent
-			? eq(matriculationsTable.idStudent, filters.idStudent)
-			: undefined;
+		const conditions = [
+			filters.idStudent ? eq(matriculationsTable.idStudent, filters.idStudent) : undefined,
+			filters.idDiscipline
+				? eq(matriculationsTable.idDiscipline, filters.idDiscipline)
+				: undefined,
+			filters.idRank ? eq(matriculationsTable.idRank, filters.idRank) : undefined,
+			filters.status ? eq(matriculationsTable.status, filters.status) : undefined,
+			filters.isPaymentExempt
+				? eq(matriculationsTable.isPaymentExempt, filters.isPaymentExempt)
+				: undefined
+		];
 
 		const [matriculations, [{ count: total }]] = await Promise.all([
 			db
@@ -37,10 +46,10 @@ export class MatriculationService {
 					updatedAt: matriculationsTable.updatedAt,
 				})
 				.from(matriculationsTable)
-				.where(where)
+				.where(and(...conditions))
 				.limit(limit)
 				.offset(offset),
-			db.select({ count: count() }).from(matriculationsTable).where(where),
+			db.select({ count: count() }).from(matriculationsTable).where(and(...conditions)),
 		]);
 
 		return { items: matriculations, count: Number(total) };

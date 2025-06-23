@@ -17,9 +17,20 @@ export const updateMatriculationSchema = z.object({
 	inactivatedBy: z.number().int().positive().optional(),
 });
 
+export const listMatriculationSchema = z.object({
+	idStudent: z.coerce.number().int().positive().optional(),
+	idDiscipline: z.coerce.number().int().positive().optional(),
+	idRank: z.coerce.number().int().positive().optional(),
+	status: z.enum(["active", "inactive", "suspended"]).optional(),
+	isPaymentExempt: z.enum(["Y", "N"]).optional(),
+});
+
 export type CreateMatriculationInput = z.infer<
 	typeof createMatriculationSchema
 >;
 export type UpdateMatriculationInput = z.infer<
 	typeof updateMatriculationSchema
+>;
+export type ListMatriculationInput = z.infer<
+	typeof listMatriculationSchema
 >;
