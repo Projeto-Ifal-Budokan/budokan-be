@@ -2,6 +2,7 @@ import type { RequestHandler } from "express";
 import {
 	createInstructorDisciplineSchema,
 	updateInstructorDisciplineSchema,
+	listInstructorDisciplineSchema,
 } from "../schemas/instructor-discipline.schemas";
 import { InstructorDisciplineService } from "../services/instructor-discipline-service";
 import { getPaginationParams } from "../utils/pagination";
@@ -15,13 +16,10 @@ export const listInstructorDisciplines: RequestHandler = async (
 ) => {
 	try {
 		const { page_size, page, offset } = getPaginationParams(req.query);
-
-		const idInstructor = req.query.idInstructor
-			? Number(req.query.idInstructor)
-			: undefined;
+		const filters = listInstructorDisciplineSchema.parse(req.query);
 
 		const { items, count } = await instructorDisciplineService.list(
-			{ idInstructor },
+			filters,
 			{ limit: page_size, offset },
 		);
 		res.status(200).json({ page_size, page, count, items });
