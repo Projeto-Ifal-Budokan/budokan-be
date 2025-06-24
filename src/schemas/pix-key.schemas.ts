@@ -14,9 +14,16 @@ export const updatePixKeySchema = z.object({
     description: z.string().min(2).max(100).optional()
 });
 
+export const listPixKeySchema = z.object({
+    idInstructor: z.coerce.number().int().positive().optional()
+});
+
 export type CreatePixKeyInput = z.infer<
     typeof createPixKeySchema
 >;
 export type UpdatePixKeyInput = z.infer<
     typeof updatePixKeySchema
+>;
+export type ListPixKeyInput = z.infer<
+    typeof listPixKeySchema
 >;

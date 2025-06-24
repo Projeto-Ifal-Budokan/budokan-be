@@ -7,14 +7,19 @@ import { ConflictError, NotFoundError } from "../errors/app-errors";
 import type {
 	CreatePixKeyInput,
 	UpdatePixKeyInput,
+	ListPixKeyInput,
 } from "../schemas/pix-key.schemas";
 
 export class PixKeyService {
 	async listPixKeys(
-		filters?: { idInstructor?: number },
+		filters: ListPixKeyInput,
 		pagination?: { limit: number; offset: number },
 	) {
 		const { limit, offset } = pagination || { limit: 10, offset: 0 };
+
+		const conditions = [
+			filters.idInstructor ? eq(pixKeysTable.idInstructor, filters.idInstructor) : undefined,
+		];
 
 		const [pixKeys, [{ count: total }]] = await Promise.all([
 			db
@@ -28,21 +33,13 @@ export class PixKeyService {
 					updatedAt: pixKeysTable.updatedAt,
 				})
 				.from(pixKeysTable)
-				.where(
-					filters?.idInstructor
-						? eq(pixKeysTable.idInstructor, filters.idInstructor)
-						: undefined,
-				)
+				.where(and(...conditions))
 				.limit(limit)
 				.offset(offset),
 			db
 				.select({ count: count() })
 				.from(pixKeysTable)
-				.where(
-					filters?.idInstructor
-						? eq(pixKeysTable.idInstructor, filters.idInstructor)
-						: undefined,
-				),
+				.where(and(...conditions)),
 		]);
 
 		return { items: pixKeys, count: Number(total) };

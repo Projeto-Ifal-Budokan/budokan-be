@@ -10,18 +10,27 @@ import { ConflictError, NotFoundError } from "../errors/app-errors";
 import type {
 	CreateInstructorDisciplineInput,
 	UpdateInstructorDisciplineInput,
+	ListInstructorDisciplineInput,
 } from "../schemas/instructor-discipline.schemas";
 
 export class InstructorDisciplineService {
 	async list(
-		filters?: { idInstructor?: number },
+		filters?: ListInstructorDisciplineInput,
 		pagination?: { limit: number; offset: number },
 	) {
 		const { limit, offset } = pagination || { limit: 10, offset: 0 };
 
-		const where = filters?.idInstructor
+		const where = [
+			filters?.idInstructor
 			? eq(instructorDisciplinesTable.idInstructor, filters.idInstructor)
-			: undefined;
+			: undefined,
+			filters?.idDiscipline
+			? eq(instructorDisciplinesTable.idDiscipline, filters.idDiscipline)
+			: undefined,
+			filters?.status
+			? eq(instructorDisciplinesTable.status, filters.status)
+			: undefined,
+		]
 
 		const [instructorDisciplines, [{ count: total }]] = await Promise.all([
 			db
@@ -56,13 +65,13 @@ export class InstructorDisciplineService {
 					),
 				)
 				.leftJoin(usersTable, eq(practitionersTable.idUser, usersTable.id))
-				.where(where)
+				.where(and(...where))
 				.limit(limit)
 				.offset(offset),
 			db
 				.select({ count: count() })
 				.from(instructorDisciplinesTable)
-				.where(where),
+				.where(and(...where)),
 		]);
 
 		return { items: instructorDisciplines, count: Number(total) };

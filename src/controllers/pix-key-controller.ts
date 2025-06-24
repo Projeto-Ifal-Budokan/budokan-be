@@ -2,6 +2,7 @@ import type { RequestHandler } from "express";
 import {
 	createPixKeySchema,
 	updatePixKeySchema,
+	listPixKeySchema,
 } from "../schemas/pix-key.schemas";
 import { PixKeyService } from "../services/pix-key-service";
 import { getPaginationParams } from "../utils/pagination";
@@ -10,12 +11,10 @@ const pixKeyService = new PixKeyService();
 
 export const listPixKeys: RequestHandler = async (req, res, next) => {
 	try {
+		const filtersData = listPixKeySchema.parse(req.query);
 		const { page_size, page, offset } = getPaginationParams(req.query);
-		const idInstructor = req.query.idInstructor
-			? Number(req.query.idInstructor)
-			: undefined;
 		const { items, count } = await pixKeyService.listPixKeys(
-			{ idInstructor },
+			filtersData,
 			{ limit: page_size, offset },
 		);
 		res.status(200).json({ page_size, page, count, items });

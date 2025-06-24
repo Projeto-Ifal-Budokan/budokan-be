@@ -1,3 +1,4 @@
+import e from "express";
 import { z } from "zod";
 
 export const createInstructorDisciplineSchema = z.object({
@@ -15,9 +16,18 @@ export const updateInstructorDisciplineSchema = z.object({
 	inactivatedBy: z.number().int().positive().optional(),
 });
 
+export const listInstructorDisciplineSchema = z.object({
+	idInstructor: z.coerce.number().int().positive().optional(),
+	idDiscipline: z.coerce.number().int().positive().optional(),
+	status: z.enum(["active", "inactive", "suspended"]).optional()
+});
+
 export type CreateInstructorDisciplineInput = z.infer<
 	typeof createInstructorDisciplineSchema
 >;
 export type UpdateInstructorDisciplineInput = z.infer<
 	typeof updateInstructorDisciplineSchema
+>;
+export type ListInstructorDisciplineInput = z.infer<
+	typeof listInstructorDisciplineSchema
 >;

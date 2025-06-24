@@ -1,5 +1,5 @@
 import type { RequestHandler } from "express";
-import { createRoleSchema, updateRoleSchema } from "../schemas/role.schemas";
+import { createRoleSchema, updateRoleSchema, listRoleSchema } from "../schemas/role.schemas";
 import { RoleService } from "../services/role-service";
 import { getPaginationParams } from "../utils/pagination";
 
@@ -7,8 +7,9 @@ const roleService = new RoleService();
 
 export const listRoles: RequestHandler = async (req, res, next) => {
 	try {
+		const filtersData = listRoleSchema.parse(req.query);
 		const { page_size, page, offset } = getPaginationParams(req.query);
-		const { items, count } = await roleService.listRoles({
+		const { items, count } = await roleService.listRoles(filtersData, {
 			limit: page_size,
 			offset,
 		});

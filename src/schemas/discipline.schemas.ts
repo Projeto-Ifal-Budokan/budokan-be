@@ -11,5 +11,10 @@ export const updateDisciplineSchema = z.object({
     status: z.enum(["active", "inactive"]).optional(),
 });
 
+export const listDisciplineSchema = z.object({
+    status: z.enum(["active", "inactive", "suspended"]).optional(),
+});
+
 export type CreateDisciplineInput = z.infer<typeof createDisciplineSchema>;
 export type UpdateDisciplineInput = z.infer<typeof updateDisciplineSchema>;
+export type ListDisciplineInput = z.infer<typeof listDisciplineSchema>;
