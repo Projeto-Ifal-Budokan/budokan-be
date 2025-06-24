@@ -3,6 +3,7 @@ import { db } from "../db";
 import { privilegesTable } from "../db/schema/user-schemas/privileges";
 import { rolePrivilegesTable } from "../db/schema/user-schemas/role-privileges";
 import { rolesTable } from "../db/schema/user-schemas/roles";
+import { userRolesTable } from "../db/schema/user-schemas/user-roles";
 import { ConflictError, NotFoundError } from "../errors/app-errors";
 import type {
 	CreateRoleInput,
@@ -157,6 +158,18 @@ export class RoleService {
 
 		if (existingRole.length === 0) {
 			throw new NotFoundError("Cargo não encontrado");
+		}
+
+		// Verifica se existe algum usuário atrelado a este cargo
+		const userRole = await db
+			.select()
+			.from(userRolesTable)
+			.where(eq(userRolesTable.idRole, id));
+
+		if (userRole.length > 0) {
+			throw new ConflictError(
+				"Não é possível excluir o cargo pois ele está associado a um ou mais usuários.",
+			);
 		}
 
 		// Delete all role privileges for this role before deleting the role itself
