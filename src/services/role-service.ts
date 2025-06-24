@@ -1,37 +1,47 @@
-import { count, eq, like, and, inArray } from "drizzle-orm";
+import { and, count, eq, inArray, like } from "drizzle-orm";
 import { db } from "../db";
-import { rolesTable } from "../db/schema/user-schemas/roles";
 import { privilegesTable } from "../db/schema/user-schemas/privileges";
 import { rolePrivilegesTable } from "../db/schema/user-schemas/role-privileges";
+import { rolesTable } from "../db/schema/user-schemas/roles";
 import { ConflictError, NotFoundError } from "../errors/app-errors";
-import type { CreateRoleInput, UpdateRoleInput, ListRoleInput } from "../schemas/role.schemas";
+import type {
+	CreateRoleInput,
+	ListRoleInput,
+	UpdateRoleInput,
+} from "../schemas/role.schemas";
 
 export class RoleService {
 	async listRoles(
 		filters: ListRoleInput,
-		pagination?: { limit: number; offset: number }) {
+		pagination?: { limit: number; offset: number },
+	) {
 		const { limit, offset } = pagination || { limit: 10, offset: 0 };
 
 		const conditions = [
-			filters.name ? like(rolesTable.name, "%" + filters.name + "%") : undefined,
-			filters.description ? like(rolesTable.description, "%" + filters.description + "%") : undefined,
+			filters.name ? like(rolesTable.name, `%${filters.name}%`) : undefined,
+			filters.description
+				? like(rolesTable.description, `%${filters.description}%`)
+				: undefined,
 		];
 
 		if (filters.idPrivilege) {
-
 			const rolePrivilegesIds = await db
 				.select({ idRole: rolePrivilegesTable.idRole })
 				.from(rolePrivilegesTable)
 				.where(eq(rolePrivilegesTable.idPrivilege, filters.idPrivilege));
 
 			if (rolePrivilegesIds.length === 0) {
-				throw new NotFoundError("Este privilégio não está associado a nenhum cargo");
+				throw new NotFoundError(
+					"Este privilégio não está associado a nenhum cargo",
+				);
 			}
 
 			conditions.push(
 				inArray(
 					rolesTable.id,
-					rolePrivilegesIds.map((RolePrivilegesTable) => RolePrivilegesTable.idRole)
+					rolePrivilegesIds.map(
+						(RolePrivilegesTable) => RolePrivilegesTable.idRole,
+					),
 				),
 			);
 		}
@@ -42,7 +52,7 @@ export class RoleService {
 				.from(privilegesTable)
 				.innerJoin(
 					rolePrivilegesTable,
-					eq(rolePrivilegesTable.idPrivilege, privilegesTable.id)
+					eq(rolePrivilegesTable.idPrivilege, privilegesTable.id),
 				)
 				.where(eq(privilegesTable.name, filters.namePrivilege));
 
@@ -60,8 +70,7 @@ export class RoleService {
 
 		const [roles, [{ count: total }]] = await Promise.all([
 			db.query.rolesTable.findMany({
-				where:
-					conditions.length > 0 ? (role) => and(...conditions) : undefined,
+				where: conditions.length > 0 ? (role) => and(...conditions) : undefined,
 				with: {
 					rolePrivileges: {
 						with: {
@@ -72,31 +81,32 @@ export class RoleService {
 				limit,
 				offset,
 			}),
-			db.select({ count: count() }).from(rolesTable).where(
-				conditions.length > 0 ? and(...conditions) : undefined
-			),
+			db
+				.select({ count: count() })
+				.from(rolesTable)
+				.where(conditions.length > 0 ? and(...conditions) : undefined),
 		]);
 
 		return { items: roles, count: Number(total) };
 	}
 
 	async getRoleById(id: number) {
-		const role = await db
-			.select({
-				id: rolesTable.id,
-				name: rolesTable.name,
-				description: rolesTable.description,
-				createdAt: rolesTable.createdAt,
-				updatedAt: rolesTable.updatedAt,
-			})
-			.from(rolesTable)
-			.where(eq(rolesTable.id, id));
+		const role = await db.query.rolesTable.findFirst({
+			where: (role) => eq(role.id, id),
+			with: {
+				rolePrivileges: {
+					with: {
+						privilege: true,
+					},
+				},
+			},
+		});
 
-		if (role.length === 0) {
+		if (!role) {
 			throw new NotFoundError("Cargo não encontrado");
 		}
 
-		return role[0];
+		return role;
 	}
 
 	async createRole(data: CreateRoleInput) {
@@ -148,6 +158,11 @@ export class RoleService {
 		if (existingRole.length === 0) {
 			throw new NotFoundError("Cargo não encontrado");
 		}
+
+		// Delete all role privileges for this role before deleting the role itself
+		await db
+			.delete(rolePrivilegesTable)
+			.where(eq(rolePrivilegesTable.idRole, id));
 
 		await db.delete(rolesTable).where(eq(rolesTable.id, id));
 		return { message: "Cargo excluído com sucesso" };
