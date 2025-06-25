@@ -21,6 +21,7 @@ app.use(passport.initialize());
 /* CORS */
 const allowedOrigins = [
 	"https://budokanryu.com.br",
+	"https://dev.budokanryu.com.br",
 	"http://localhost:3000",
 	"http://localhost:8000",
 ];
