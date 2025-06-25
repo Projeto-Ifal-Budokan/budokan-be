@@ -4,7 +4,7 @@
  *   post:
  *     summary: Atribui um cargo a um usuário
  *     tags:
- *       - UserRole
+ *       - UserRoles
  *     requestBody:
  *       required: true
  *       content:
@@ -67,7 +67,7 @@
  *   post:
  *     summary: Remove um cargo de um usuário
  *     tags:
- *       - UserRole
+ *       - UserRoles
  *     requestBody:
  *       required: true
  *       content:
@@ -120,7 +120,7 @@
  *   get:
  *     summary: Lista os cargos de um usuário
  *     tags:
- *       - UserRole
+ *       - UserRoles
  *     parameters:
  *       - in: path
  *         name: id

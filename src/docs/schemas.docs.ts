@@ -252,4 +252,61 @@
  *       type: array
  *       items:
  *         $ref: '#/components/schemas/AttendanceUpdateItem'
+ *     DailyAbsence:
+ *       type: object
+ *       properties:
+ *         id:
+ *           type: integer
+ *         idMatriculation:
+ *           type: integer
+ *         date:
+ *           type: string
+ *           format: date
+ *         justification:
+ *           type: string
+ *           enum: [medical, personal, professional, weather, transport, family, academic, technical, emergency, other]
+ *         justificationDescription:
+ *           type: string
+ *         createdAt:
+ *           type: string
+ *           format: date-time
+ *         updatedAt:
+ *           type: string
+ *           format: date-time
+ *     CreateDailyAbsenceInput:
+ *       type: object
+ *       properties:
+ *         idMatriculation:
+ *           type: integer
+ *         date:
+ *           type: string
+ *           format: date
+ *         justification:
+ *           type: string
+ *           enum: [medical, personal, professional, weather, transport, family, academic, technical, emergency, other]
+ *         justificationDescription:
+ *           type: string
+ *     UpdateDailyAbsenceInput:
+ *       type: object
+ *       properties:
+ *         justification:
+ *           type: string
+ *           enum: [medical, personal, professional, weather, transport, family, academic, technical, emergency, other]
+ *         justificationDescription:
+ *           type: string
+ *     ProcessAbsencesForDateInput:
+ *       type: object
+ *       properties:
+ *         date:
+ *           type: string
+ *           format: date
+ *     ProcessAbsencesForDateRangeInput:
+ *       type: object
+ *       properties:
+ *         startDate:
+ *           type: string
+ *           format: date
+ *         endDate:
+ *           type: string
+ *           format: date
  */
