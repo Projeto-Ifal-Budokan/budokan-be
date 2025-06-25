@@ -64,7 +64,17 @@
  *               properties:
  *                 message:
  *                   type: string
- *                   example: Unauthorized
+ *                   example: Não autorizado
+ *       403:
+ *         description: Proibido. O usuário não possui privilégio suficiente para acessar este recurso.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Você não tem permissão para acessar este recurso
  *
  * /users/{id}:
  *   get:
@@ -94,9 +104,27 @@
  *               properties:
  *                 message:
  *                   type: string
- *                   example: Unauthorized
+ *                   example: Não autorizado
+ *       403:
+ *         description: Proibido. O usuário não possui privilégio suficiente para acessar este recurso.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Você não tem permissão para acessar este recurso
  *       404:
  *         description: Usuário não encontrado
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Usuário não encontrado
  *
  *   put:
  *     summary: Atualiza um usuário
@@ -137,11 +165,37 @@
  *               properties:
  *                 message:
  *                   type: string
- *                   example: Unauthorized
+ *                   example: Não autorizado
+ *       403:
+ *         description: Proibido. O usuário não possui privilégio suficiente para acessar este recurso.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Você não tem permissão para acessar este recurso
  *       404:
  *         description: Usuário não encontrado
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Usuário não encontrado
  *       409:
  *         description: Email já está em uso por outro usuário
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Este email já está em uso por outro usuário
  *
  *   delete:
  *     summary: Remove um usuário
@@ -173,9 +227,27 @@
  *               properties:
  *                 message:
  *                   type: string
- *                   example: Unauthorized
+ *                   example: Não autorizado
+ *       403:
+ *         description: Proibido. O usuário não possui privilégio suficiente para acessar este recurso.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Você não tem permissão para acessar este recurso
  *       404:
  *         description: Usuário não encontrado
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Usuário não encontrado
  *
  * /users/{id}/status:
  *   patch:
@@ -217,7 +289,25 @@
  *               properties:
  *                 message:
  *                   type: string
- *                   example: Unauthorized
+ *                   example: Não autorizado
+ *       403:
+ *         description: Proibido. O usuário não possui privilégio suficiente para acessar este recurso.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Você não tem permissão para acessar este recurso
  *       404:
  *         description: Usuário não encontrado
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Usuário não encontrado
  */
