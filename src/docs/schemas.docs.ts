@@ -215,4 +215,41 @@
  *         finalDate:
  *           type: string
  *           format: date
+ *     Attendance:
+ *       type: object
+ *       properties:
+ *         id:
+ *           type: integer
+ *         idMatriculation:
+ *           type: integer
+ *         idSession:
+ *           type: integer
+ *         status:
+ *           type: string
+ *           enum: [present, absent]
+ *         createdAt:
+ *           type: string
+ *           format: date-time
+ *         updatedAt:
+ *           type: string
+ *           format: date-time
+ *         session:
+ *           $ref: '#/components/schemas/Session'
+ *     CreateAttendanceInput:
+ *       type: object
+ *       properties:
+ *         idSession:
+ *           type: integer
+ *     AttendanceUpdateItem:
+ *       type: object
+ *       properties:
+ *         idMatriculation:
+ *           type: integer
+ *         status:
+ *           type: string
+ *           enum: [present, absent]
+ *     UpdateAttendanceInput:
+ *       type: array
+ *       items:
+ *         $ref: '#/components/schemas/AttendanceUpdateItem'
  */
