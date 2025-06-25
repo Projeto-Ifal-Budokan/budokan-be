@@ -12,7 +12,11 @@ const router = express.Router();
 // Protected routes
 router.get("/", hasPrivilege("list_attendances"), listAttendances);
 router.post("/", hasPrivilege("create_attendance"), createAttendance);
-router.put("/session/:id", hasPrivilege("update_attendance"), updateAttendance);
+router.put(
+	"/session/:idSession",
+	hasPrivilege("update_attendance"),
+	updateAttendance,
+);
 router.delete(
 	"/session/:idSession",
 	hasPrivilege("delete_attendance"),

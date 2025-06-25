@@ -227,6 +227,9 @@
  *         status:
  *           type: string
  *           enum: [present, absent]
+ *         studentName:
+ *           type: string
+ *           description: Nome completo do estudante
  *         createdAt:
  *           type: string
  *           format: date-time

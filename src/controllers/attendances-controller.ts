@@ -69,7 +69,7 @@ export const createAttendance: RequestHandler = async (req, res, next) => {
 
 export const updateAttendance: RequestHandler = async (req, res, next) => {
 	try {
-		const { id } = req.params;
+		const { idSession } = req.params;
 
 		// Tentar validar com ambos os schemas
 		let validatedData: z.infer<typeof updateAttendanceSchema>;
@@ -83,7 +83,7 @@ export const updateAttendance: RequestHandler = async (req, res, next) => {
 		}
 
 		const result = await attendanceService.updateAttendance(
-			Number(id),
+			Number(idSession),
 			validatedData,
 		);
 		res.status(200).json(result);

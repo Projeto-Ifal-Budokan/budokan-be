@@ -3,6 +3,15 @@
  * /attendances:
  *   get:
  *     summary: Lista registros de frequência
+ *     description: |
+ *       Lista registros de frequência com suporte a filtros e paginação.
+ *
+ *       **Exemplos de uso:**
+ *       - `GET /attendances` - Lista todas as frequências
+ *       - `GET /attendances?studentName=João` - Filtra por nome do estudante
+ *       - `GET /attendances?idSession=123` - Filtra por sessão específica
+ *       - `GET /attendances?status=present` - Filtra apenas presenças
+ *       - `GET /attendances?date=2024-01-15` - Filtra por data específica
  *     tags:
  *       - Attendances
  *     parameters:
@@ -34,6 +43,11 @@
  *           enum: [present, absent]
  *         description: Status da frequência
  *       - in: query
+ *         name: studentName
+ *         schema:
+ *           type: string
+ *         description: Nome do estudante (busca por nome ou sobrenome)
+ *       - in: query
  *         name: page
  *         schema:
  *           type: integer
@@ -61,6 +75,41 @@
  *                   type: array
  *                   items:
  *                     $ref: '#/components/schemas/Attendance'
+ *             example:
+ *               page_size: 10
+ *               page: 1
+ *               count: 25
+ *               items:
+ *                 - id: 1
+ *                   idMatriculation: 123
+ *                   idSession: 456
+ *                   status: "present"
+ *                   studentName: "João Silva"
+ *                   createdAt: "2024-01-15T10:30:00Z"
+ *                   updatedAt: "2024-01-15T10:30:00Z"
+ *                   session:
+ *                     id: 456
+ *                     idInstructorDiscipline: 789
+ *                     idDiscipline: 101
+ *                     date: "2024-01-15"
+ *                     startingTime: "08:00"
+ *                     endingTime: "09:00"
+ *                     isLastSessionOfDay: false
+ *                 - id: 2
+ *                   idMatriculation: 124
+ *                   idSession: 456
+ *                   status: "absent"
+ *                   studentName: "Maria Santos"
+ *                   createdAt: "2024-01-15T10:30:00Z"
+ *                   updatedAt: "2024-01-15T10:30:00Z"
+ *                   session:
+ *                     id: 456
+ *                     idInstructorDiscipline: 789
+ *                     idDiscipline: 101
+ *                     date: "2024-01-15"
+ *                     startingTime: "08:00"
+ *                     endingTime: "09:00"
+ *                     isLastSessionOfDay: false
  *       401:
  *         description: Não autenticado
  *         content:
@@ -159,14 +208,14 @@
  *                   type: string
  *                   example: conflict
  *
- * /attendances/session/{id}:
+ * /attendances/session/{idSession}:
  *   put:
  *     summary: Atualiza registros de frequência de uma sessão
  *     tags:
  *       - Attendances
  *     parameters:
  *       - in: path
- *         name: id
+ *         name: idSession
  *         required: true
  *         schema:
  *           type: integer
@@ -228,8 +277,6 @@
  *                 message:
  *                   type: string
  *                   example: Aula não encontrada
- *
- * /attendances/session/{idSession}:
  *   delete:
  *     summary: Remove todos os registros de frequência de uma aula
  *     tags:
