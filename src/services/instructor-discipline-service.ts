@@ -9,8 +9,8 @@ import { usersTable } from "../db/schema/user-schemas/users";
 import { ConflictError, NotFoundError } from "../errors/app-errors";
 import type {
 	CreateInstructorDisciplineInput,
-	UpdateInstructorDisciplineInput,
 	ListInstructorDisciplineInput,
+	UpdateInstructorDisciplineInput,
 } from "../schemas/instructor-discipline.schemas";
 
 export class InstructorDisciplineService {
@@ -22,15 +22,15 @@ export class InstructorDisciplineService {
 
 		const where = [
 			filters?.idInstructor
-			? eq(instructorDisciplinesTable.idInstructor, filters.idInstructor)
-			: undefined,
+				? eq(instructorDisciplinesTable.idInstructor, filters.idInstructor)
+				: undefined,
 			filters?.idDiscipline
-			? eq(instructorDisciplinesTable.idDiscipline, filters.idDiscipline)
-			: undefined,
+				? eq(instructorDisciplinesTable.idDiscipline, filters.idDiscipline)
+				: undefined,
 			filters?.status
-			? eq(instructorDisciplinesTable.status, filters.status)
-			: undefined,
-		]
+				? eq(instructorDisciplinesTable.status, filters.status)
+				: undefined,
+		];
 
 		const [instructorDisciplines, [{ count: total }]] = await Promise.all([
 			db
@@ -82,8 +82,11 @@ export class InstructorDisciplineService {
 			.select({
 				id: instructorDisciplinesTable.id,
 				idInstructor: instructorDisciplinesTable.idInstructor,
+				instructorName: sql<string>`concat(${usersTable.firstName}, ' ', ${usersTable.surname})`,
 				idDiscipline: instructorDisciplinesTable.idDiscipline,
+				disciplineName: disciplinesTable.name,
 				idRank: instructorDisciplinesTable.idRank,
+				rankName: ranksTable.name,
 				status: instructorDisciplinesTable.status,
 				activatedBy: instructorDisciplinesTable.activatedBy,
 				inactivatedBy: instructorDisciplinesTable.inactivatedBy,
@@ -91,6 +94,19 @@ export class InstructorDisciplineService {
 				updatedAt: instructorDisciplinesTable.updatedAt,
 			})
 			.from(instructorDisciplinesTable)
+			.leftJoin(
+				disciplinesTable,
+				eq(instructorDisciplinesTable.idDiscipline, disciplinesTable.id),
+			)
+			.leftJoin(
+				ranksTable,
+				eq(instructorDisciplinesTable.idRank, ranksTable.id),
+			)
+			.leftJoin(
+				practitionersTable,
+				eq(instructorDisciplinesTable.idInstructor, practitionersTable.idUser),
+			)
+			.leftJoin(usersTable, eq(practitionersTable.idUser, usersTable.id))
 			.where(eq(instructorDisciplinesTable.id, id));
 
 		if (instructorDiscipline.length === 0) {
