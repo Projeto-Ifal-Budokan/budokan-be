@@ -119,4 +119,20 @@
  *         birthDate:
  *           type: string
  *           format: date
+ *     AssignUserRoleInput:
+ *       type: object
+ *       properties:
+ *         idUser:
+ *           type: integer
+ *         idRole:
+ *           type: integer
+ *     Role:
+ *       type: object
+ *       properties:
+ *         id:
+ *           type: integer
+ *         name:
+ *           type: string
+ *         description:
+ *           type: string
  */

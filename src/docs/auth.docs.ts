@@ -4,7 +4,7 @@
  *   post:
  *     summary: Registra um novo usuário
  *     tags:
- *       - Autenticação
+ *       - Auth
  *     requestBody:
  *       required: true
  *       content:
@@ -37,7 +37,7 @@
  *   post:
  *     summary: Realiza login do usuário
  *     tags:
- *       - Autenticação
+ *       - Auth
  *     requestBody:
  *       required: true
  *       content:
@@ -80,7 +80,7 @@
  *   get:
  *     summary: Retorna os dados do usuário autenticado
  *     tags:
- *       - Autenticação
+ *       - Auth
  *     security:
  *       - bearerAuth: []
  *     responses:
@@ -105,7 +105,7 @@
  *   post:
  *     summary: Solicita recuperação de senha
  *     tags:
- *       - Autenticação
+ *       - Auth
  *     requestBody:
  *       required: true
  *       content:
@@ -128,7 +128,7 @@
  *   post:
  *     summary: Redefine a senha do usuário
  *     tags:
- *       - Autenticação
+ *       - Auth
  *     requestBody:
  *       required: true
  *       content:

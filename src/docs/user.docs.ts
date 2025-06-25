@@ -4,7 +4,7 @@
  *   get:
  *     summary: Lista todos os usuários
  *     tags:
- *       - Usuários
+ *       - Users
  *     parameters:
  *       - in: query
  *         name: firstName
@@ -80,7 +80,7 @@
  *   get:
  *     summary: Busca um usuário pelo ID
  *     tags:
- *       - Usuários
+ *       - Users
  *     parameters:
  *       - in: path
  *         name: id
@@ -129,7 +129,7 @@
  *   put:
  *     summary: Atualiza um usuário
  *     tags:
- *       - Usuários
+ *       - Users
  *     parameters:
  *       - in: path
  *         name: id
@@ -200,7 +200,7 @@
  *   delete:
  *     summary: Remove um usuário
  *     tags:
- *       - Usuários
+ *       - Users
  *     parameters:
  *       - in: path
  *         name: id
@@ -253,7 +253,7 @@
  *   patch:
  *     summary: Ativa, desativa ou suspende um usuário
  *     tags:
- *       - Usuários
+ *       - Users
  *     parameters:
  *       - in: path
  *         name: id
