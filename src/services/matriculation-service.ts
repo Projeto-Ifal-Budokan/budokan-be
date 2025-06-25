@@ -5,30 +5,39 @@ import { ranksTable } from "../db/schema/discipline-schemas/ranks";
 import { matriculationsTable } from "../db/schema/practitioner-schemas/matriculations";
 import { practitionersTable } from "../db/schema/practitioner-schemas/practitioners";
 import { studentsTable } from "../db/schema/practitioner-schemas/students";
+import { usersTable } from "../db/schema/user-schemas/users";
 import { ConflictError, NotFoundError } from "../errors/app-errors";
 import type {
 	CreateMatriculationInput,
-	UpdateMatriculationInput,
 	ListMatriculationInput,
+	MatriculationListResponse,
+	MatriculationWithStudentName,
+	UpdateMatriculationInput,
 } from "../schemas/matriculation.schemas";
 
 export class MatriculationService {
 	async listMatriculations(
 		filters: ListMatriculationInput,
 		pagination?: { limit: number; offset: number },
-	) {
+	): Promise<MatriculationListResponse> {
 		const { limit, offset } = pagination || { limit: 10, offset: 0 };
 
 		const conditions = [
-			filters.idStudent ? eq(matriculationsTable.idStudent, filters.idStudent) : undefined,
+			filters.idStudent
+				? eq(matriculationsTable.idStudent, filters.idStudent)
+				: undefined,
 			filters.idDiscipline
 				? eq(matriculationsTable.idDiscipline, filters.idDiscipline)
 				: undefined,
-			filters.idRank ? eq(matriculationsTable.idRank, filters.idRank) : undefined,
-			filters.status ? eq(matriculationsTable.status, filters.status) : undefined,
+			filters.idRank
+				? eq(matriculationsTable.idRank, filters.idRank)
+				: undefined,
+			filters.status
+				? eq(matriculationsTable.status, filters.status)
+				: undefined,
 			filters.isPaymentExempt
 				? eq(matriculationsTable.isPaymentExempt, filters.isPaymentExempt)
-				: undefined
+				: undefined,
 		];
 
 		const [matriculations, [{ count: total }]] = await Promise.all([
@@ -36,6 +45,8 @@ export class MatriculationService {
 				.select({
 					id: matriculationsTable.id,
 					idStudent: matriculationsTable.idStudent,
+					studentName: usersTable.firstName,
+					studentSurname: usersTable.surname,
 					idDiscipline: matriculationsTable.idDiscipline,
 					idRank: matriculationsTable.idRank,
 					status: matriculationsTable.status,
@@ -46,20 +57,36 @@ export class MatriculationService {
 					updatedAt: matriculationsTable.updatedAt,
 				})
 				.from(matriculationsTable)
+				.innerJoin(
+					studentsTable,
+					eq(matriculationsTable.idStudent, studentsTable.idPractitioner),
+				)
+				.innerJoin(
+					practitionersTable,
+					eq(studentsTable.idPractitioner, practitionersTable.idUser),
+				)
+				.innerJoin(usersTable, eq(practitionersTable.idUser, usersTable.id))
 				.where(and(...conditions))
 				.limit(limit)
 				.offset(offset),
-			db.select({ count: count() }).from(matriculationsTable).where(and(...conditions)),
+			db
+				.select({ count: count() })
+				.from(matriculationsTable)
+				.where(and(...conditions)),
 		]);
 
 		return { items: matriculations, count: Number(total) };
 	}
 
-	async getMatriculationById(id: number) {
+	async getMatriculationById(
+		id: number,
+	): Promise<MatriculationWithStudentName> {
 		const matriculation = await db
 			.select({
 				id: matriculationsTable.id,
 				idStudent: matriculationsTable.idStudent,
+				studentName: usersTable.firstName,
+				studentSurname: usersTable.surname,
 				idDiscipline: matriculationsTable.idDiscipline,
 				idRank: matriculationsTable.idRank,
 				status: matriculationsTable.status,
@@ -70,6 +97,15 @@ export class MatriculationService {
 				updatedAt: matriculationsTable.updatedAt,
 			})
 			.from(matriculationsTable)
+			.innerJoin(
+				studentsTable,
+				eq(matriculationsTable.idStudent, studentsTable.idPractitioner),
+			)
+			.innerJoin(
+				practitionersTable,
+				eq(studentsTable.idPractitioner, practitionersTable.idUser),
+			)
+			.innerJoin(usersTable, eq(practitionersTable.idUser, usersTable.id))
 			.where(eq(matriculationsTable.id, id));
 
 		if (matriculation.length === 0) {
