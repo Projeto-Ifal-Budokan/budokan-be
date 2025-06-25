@@ -135,4 +135,84 @@
  *           type: string
  *         description:
  *           type: string
+ *     Session:
+ *       type: object
+ *       properties:
+ *         id:
+ *           type: integer
+ *         idInstructorDiscipline:
+ *           type: integer
+ *         idDiscipline:
+ *           type: integer
+ *         date:
+ *           type: string
+ *           format: date
+ *         startingTime:
+ *           type: string
+ *           example: '08:00'
+ *         endingTime:
+ *           type: string
+ *           example: '09:00'
+ *         isLastSessionOfDay:
+ *           type: boolean
+ *     CreateSessionInput:
+ *       type: object
+ *       properties:
+ *         idInstructor:
+ *           type: integer
+ *         idDiscipline:
+ *           type: integer
+ *         date:
+ *           type: string
+ *           format: date
+ *         startingTime:
+ *           type: string
+ *           example: '08:00'
+ *         endingTime:
+ *           type: string
+ *           example: '09:00'
+ *         isLastSessionOfDay:
+ *           type: boolean
+ *     UpdateSessionInput:
+ *       type: object
+ *       properties:
+ *         idInstructor:
+ *           type: integer
+ *         idDiscipline:
+ *           type: integer
+ *         date:
+ *           type: string
+ *           format: date
+ *         startingTime:
+ *           type: string
+ *           example: '08:00'
+ *         endingTime:
+ *           type: string
+ *           example: '09:00'
+ *         isLastSessionOfDay:
+ *           type: boolean
+ *     ListSessionInput:
+ *       type: object
+ *       properties:
+ *         initialDate:
+ *           type: string
+ *           format: date
+ *         finalDate:
+ *           type: string
+ *           format: date
+ *         idInstructor:
+ *           type: integer
+ *         idDiscipline:
+ *           type: integer
+ *     ViewMatriculationSessionsInput:
+ *       type: object
+ *       properties:
+ *         idDiscipline:
+ *           type: integer
+ *         initialDate:
+ *           type: string
+ *           format: date
+ *         finalDate:
+ *           type: string
+ *           format: date
  */
