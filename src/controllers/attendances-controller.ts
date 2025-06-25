@@ -36,6 +36,8 @@ export const listAttendances: RequestHandler = async (req, res, next) => {
 				["present", "absent"].includes(String(req.query.status))
 					? (req.query.status as "present" | "absent")
 					: undefined,
+
+			studentName: req.query.studentName as string | undefined,
 		};
 
 		const { items, count } = await attendanceService.listAttendances(filters, {
