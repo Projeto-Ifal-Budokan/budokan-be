@@ -92,8 +92,8 @@ export const updateAttendance: RequestHandler = async (req, res, next) => {
 
 export const deleteAttendance: RequestHandler = async (req, res, next) => {
 	try {
-		const { id } = req.params;
-		const result = await attendanceService.deleteAttendance(Number(id));
+		const { idSession } = req.params;
+		const result = await attendanceService.deleteAttendance(Number(idSession));
 		res.status(200).json(result);
 	} catch (error) {
 		next(error);

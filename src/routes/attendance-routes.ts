@@ -13,6 +13,10 @@ const router = express.Router();
 router.get("/", hasPrivilege("list_attendances"), listAttendances);
 router.post("/", hasPrivilege("create_attendance"), createAttendance);
 router.put("/session/:id", hasPrivilege("update_attendance"), updateAttendance);
-router.delete("/:id", hasPrivilege("delete_attendance"), deleteAttendance);
+router.delete(
+	"/session/:idSession",
+	hasPrivilege("delete_attendance"),
+	deleteAttendance,
+);
 
 export default router;

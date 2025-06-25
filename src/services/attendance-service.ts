@@ -198,18 +198,35 @@ export class AttendanceService {
 		return { message: "Frequência atualizada com sucesso" };
 	}
 
-	async deleteAttendance(id: number) {
-		const existingAttendance = await db
+	async deleteAttendance(idSession: number) {
+		// Verificar se a aula existe
+		const existingSession = await db
 			.select()
-			.from(attendancesTable)
-			.where(eq(attendancesTable.id, id));
+			.from(sessionsTable)
+			.where(eq(sessionsTable.id, idSession));
 
-		if (existingAttendance.length === 0) {
-			throw new NotFoundError("Registro não encontrado");
+		if (existingSession.length === 0) {
+			throw new NotFoundError("Aula não encontrada");
 		}
 
-		await db.delete(attendancesTable).where(eq(attendancesTable.id, id));
+		// Verificar se existem frequências para esta aula
+		const existingAttendances = await db
+			.select()
+			.from(attendancesTable)
+			.where(eq(attendancesTable.idSession, idSession));
 
-		return { message: "Registro excluído com sucesso" };
+		if (existingAttendances.length === 0) {
+			throw new NotFoundError("Nenhuma frequência encontrada para esta aula");
+		}
+
+		// Deletar todas as frequências da aula
+		await db
+			.delete(attendancesTable)
+			.where(eq(attendancesTable.idSession, idSession));
+
+		return {
+			message: "Frequências da aula excluídas com sucesso",
+			deletedCount: existingAttendances.length,
+		};
 	}
 }

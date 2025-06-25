@@ -229,21 +229,21 @@
  *                   type: string
  *                   example: Aula não encontrada
  *
- * /attendances/{id}:
+ * /attendances/session/{idSession}:
  *   delete:
- *     summary: Remove um registro de frequência
+ *     summary: Remove todos os registros de frequência de uma aula
  *     tags:
  *       - Attendances
  *     parameters:
  *       - in: path
- *         name: id
+ *         name: idSession
  *         required: true
  *         schema:
  *           type: integer
- *         description: ID do registro de frequência
+ *         description: ID da sessão/aula
  *     responses:
  *       200:
- *         description: Frequência removida com sucesso
+ *         description: Frequências da aula removidas com sucesso
  *         content:
  *           application/json:
  *             schema:
@@ -251,7 +251,10 @@
  *               properties:
  *                 message:
  *                   type: string
- *                   example: Frequência removida com sucesso
+ *                   example: Frequências da aula excluídas com sucesso
+ *                 deletedCount:
+ *                   type: integer
+ *                   description: Número de registros de frequência excluídos
  *       401:
  *         description: Não autenticado
  *         content:
@@ -273,7 +276,7 @@
  *                   type: string
  *                   example: Você não tem permissão para acessar este recurso
  *       404:
- *         description: Frequência não encontrada
+ *         description: Aula não encontrada ou nenhuma frequência encontrada para esta aula
  *         content:
  *           application/json:
  *             schema:
@@ -281,5 +284,5 @@
  *               properties:
  *                 message:
  *                   type: string
- *                   example: Frequência não encontrada
+ *                   example: Aula não encontrada
  */
