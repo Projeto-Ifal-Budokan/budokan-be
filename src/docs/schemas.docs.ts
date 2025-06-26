@@ -459,4 +459,95 @@
  *           type: string
  *         description:
  *           type: string
+ *     Matriculation:
+ *       type: object
+ *       properties:
+ *         id:
+ *           type: integer
+ *         idStudent:
+ *           type: integer
+ *         studentName:
+ *           type: string
+ *         studentSurname:
+ *           type: string
+ *         idDiscipline:
+ *           type: integer
+ *         disciplineName:
+ *           type: string
+ *         idRank:
+ *           type: integer
+ *           nullable: true
+ *         rankName:
+ *           type: string
+ *           nullable: true
+ *         status:
+ *           type: string
+ *           enum: [active, inactive, suspended]
+ *         isPaymentExempt:
+ *           type: string
+ *           enum: [Y, N]
+ *         activatedBy:
+ *           type: integer
+ *           nullable: true
+ *         inactivatedBy:
+ *           type: integer
+ *           nullable: true
+ *         createdAt:
+ *           type: string
+ *           format: date-time
+ *         updatedAt:
+ *           type: string
+ *           format: date-time
+ *           nullable: true
+ *     CreateMatriculationInput:
+ *       type: object
+ *       required:
+ *         - idStudent
+ *         - idDiscipline
+ *         - idRank
+ *       properties:
+ *         idStudent:
+ *           type: integer
+ *         idDiscipline:
+ *           type: integer
+ *         idRank:
+ *           type: integer
+ *         status:
+ *           type: string
+ *           enum: [active, inactive, suspended]
+ *         isPaymentExempt:
+ *           type: string
+ *           enum: [Y, N]
+ *         activatedBy:
+ *           type: integer
+ *     UpdateMatriculationInput:
+ *       type: object
+ *       properties:
+ *         idRank:
+ *           type: integer
+ *         status:
+ *           type: string
+ *           enum: [active, inactive, suspended]
+ *         isPaymentExempt:
+ *           type: string
+ *           enum: [Y, N]
+ *         activatedBy:
+ *           type: integer
+ *         inactivatedBy:
+ *           type: integer
+ *     ListMatriculationInput:
+ *       type: object
+ *       properties:
+ *         idStudent:
+ *           type: integer
+ *         idDiscipline:
+ *           type: integer
+ *         idRank:
+ *           type: integer
+ *         status:
+ *           type: string
+ *           enum: [active, inactive, suspended]
+ *         isPaymentExempt:
+ *           type: string
+ *           enum: [Y, N]
  */
