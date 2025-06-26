@@ -48,7 +48,9 @@ export class MatriculationService {
 					studentName: usersTable.firstName,
 					studentSurname: usersTable.surname,
 					idDiscipline: matriculationsTable.idDiscipline,
+					disciplineName: disciplinesTable.name,
 					idRank: matriculationsTable.idRank,
+					rankName: ranksTable.name,
 					status: matriculationsTable.status,
 					isPaymentExempt: matriculationsTable.isPaymentExempt,
 					activatedBy: matriculationsTable.activatedBy,
@@ -66,6 +68,11 @@ export class MatriculationService {
 					eq(studentsTable.idPractitioner, practitionersTable.idUser),
 				)
 				.innerJoin(usersTable, eq(practitionersTable.idUser, usersTable.id))
+				.innerJoin(
+					disciplinesTable,
+					eq(matriculationsTable.idDiscipline, disciplinesTable.id),
+				)
+				.leftJoin(ranksTable, eq(matriculationsTable.idRank, ranksTable.id))
 				.where(and(...conditions))
 				.limit(limit)
 				.offset(offset),
@@ -88,7 +95,9 @@ export class MatriculationService {
 				studentName: usersTable.firstName,
 				studentSurname: usersTable.surname,
 				idDiscipline: matriculationsTable.idDiscipline,
+				disciplineName: disciplinesTable.name,
 				idRank: matriculationsTable.idRank,
+				rankName: ranksTable.name,
 				status: matriculationsTable.status,
 				isPaymentExempt: matriculationsTable.isPaymentExempt,
 				activatedBy: matriculationsTable.activatedBy,
@@ -106,6 +115,11 @@ export class MatriculationService {
 				eq(studentsTable.idPractitioner, practitionersTable.idUser),
 			)
 			.innerJoin(usersTable, eq(practitionersTable.idUser, usersTable.id))
+			.innerJoin(
+				disciplinesTable,
+				eq(matriculationsTable.idDiscipline, disciplinesTable.id),
+			)
+			.leftJoin(ranksTable, eq(matriculationsTable.idRank, ranksTable.id))
 			.where(eq(matriculationsTable.id, id));
 
 		if (matriculation.length === 0) {

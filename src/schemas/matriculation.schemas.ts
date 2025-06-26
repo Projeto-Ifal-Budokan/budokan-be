@@ -40,7 +40,9 @@ export type MatriculationWithStudentName = {
 	studentName: string;
 	studentSurname: string;
 	idDiscipline: number;
+	disciplineName: string;
 	idRank: number | null;
+	rankName: string | null;
 	status: string;
 	isPaymentExempt: string;
 	activatedBy: number | null;
