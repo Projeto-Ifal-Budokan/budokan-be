@@ -312,4 +312,20 @@
  *         endDate:
  *           type: string
  *           format: date
+ *     Privilege:
+ *       type: object
+ *       properties:
+ *         id:
+ *           type: integer
+ *         name:
+ *           type: string
+ *         description:
+ *           type: string
+ *     AssignRolePrivilegeInput:
+ *       type: object
+ *       properties:
+ *         idRole:
+ *           type: integer
+ *         idPrivilege:
+ *           type: integer
  */
