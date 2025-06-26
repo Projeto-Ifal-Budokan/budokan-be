@@ -418,4 +418,45 @@
  *       properties:
  *         idInstructor:
  *           type: integer
+ *     Rank:
+ *       type: object
+ *       properties:
+ *         id:
+ *           type: integer
+ *         idDiscipline:
+ *           type: integer
+ *         name:
+ *           type: string
+ *         description:
+ *           type: string
+ *         createdAt:
+ *           type: string
+ *           format: date-time
+ *         updatedAt:
+ *           type: string
+ *           format: date-time
+ *         disciplineName:
+ *           type: string
+ *     CreateRankInput:
+ *       type: object
+ *       required:
+ *         - idDiscipline
+ *         - name
+ *         - description
+ *       properties:
+ *         idDiscipline:
+ *           type: integer
+ *         name:
+ *           type: string
+ *         description:
+ *           type: string
+ *     UpdateRankInput:
+ *       type: object
+ *       properties:
+ *         idDiscipline:
+ *           type: integer
+ *         name:
+ *           type: string
+ *         description:
+ *           type: string
  */
