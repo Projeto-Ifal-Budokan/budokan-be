@@ -369,4 +369,53 @@
  *         status:
  *           type: string
  *           enum: [active, inactive, suspended]
+ *     PixKey:
+ *       type: object
+ *       properties:
+ *         id:
+ *           type: integer
+ *         idInstructor:
+ *           type: integer
+ *         type:
+ *           type: string
+ *           enum: [email, cpf, phone, randomKey]
+ *         key:
+ *           type: string
+ *         description:
+ *           type: string
+ *         createdAt:
+ *           type: string
+ *           format: date-time
+ *         updatedAt:
+ *           type: string
+ *           format: date-time
+ *     CreatePixKeyInput:
+ *       type: object
+ *       properties:
+ *         idInstructor:
+ *           type: integer
+ *         type:
+ *           type: string
+ *           enum: [email, cpf, phone, randomKey]
+ *         key:
+ *           type: string
+ *         description:
+ *           type: string
+ *     UpdatePixKeyInput:
+ *       type: object
+ *       properties:
+ *         idInstructor:
+ *           type: integer
+ *         type:
+ *           type: string
+ *           enum: [email, cpf, phone, randomKey]
+ *         key:
+ *           type: string
+ *         description:
+ *           type: string
+ *     ListPixKeyInput:
+ *       type: object
+ *       properties:
+ *         idInstructor:
+ *           type: integer
  */
