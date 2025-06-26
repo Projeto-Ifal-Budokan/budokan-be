@@ -328,4 +328,45 @@
  *           type: integer
  *         idPrivilege:
  *           type: integer
+ *     Discipline:
+ *       type: object
+ *       properties:
+ *         id:
+ *           type: integer
+ *         name:
+ *           type: string
+ *         description:
+ *           type: string
+ *         status:
+ *           type: string
+ *           enum: [active, inactive, suspended]
+ *         createdAt:
+ *           type: string
+ *           format: date-time
+ *         updatedAt:
+ *           type: string
+ *           format: date-time
+ *     CreateDisciplineInput:
+ *       type: object
+ *       properties:
+ *         name:
+ *           type: string
+ *         description:
+ *           type: string
+ *     UpdateDisciplineInput:
+ *       type: object
+ *       properties:
+ *         name:
+ *           type: string
+ *         description:
+ *           type: string
+ *         status:
+ *           type: string
+ *           enum: [active, inactive]
+ *     ListDisciplineInput:
+ *       type: object
+ *       properties:
+ *         status:
+ *           type: string
+ *           enum: [active, inactive, suspended]
  */
