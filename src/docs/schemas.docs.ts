@@ -550,4 +550,41 @@
  *         isPaymentExempt:
  *           type: string
  *           enum: [Y, N]
+ *     PractitionerContact:
+ *       type: object
+ *       properties:
+ *         id:
+ *           type: integer
+ *         idPractitioner:
+ *           type: integer
+ *         phone:
+ *           type: string
+ *         relationship:
+ *           type: string
+ *         createdAt:
+ *           type: string
+ *           format: date-time
+ *         updatedAt:
+ *           type: string
+ *           format: date-time
+ *           nullable: true
+ *     CreatePractitionerContactInput:
+ *       type: object
+ *       required:
+ *         - phone
+ *         - relationship
+ *       properties:
+ *         phone:
+ *           type: string
+ *         relationship:
+ *           type: string
+ *           maxLength: 100
+ *     UpdatePractitionerContactInput:
+ *       type: object
+ *       properties:
+ *         phone:
+ *           type: string
+ *         relationship:
+ *           type: string
+ *           maxLength: 100
  */
