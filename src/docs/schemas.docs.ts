@@ -587,4 +587,68 @@
  *         relationship:
  *           type: string
  *           maxLength: 100
+ *     TrainingSchedule:
+ *       type: object
+ *       properties:
+ *         id:
+ *           type: integer
+ *         idDiscipline:
+ *           type: integer
+ *         disciplineName:
+ *           type: string
+ *         weekday:
+ *           type: string
+ *           enum: [monday, tuesday, wednesday, thursday, friday, saturday, sunday]
+ *         startTime:
+ *           type: string
+ *           pattern: '^([01]\d|2[0-3]):([0-5]\d):([0-5]\d)$'
+ *           example: "18:00:00"
+ *         endTime:
+ *           type: string
+ *           pattern: '^([01]\d|2[0-3]):([0-5]\d):([0-5]\d)$'
+ *           example: "19:30:00"
+ *         createdAt:
+ *           type: string
+ *           format: date-time
+ *         updatedAt:
+ *           type: string
+ *           format: date-time
+ *           nullable: true
+ *     CreateTrainingScheduleInput:
+ *       type: object
+ *       required:
+ *         - idDiscipline
+ *         - weekday
+ *         - startTime
+ *         - endTime
+ *       properties:
+ *         idDiscipline:
+ *           type: integer
+ *         weekday:
+ *           type: string
+ *           enum: [monday, tuesday, wednesday, thursday, friday, saturday, sunday]
+ *         startTime:
+ *           type: string
+ *           pattern: '^([01]\d|2[0-3]):([0-5]\d):([0-5]\d)$'
+ *           example: "18:00:00"
+ *         endTime:
+ *           type: string
+ *           pattern: '^([01]\d|2[0-3]):([0-5]\d):([0-5]\d)$'
+ *           example: "19:30:00"
+ *     UpdateTrainingScheduleInput:
+ *       type: object
+ *       properties:
+ *         idDiscipline:
+ *           type: integer
+ *         weekday:
+ *           type: string
+ *           enum: [monday, tuesday, wednesday, thursday, friday, saturday, sunday]
+ *         startTime:
+ *           type: string
+ *           pattern: '^([01]\d|2[0-3]):([0-5]\d):([0-5]\d)$'
+ *           example: "18:00:00"
+ *         endTime:
+ *           type: string
+ *           pattern: '^([01]\d|2[0-3]):([0-5]\d):([0-5]\d)$'
+ *           example: "19:30:00"
  */
