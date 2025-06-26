@@ -651,4 +651,79 @@
  *           type: string
  *           pattern: '^([01]\d|2[0-3]):([0-5]\d):([0-5]\d)$'
  *           example: "19:30:00"
+ *     InstructorDiscipline:
+ *       type: object
+ *       properties:
+ *         id:
+ *           type: integer
+ *         idInstructor:
+ *           type: integer
+ *         instructorName:
+ *           type: string
+ *         idDiscipline:
+ *           type: integer
+ *         disciplineName:
+ *           type: string
+ *         idRank:
+ *           type: integer
+ *           nullable: true
+ *         rankName:
+ *           type: string
+ *           nullable: true
+ *         status:
+ *           type: string
+ *           enum: [active, inactive, suspended]
+ *         activatedBy:
+ *           type: integer
+ *           nullable: true
+ *         inactivatedBy:
+ *           type: integer
+ *           nullable: true
+ *         createdAt:
+ *           type: string
+ *           format: date-time
+ *         updatedAt:
+ *           type: string
+ *           format: date-time
+ *           nullable: true
+ *     CreateInstructorDisciplineInput:
+ *       type: object
+ *       required:
+ *         - idInstructor
+ *         - idDiscipline
+ *         - idRank
+ *       properties:
+ *         idInstructor:
+ *           type: integer
+ *         idDiscipline:
+ *           type: integer
+ *         idRank:
+ *           type: integer
+ *         status:
+ *           type: string
+ *           enum: [active, inactive, suspended]
+ *         activatedBy:
+ *           type: integer
+ *     UpdateInstructorDisciplineInput:
+ *       type: object
+ *       properties:
+ *         idRank:
+ *           type: integer
+ *         status:
+ *           type: string
+ *           enum: [active, inactive, suspended]
+ *         activatedBy:
+ *           type: integer
+ *         inactivatedBy:
+ *           type: integer
+ *     ListInstructorDisciplineInput:
+ *       type: object
+ *       properties:
+ *         idInstructor:
+ *           type: integer
+ *         idDiscipline:
+ *           type: integer
+ *         status:
+ *           type: string
+ *           enum: [active, inactive, suspended]
  */
