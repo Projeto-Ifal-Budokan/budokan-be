@@ -321,6 +321,34 @@
  *           type: string
  *         description:
  *           type: string
+ *         createdAt:
+ *           type: string
+ *           format: date-time
+ *         updatedAt:
+ *           type: string
+ *           format: date-time
+ *           nullable: true
+ *     CreatePrivilegeInput:
+ *       type: object
+ *       required:
+ *         - name
+ *         - description
+ *       properties:
+ *         name:
+ *           type: string
+ *           maxLength: 100
+ *         description:
+ *           type: string
+ *           maxLength: 255
+ *     UpdatePrivilegeInput:
+ *       type: object
+ *       properties:
+ *         name:
+ *           type: string
+ *           maxLength: 100
+ *         description:
+ *           type: string
+ *           maxLength: 255
  *     AssignRolePrivilegeInput:
  *       type: object
  *       properties:
