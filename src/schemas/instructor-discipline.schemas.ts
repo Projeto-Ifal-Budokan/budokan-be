@@ -31,3 +31,25 @@ export type UpdateInstructorDisciplineInput = z.infer<
 export type ListInstructorDisciplineInput = z.infer<
 	typeof listInstructorDisciplineSchema
 >;
+
+// Tipos para os dados retornados que incluem o nome do instrutor
+export type InstructorDisciplineWithInstructorName = {
+	id: number;
+	idInstructor: number;
+	instructorName: string;
+	instructorProfileImageUrl: string | null;
+	idDiscipline: number;
+	disciplineName: string;
+	idRank: number | null;
+	rankName: string | null;
+	status: string;
+	activatedBy: number | null;
+	inactivatedBy: number | null;
+	createdAt: Date;
+	updatedAt: Date | null;
+};
+
+export type InstructorDisciplineListResponse = {
+	items: InstructorDisciplineWithInstructorName[];
+	count: number;
+};

@@ -28,10 +28,11 @@ passport.use(new JwtStrategy(options, async (jwt_payload, done) => {
       email: usersTable.email,
       firstName: usersTable.firstName,
       surname: usersTable.surname,
-				status: usersTable.status,
-				birthDate: usersTable.birthDate,
-				phone: usersTable.phone,
-			})
+			status: usersTable.status,
+			birthDate: usersTable.birthDate,
+			phone: usersTable.phone,
+			profileImageUrl: usersTable.profileImageUrl,
+		})
 			.from(usersTable)
 			.where(eq(usersTable.id, jwt_payload.id));
 

@@ -36,6 +36,7 @@ export class UserService {
 					phone: usersTable.phone,
 					birthDate: usersTable.birthDate,
 					status: usersTable.status,
+					profileImageUrl: usersTable.profileImageUrl,
 				})
 				.from(usersTable)
 				.where(and(...where))
@@ -57,6 +58,7 @@ export class UserService {
 				phone: usersTable.phone,
 				birthDate: usersTable.birthDate,
 				status: usersTable.status,
+				profileImageUrl: usersTable.profileImageUrl,
 			})
 			.from(usersTable)
 			.where(eq(usersTable.id, id));
@@ -98,6 +100,7 @@ export class UserService {
 		if (data.surname !== undefined) updateData.surname = data.surname;
 		if (data.email !== undefined) updateData.email = data.email;
 		if (data.phone !== undefined) updateData.phone = data.phone;
+		if (data.profileImageUrl !== undefined) updateData.profileImageUrl = data.profileImageUrl;
 
 		// Converte a data de nascimento para Date apenas se ela for informada
 		if (data.birthDate !== undefined) {

@@ -39,6 +39,7 @@ export type MatriculationWithStudentName = {
 	idStudent: number;
 	studentName: string;
 	studentSurname: string;
+	studentProfileImageUrl: string | null;
 	idDiscipline: number;
 	disciplineName: string;
 	idRank: number | null;

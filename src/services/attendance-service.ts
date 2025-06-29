@@ -38,6 +38,7 @@ export class AttendanceService {
 				idMatriculation: attendancesTable.idMatriculation,
 				studentFirstName: usersTable.firstName,
 				studentSurname: usersTable.surname,
+				studentProfileImageUrl: usersTable.profileImageUrl,
 				idSession: attendancesTable.idSession,
 				status: attendancesTable.status,
 				createdAt: attendancesTable.createdAt,
@@ -134,6 +135,7 @@ export class AttendanceService {
 			idMatriculation: item.idMatriculation,
 			studentName:
 				`${item.studentFirstName || ""} ${item.studentSurname || ""}`.trim(),
+			studentProfileImageUrl: item.studentProfileImageUrl,
 			idSession: item.idSession,
 			status: item.status,
 			createdAt: item.createdAt,

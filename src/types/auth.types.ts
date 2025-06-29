@@ -20,6 +20,7 @@ export interface User {
 	status: string;
 	phone: string;
 	birthDate: Date;
+	profileImageUrl?: string | null;
 }
 
 export interface AuthenticatedRequest extends Request {

@@ -8,6 +8,7 @@ export const updateUserSchema = z.object({
 	phone: z.string().optional(),
 	birthDate: z.string().optional(),
 	status: z.enum(["active", "inactive", "suspended"]).optional(),
+	profileImageUrl: z.string().url().optional(),
 });
 
 export const listUserSchema = z.object({

@@ -21,6 +21,10 @@
  *         status:
  *           type: string
  *           enum: [active, inactive, suspended]
+ *         profileImageUrl:
+ *           type: string
+ *           format: uri
+ *           description: URL da imagem de perfil do usuário
  *     UpdateUserInput:
  *       type: object
  *       properties:
@@ -39,6 +43,10 @@
  *         status:
  *           type: string
  *           enum: [active, inactive, suspended]
+ *         profileImageUrl:
+ *           type: string
+ *           format: uri
+ *           description: URL da imagem de perfil do usuário
  *       required: []
  *     ToggleUserStatusInput:
  *       type: object
@@ -119,6 +127,10 @@
  *         birthDate:
  *           type: string
  *           format: date
+ *         profileImageUrl:
+ *           type: string
+ *           format: uri
+ *           description: URL da imagem de perfil do usuário
  *     AssignUserRoleInput:
  *       type: object
  *       properties:
@@ -230,6 +242,11 @@
  *         studentName:
  *           type: string
  *           description: Nome completo do estudante
+ *         studentProfileImageUrl:
+ *           type: string
+ *           format: uri
+ *           nullable: true
+ *           description: URL da imagem de perfil do estudante
  *         createdAt:
  *           type: string
  *           format: date-time
@@ -498,6 +515,11 @@
  *           type: string
  *         studentSurname:
  *           type: string
+ *         studentProfileImageUrl:
+ *           type: string
+ *           format: uri
+ *           nullable: true
+ *           description: URL da imagem de perfil do estudante
  *         idDiscipline:
  *           type: integer
  *         disciplineName:
@@ -688,6 +710,11 @@
  *           type: integer
  *         instructorName:
  *           type: string
+ *         instructorProfileImageUrl:
+ *           type: string
+ *           format: uri
+ *           nullable: true
+ *           description: URL da imagem de perfil do instrutor
  *         idDiscipline:
  *           type: integer
  *         disciplineName:
