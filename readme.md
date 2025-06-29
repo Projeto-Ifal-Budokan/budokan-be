@@ -113,7 +113,7 @@ docker-compose down -v
 
 ### Migrações do Banco de Dados
 
-Para aplicar suas alterações novas no banco (Gerar e aplicar migrations automaticamente):
+Se seu container do banco está recém criado e não possui nenhuma migration executada, ou você deseja aplicar suas alterações novas no banco (Gerar e aplicar migrations automaticamente):
 ```bash
 pnpm drizzle-kit push
 ```
