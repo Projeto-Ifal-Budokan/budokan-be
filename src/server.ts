@@ -12,18 +12,13 @@ import cors from "cors";
 
 const app = express();
 
-/* MIDDLEWARES */
-app.use(urlencoded({ extended: true }));
-app.use(json());
-app.use(cookieParser());
-app.use(passport.initialize());
-
-/* CORS */
+/* CORS - Deve vir primeiro */
 const allowedOrigins = [
 	"https://budokanryu.com.br",
 	"https://dev.budokanryu.com.br",
 	"http://localhost:3000",
 	"http://localhost:8000",
+	"http://localhost:8001",
 ];
 
 app.use(
@@ -38,6 +33,12 @@ app.use(
 		credentials: true,
 	}),
 );
+
+/* MIDDLEWARES */
+app.use(urlencoded({ extended: true }));
+app.use(json());
+app.use(cookieParser());
+app.use(passport.initialize());
 
 // Expor a pasta uploads como estática
 app.use("/uploads", express.static("uploads"));
