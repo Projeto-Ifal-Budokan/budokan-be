@@ -36,6 +36,7 @@ const transporter = nodemailer.createTransport(
 				// Configuração para desenvolvimento (Ethereal)
 				host: "smtp.ethereal.email",
 				port: 587,
+				secure: false, // true para 465, false para outras portas
 				auth: {
 					user: process.env.ETHEREAL_USER,
 					pass: process.env.ETHEREAL_PASS,
@@ -47,13 +48,16 @@ const transporter = nodemailer.createTransport(
 transporter.verify((error, success) => {
 	if (error) {
 		console.error("Erro na configuração do transporter:", error);
+		console.error("Verifique as variáveis de ambiente GMAIL_USER e GMAIL_APP_PASSWORD");
 	} else {
-		console.log("Servidor de email pronto para enviar mensagens");
-		console.log("Ambiente:", process.env.NODE_ENV);
-		console.log(
-			"Configuração:",
-			process.env.NODE_ENV === "production" ? "Gmail" : "Ethereal",
-		);
+		console.log("✅ Servidor de email pronto para enviar mensagens");
+		console.log("📧 Ambiente:", process.env.NODE_ENV);
+		console.log("🔧 Configuração:", process.env.NODE_ENV === "production" ? "Gmail (Produção)" : "Ethereal (Desenvolvimento)");
+		if (process.env.NODE_ENV === "production") {
+			console.log("📨 Email remetente:", process.env.GMAIL_USER);
+		} else {
+			console.log("📨 Email remetente:", process.env.ETHEREAL_USER);
+		}
 	}
 });
 
@@ -239,8 +243,18 @@ export class AuthService {
 
 		try {
 			const info = await transporter.sendMail(mailOptions);
-			console.log("Email enviado:", nodemailer.getTestMessageUrl(info));
+			
+			// Verificar se o email foi enviado com sucesso
+			const isTestEmail = process.env.NODE_ENV !== "production";
+			const testUrl = isTestEmail ? nodemailer.getTestMessageUrl(info) : null;
+			
+			console.log("Email enviado:", isTestEmail ? testUrl : "Email enviado com sucesso para servidor real");
 			console.log("Detalhes do envio:", info);
+			
+			// Verificar se houve algum erro no envio
+			if (info.rejected && info.rejected.length > 0) {
+				throw new Error(`Falha ao enviar email: ${info.rejected.join(', ')}`);
+			}
 		} catch (error) {
 			console.error("Erro ao enviar email:", error);
 			throw new Error("Falha ao enviar email de recuperação de senha");
