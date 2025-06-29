@@ -1,6 +1,7 @@
 import type { ErrorRequestHandler } from "express";
 import { ZodError } from "zod";
 import { AppError } from "../errors/app-errors";
+import multer from "multer";
 
 /**
  * Middleware de tratamento de erros
@@ -15,6 +16,32 @@ export const errorHandler: ErrorRequestHandler = (err, req, res, next) => {
 			errors: err.errors,
 		});
 		return;
+	}
+
+	// Tratamento de erros do Multer
+	if (err instanceof multer.MulterError) {
+		switch (err.code) {
+			case "LIMIT_FILE_SIZE":
+				res.status(400).json({
+					message: "Arquivo muito grande. Tamanho máximo permitido: 5MB",
+				});
+				return;
+			case "LIMIT_FILE_COUNT":
+				res.status(400).json({
+					message: "Muitos arquivos enviados. Máximo permitido: 1 arquivo",
+				});
+				return;
+			case "LIMIT_UNEXPECTED_FILE":
+				res.status(400).json({
+					message: "Campo de arquivo inesperado",
+				});
+				return;
+			default:
+				res.status(400).json({
+					message: "Erro no upload do arquivo",
+				});
+				return;
+		}
 	}
 
 	// Tratamento de erros personalizados da aplicação

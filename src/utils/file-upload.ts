@@ -140,7 +140,8 @@ export const getProfileImageUrl = (filename: string): string => {
 	}
 
 	// Fallback para desenvolvimento local
-	const baseUrl = process.env.BASE_URL || "http://localhost:8001";
+	const port = process.env.PORT || "8000";
+	const baseUrl = `http://localhost:${port}`;
 	return `${baseUrl}/uploads/profile-images/${filename}`;
 };
 

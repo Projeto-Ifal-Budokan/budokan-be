@@ -64,7 +64,6 @@
  *               properties:
  *                 message:
  *                   type: string
- *                   example: Não autorizado
  *       403:
  *         description: Proibido. O usuário não possui privilégio suficiente para acessar este recurso.
  *         content:
@@ -74,7 +73,6 @@
  *               properties:
  *                 message:
  *                   type: string
- *                   example: Você não tem permissão para acessar este recurso
  *
  * /users/{id}:
  *   get:
@@ -104,7 +102,6 @@
  *               properties:
  *                 message:
  *                   type: string
- *                   example: Não autorizado
  *       403:
  *         description: Proibido. O usuário não possui privilégio suficiente para acessar este recurso.
  *         content:
@@ -114,7 +111,6 @@
  *               properties:
  *                 message:
  *                   type: string
- *                   example: Você não tem permissão para acessar este recurso
  *       404:
  *         description: Usuário não encontrado
  *         content:
@@ -124,7 +120,6 @@
  *               properties:
  *                 message:
  *                   type: string
- *                   example: Usuário não encontrado
  *
  *   put:
  *     summary: Atualiza um usuário
@@ -165,7 +160,6 @@
  *               properties:
  *                 message:
  *                   type: string
- *                   example: Não autorizado
  *       403:
  *         description: Proibido. O usuário não possui privilégio suficiente para acessar este recurso.
  *         content:
@@ -175,7 +169,6 @@
  *               properties:
  *                 message:
  *                   type: string
- *                   example: Você não tem permissão para acessar este recurso
  *       404:
  *         description: Usuário não encontrado
  *         content:
@@ -185,7 +178,6 @@
  *               properties:
  *                 message:
  *                   type: string
- *                   example: Usuário não encontrado
  *       409:
  *         description: Email já está em uso por outro usuário
  *         content:
@@ -195,7 +187,6 @@
  *               properties:
  *                 message:
  *                   type: string
- *                   example: Este email já está em uso por outro usuário
  *
  *   delete:
  *     summary: Remove um usuário
@@ -227,7 +218,6 @@
  *               properties:
  *                 message:
  *                   type: string
- *                   example: Não autorizado
  *       403:
  *         description: Proibido. O usuário não possui privilégio suficiente para acessar este recurso.
  *         content:
@@ -237,7 +227,6 @@
  *               properties:
  *                 message:
  *                   type: string
- *                   example: Você não tem permissão para acessar este recurso
  *       404:
  *         description: Usuário não encontrado
  *         content:
@@ -247,7 +236,6 @@
  *               properties:
  *                 message:
  *                   type: string
- *                   example: Usuário não encontrado
  *
  * /users/{id}/status:
  *   patch:
@@ -289,7 +277,6 @@
  *               properties:
  *                 message:
  *                   type: string
- *                   example: Não autorizado
  *       403:
  *         description: Proibido. O usuário não possui privilégio suficiente para acessar este recurso.
  *         content:
@@ -299,7 +286,6 @@
  *               properties:
  *                 message:
  *                   type: string
- *                   example: Você não tem permissão para acessar este recurso
  *       404:
  *         description: Usuário não encontrado
  *         content:
@@ -309,5 +295,78 @@
  *               properties:
  *                 message:
  *                   type: string
- *                   example: Usuário não encontrado
+ *
+ * /users/{id}/profile-image:
+ *   patch:
+ *     summary: Faz upload da foto de perfil do usuário
+ *     tags:
+ *       - Users
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID do usuário
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               profileImage:
+ *                 type: string
+ *                 format: binary
+ *                 description: Arquivo de imagem para foto de perfil (JPG, PNG, GIF)
+ *     responses:
+ *       200:
+ *         description: Foto de perfil atualizada com sucesso
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                 imageUrl:
+ *                   type: string
+ *       400:
+ *         description: Erro no upload do arquivo (arquivo não enviado, muito grande, formato inválido)
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                 error:
+ *                   type: string
+ *       401:
+ *         description: Não autorizado. Token de autenticação ausente ou inválido.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *       403:
+ *         description: Proibido. O usuário não possui privilégio suficiente para acessar este recurso.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *       404:
+ *         description: Usuário não encontrado
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
  */
