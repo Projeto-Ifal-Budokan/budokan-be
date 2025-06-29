@@ -34,8 +34,6 @@ app.use(
 	}),
 );
 
-<<<<<<< Updated upstream
-=======
 /* MIDDLEWARES */
 app.use(urlencoded({ extended: true }));
 app.use(json());
@@ -45,7 +43,6 @@ app.use(passport.initialize());
 // Expor a pasta uploads como estática
 app.use("/uploads", express.static("uploads"));
 
->>>>>>> Stashed changes
 /* ROUTES */
 app.use(routes);
 
