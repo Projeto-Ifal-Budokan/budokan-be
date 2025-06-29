@@ -27,14 +27,21 @@ export const login: RequestHandler = async (req, res, next) => {
 		const validatedData = loginSchema.parse(req.body);
 		const { token } = await authService.login(validatedData);
 
+		// Configuração do cookie baseada no ambiente
+		const cookieOptions: any = {
+			httpOnly: true,
+			secure: process.env.NODE_ENV === "production",
+			sameSite: "lax",
+			maxAge: 60 * 60 * 1000, // 1 hora (mesmo tempo do JWT)
+		};
+
+		// Adiciona domain apenas em produção
+		if (process.env.NODE_ENV === "production") {
+			cookieOptions.domain = ".budokanryu.com.br";
+		}
+
 		res
-			.cookie("access_token", token, {
-				httpOnly: true,
-				secure: process.env.NODE_ENV === "production",
-				sameSite: "lax", // Changed from "strict" to "lax"
-				domain: ".budokanryu.com.br", // Added domain for subdomain sharing
-				maxAge: 24 * 60 * 60 * 1000, // 1 dia
-			})
+			.cookie("access_token", token, cookieOptions)
 			.json({ message: "Login bem-sucedido" });
 	} catch (error) {
 		next(error);
