@@ -1,10 +1,13 @@
-import { and, count, eq, inArray } from "drizzle-orm";
+import { and, count, eq, inArray, like, or } from "drizzle-orm";
 import { DateTime } from "luxon";
 import { db } from "../db";
 import { attendancesTable } from "../db/schema/attendance-schemas/attendances";
 import { sessionsTable } from "../db/schema/attendance-schemas/sessions";
 import { instructorDisciplinesTable } from "../db/schema/practitioner-schemas/instructor-disciplines";
 import { matriculationsTable } from "../db/schema/practitioner-schemas/matriculations";
+import { practitionersTable } from "../db/schema/practitioner-schemas/practitioners";
+import { studentsTable } from "../db/schema/practitioner-schemas/students";
+import { usersTable } from "../db/schema/user-schemas/users";
 import { ConflictError, NotFoundError } from "../errors/app-errors";
 import type {
 	CreateAttendanceInput,
@@ -18,6 +21,7 @@ export interface AttendanceFilters {
 	idMatriculation?: number;
 	date?: string;
 	status?: "present" | "absent";
+	studentName?: string;
 }
 
 export class AttendanceService {
@@ -32,6 +36,8 @@ export class AttendanceService {
 			.select({
 				id: attendancesTable.id,
 				idMatriculation: attendancesTable.idMatriculation,
+				studentFirstName: usersTable.firstName,
+				studentSurname: usersTable.surname,
 				idSession: attendancesTable.idSession,
 				status: attendancesTable.status,
 				createdAt: attendancesTable.createdAt,
@@ -43,10 +49,20 @@ export class AttendanceService {
 				sessionIdDiscipline: sessionsTable.idDiscipline,
 			})
 			.from(attendancesTable)
+			.leftJoin(sessionsTable, eq(attendancesTable.idSession, sessionsTable.id))
 			.leftJoin(
-				sessionsTable,
-				eq(attendancesTable.idSession, sessionsTable.id),
-			);
+				matriculationsTable,
+				eq(attendancesTable.idMatriculation, matriculationsTable.id),
+			)
+			.leftJoin(
+				studentsTable,
+				eq(matriculationsTable.idStudent, studentsTable.idPractitioner),
+			)
+			.leftJoin(
+				practitionersTable,
+				eq(studentsTable.idPractitioner, practitionersTable.idUser),
+			)
+			.leftJoin(usersTable, eq(practitionersTable.idUser, usersTable.id));
 
 		// Construir as condições de filtro
 		const conditions = [];
@@ -74,6 +90,16 @@ export class AttendanceService {
 			conditions.push(eq(sessionsTable.date, dateObj));
 		}
 
+		if (filters?.studentName) {
+			const searchTerm = `%${filters.studentName}%`;
+			conditions.push(
+				or(
+					like(usersTable.firstName, searchTerm),
+					like(usersTable.surname, searchTerm),
+				),
+			);
+		}
+
 		const where = conditions.length > 0 ? and(...conditions) : undefined;
 
 		// Executar as consultas de contagem e de dados em paralelo
@@ -86,6 +112,19 @@ export class AttendanceService {
 					sessionsTable,
 					eq(attendancesTable.idSession, sessionsTable.id),
 				)
+				.leftJoin(
+					matriculationsTable,
+					eq(attendancesTable.idMatriculation, matriculationsTable.id),
+				)
+				.leftJoin(
+					studentsTable,
+					eq(matriculationsTable.idStudent, studentsTable.idPractitioner),
+				)
+				.leftJoin(
+					practitionersTable,
+					eq(studentsTable.idPractitioner, practitionersTable.idUser),
+				)
+				.leftJoin(usersTable, eq(practitionersTable.idUser, usersTable.id))
 				.where(where),
 		]);
 
@@ -93,6 +132,8 @@ export class AttendanceService {
 		const formattedAttendances = result.map((item) => ({
 			id: item.id,
 			idMatriculation: item.idMatriculation,
+			studentName:
+				`${item.studentFirstName || ""} ${item.studentSurname || ""}`.trim(),
 			idSession: item.idSession,
 			status: item.status,
 			createdAt: item.createdAt,
@@ -198,18 +239,35 @@ export class AttendanceService {
 		return { message: "Frequência atualizada com sucesso" };
 	}
 
-	async deleteAttendance(id: number) {
-		const existingAttendance = await db
+	async deleteAttendance(idSession: number) {
+		// Verificar se a aula existe
+		const existingSession = await db
 			.select()
-			.from(attendancesTable)
-			.where(eq(attendancesTable.id, id));
+			.from(sessionsTable)
+			.where(eq(sessionsTable.id, idSession));
 
-		if (existingAttendance.length === 0) {
-			throw new NotFoundError("Registro não encontrado");
+		if (existingSession.length === 0) {
+			throw new NotFoundError("Aula não encontrada");
 		}
 
-		await db.delete(attendancesTable).where(eq(attendancesTable.id, id));
+		// Verificar se existem frequências para esta aula
+		const existingAttendances = await db
+			.select()
+			.from(attendancesTable)
+			.where(eq(attendancesTable.idSession, idSession));
 
-		return { message: "Registro excluído com sucesso" };
+		if (existingAttendances.length === 0) {
+			throw new NotFoundError("Nenhuma frequência encontrada para esta aula");
+		}
+
+		// Deletar todas as frequências da aula
+		await db
+			.delete(attendancesTable)
+			.where(eq(attendancesTable.idSession, idSession));
+
+		return {
+			message: "Frequências da aula excluídas com sucesso",
+			deletedCount: existingAttendances.length,
+		};
 	}
 }

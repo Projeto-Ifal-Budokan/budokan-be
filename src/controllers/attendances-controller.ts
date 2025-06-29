@@ -36,6 +36,8 @@ export const listAttendances: RequestHandler = async (req, res, next) => {
 				["present", "absent"].includes(String(req.query.status))
 					? (req.query.status as "present" | "absent")
 					: undefined,
+
+			studentName: req.query.studentName as string | undefined,
 		};
 
 		const { items, count } = await attendanceService.listAttendances(filters, {
@@ -67,7 +69,7 @@ export const createAttendance: RequestHandler = async (req, res, next) => {
 
 export const updateAttendance: RequestHandler = async (req, res, next) => {
 	try {
-		const { id } = req.params;
+		const { idSession } = req.params;
 
 		// Tentar validar com ambos os schemas
 		let validatedData: z.infer<typeof updateAttendanceSchema>;
@@ -81,7 +83,7 @@ export const updateAttendance: RequestHandler = async (req, res, next) => {
 		}
 
 		const result = await attendanceService.updateAttendance(
-			Number(id),
+			Number(idSession),
 			validatedData,
 		);
 		res.status(200).json(result);
@@ -92,8 +94,8 @@ export const updateAttendance: RequestHandler = async (req, res, next) => {
 
 export const deleteAttendance: RequestHandler = async (req, res, next) => {
 	try {
-		const { id } = req.params;
-		const result = await attendanceService.deleteAttendance(Number(id));
+		const { idSession } = req.params;
+		const result = await attendanceService.deleteAttendance(Number(idSession));
 		res.status(200).json(result);
 	} catch (error) {
 		next(error);

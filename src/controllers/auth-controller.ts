@@ -31,7 +31,8 @@ export const login: RequestHandler = async (req, res, next) => {
 			.cookie("access_token", token, {
 				httpOnly: true,
 				secure: process.env.NODE_ENV === "production",
-				sameSite: "strict",
+				sameSite: "lax", // Changed from "strict" to "lax"
+				domain: ".budokanryu.com.br", // Added domain for subdomain sharing
 				maxAge: 24 * 60 * 60 * 1000, // 1 dia
 			})
 			.json({ message: "Login bem-sucedido" });

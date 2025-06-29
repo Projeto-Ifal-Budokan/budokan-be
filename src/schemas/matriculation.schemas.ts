@@ -31,6 +31,27 @@ export type CreateMatriculationInput = z.infer<
 export type UpdateMatriculationInput = z.infer<
 	typeof updateMatriculationSchema
 >;
-export type ListMatriculationInput = z.infer<
-	typeof listMatriculationSchema
->;
+export type ListMatriculationInput = z.infer<typeof listMatriculationSchema>;
+
+// Tipos para os dados retornados que incluem o nome do estudante
+export type MatriculationWithStudentName = {
+	id: number;
+	idStudent: number;
+	studentName: string;
+	studentSurname: string;
+	idDiscipline: number;
+	disciplineName: string;
+	idRank: number | null;
+	rankName: string | null;
+	status: string;
+	isPaymentExempt: string;
+	activatedBy: number | null;
+	inactivatedBy: number | null;
+	createdAt: Date;
+	updatedAt: Date | null;
+};
+
+export type MatriculationListResponse = {
+	items: MatriculationWithStudentName[];
+	count: number;
+};
