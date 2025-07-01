@@ -97,6 +97,13 @@ async function seedPrivileges() {
 			{ name: "update_discipline", description: "Atualizar disciplina" },
 			{ name: "delete_discipline", description: "Excluir disciplina" },
 
+			// Achievments management
+			{ name: "list_achievments", description: "Listar todas as conquistas" },
+			{ name: "view_achievment", description: "Visualizar detalhes da conquista" },
+			{ name: "create_achievment", description: "Criar nova conquista" },
+			{ name: "update_achievment", description: "Atualizar conquista" },
+			{ name: "delete_achievment", description: "Excluir conquista" },
+
 			// Rank management
 			{ name: "list_ranks", description: "Listar todos os ranques" },
 			{ name: "view_rank", description: "Visualizar detalhes do ranque" },

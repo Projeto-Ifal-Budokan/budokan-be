@@ -17,6 +17,7 @@ import sessionRoutes from "./session-routes.ts";
 import trainingScheduleRoutes from "./training-schedule-routes.ts";
 import userRoleRoutes from "./user-role-routes.ts";
 import userRoutes from "./user-routes.ts";
+import achievmentsRoutes from "./achievments-routes";
 
 const router = Router();
 
@@ -93,4 +94,5 @@ router.use(
 	passport.authenticate("jwt", { session: false }),
 	pixKeyRoutes,
 );
+router.use("/achievments", passport.authenticate("jwt", { session: false }), achievmentsRoutes);
 export default router;
