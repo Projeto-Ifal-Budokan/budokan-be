@@ -32,6 +32,8 @@ passport.use(new JwtStrategy(options, async (jwt_payload, done) => {
 			birthDate: usersTable.birthDate,
 			phone: usersTable.phone,
 			profileImageUrl: usersTable.profileImageUrl,
+			createdAt: usersTable.createdAt,
+			updatedAt: usersTable.updatedAt,
 		})
 			.from(usersTable)
 			.where(eq(usersTable.id, jwt_payload.id));
@@ -40,7 +42,10 @@ passport.use(new JwtStrategy(options, async (jwt_payload, done) => {
       return done(null, false);
     }
 
-    const user: User = userResult[0];
+    const user: User = {
+      ...userResult[0],
+      updatedAt: userResult[0].updatedAt || userResult[0].createdAt
+    };
     
     return done(null, user);
   } catch (error) {

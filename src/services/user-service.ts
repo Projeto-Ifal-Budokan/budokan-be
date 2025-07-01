@@ -37,6 +37,8 @@ export class UserService {
 					birthDate: usersTable.birthDate,
 					status: usersTable.status,
 					profileImageUrl: usersTable.profileImageUrl,
+					createdAt: usersTable.createdAt,
+					updatedAt: usersTable.updatedAt,
 				})
 				.from(usersTable)
 				.where(and(...where))
@@ -59,6 +61,8 @@ export class UserService {
 				birthDate: usersTable.birthDate,
 				status: usersTable.status,
 				profileImageUrl: usersTable.profileImageUrl,
+				createdAt: usersTable.createdAt,
+				updatedAt: usersTable.updatedAt,
 			})
 			.from(usersTable)
 			.where(eq(usersTable.id, id));

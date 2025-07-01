@@ -21,6 +21,8 @@ export interface User {
 	phone: string;
 	birthDate: Date;
 	profileImageUrl?: string | null;
+	createdAt: Date;
+	updatedAt: Date;
 }
 
 export interface AuthenticatedRequest extends Request {

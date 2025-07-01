@@ -25,6 +25,14 @@
  *           type: string
  *           format: uri
  *           description: URL da imagem de perfil do usuário
+ *         createdAt:
+ *           type: string
+ *           format: date-time
+ *           description: Data de criação do usuário
+ *         updatedAt:
+ *           type: string
+ *           format: date-time
+ *           description: Data da última atualização do usuário
  *     UpdateUserInput:
  *       type: object
  *       properties:
