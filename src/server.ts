@@ -46,8 +46,10 @@ app.use("/uploads", express.static("uploads"));
 /* ROUTES */
 app.use(routes);
 
-/* SWAGGER */
-app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+/* SWAGGER - Apenas em desenvolvimento */
+if (process.env.NODE_ENV !== "production") {
+	app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+}
 
 // Error handlers should be last
 app.use(notFound);
