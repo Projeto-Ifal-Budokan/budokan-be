@@ -214,7 +214,7 @@ export class TrainingScheduleService {
 		return { message: "Horário de treino atualizado com sucesso" };
 	}
 
-	// Método auxiliar para converter string de tempo (HH:MM:SS) para minutos
+	// Método auxiliar para converter string de tempo (HH:MM) para minutos
 	private timeStringToMinutes(timeString: string): number {
 		const [hours, minutes] = timeString.split(":").map(Number);
 		return hours * 60 + minutes;

@@ -629,110 +629,110 @@ async function seedTrainingSchedules() {
 			{
 				idDiscipline: karateDiscipline.id,
 				weekday: "monday" as const,
-				startTime: "07:00:00",
-				endTime: "08:00:00",
+				startTime: "07:00",
+				endTime: "08:00",
 			},
 			{
 				idDiscipline: karateDiscipline.id,
 				weekday: "monday" as const,
-				startTime: "17:00:00",
-				endTime: "18:00:00",
+				startTime: "17:00",
+				endTime: "18:00",
 			},
 			{
 				idDiscipline: karateDiscipline.id,
 				weekday: "monday" as const,
-				startTime: "18:30:00",
-				endTime: "19:30:00",
+				startTime: "18:30",
+				endTime: "19:30",
 			},
 			{
 				idDiscipline: karateDiscipline.id,
 				weekday: "monday" as const,
-				startTime: "19:30:00",
-				endTime: "20:30:00",
+				startTime: "19:30",
+				endTime: "20:30",
 			},
 
 			// Karate-Do - Quarta-feira
 			{
 				idDiscipline: karateDiscipline.id,
 				weekday: "wednesday" as const,
-				startTime: "07:00:00",
-				endTime: "08:00:00",
+				startTime: "07:00",
+				endTime: "08:00",
 			},
 			{
 				idDiscipline: karateDiscipline.id,
 				weekday: "wednesday" as const,
-				startTime: "17:00:00",
-				endTime: "18:00:00",
+				startTime: "17:00",
+				endTime: "18:00",
 			},
 			{
 				idDiscipline: karateDiscipline.id,
 				weekday: "wednesday" as const,
-				startTime: "18:30:00",
-				endTime: "19:30:00",
+				startTime: "18:30",
+				endTime: "19:30",
 			},
 			{
 				idDiscipline: karateDiscipline.id,
 				weekday: "wednesday" as const,
-				startTime: "19:30:00",
-				endTime: "20:30:00",
+				startTime: "19:30",
+				endTime: "20:30",
 			},
 
 			// Karate-Do - Sexta-feira
 			{
 				idDiscipline: karateDiscipline.id,
 				weekday: "friday" as const,
-				startTime: "07:00:00",
-				endTime: "08:00:00",
+				startTime: "07:00",
+				endTime: "08:00",
 			},
 			{
 				idDiscipline: karateDiscipline.id,
 				weekday: "friday" as const,
-				startTime: "17:00:00",
-				endTime: "18:00:00",
+				startTime: "17:00",
+				endTime: "18:00",
 			},
 			{
 				idDiscipline: karateDiscipline.id,
 				weekday: "friday" as const,
-				startTime: "18:30:00",
-				endTime: "19:30:00",
+				startTime: "18:30",
+				endTime: "19:30",
 			},
 			{
 				idDiscipline: karateDiscipline.id,
 				weekday: "friday" as const,
-				startTime: "19:30:00",
-				endTime: "20:30:00",
+				startTime: "19:30",
+				endTime: "20:30",
 			},
 
 			// Kendo - Terça-feira
 			{
 				idDiscipline: kendoDiscipline.id,
 				weekday: "tuesday" as const,
-				startTime: "20:00:00",
-				endTime: "21:30:00",
+				startTime: "20:00",
+				endTime: "21:30",
 			},
 
 			// Kendo - Quinta-feira
 			{
 				idDiscipline: kendoDiscipline.id,
 				weekday: "thursday" as const,
-				startTime: "20:00:00",
-				endTime: "21:30:00",
+				startTime: "20:00",
+				endTime: "21:30",
 			},
 
 			// Arqueria - Terça-feira
 			{
 				idDiscipline: archeryDiscipline.id,
 				weekday: "tuesday" as const,
-				startTime: "18:50:00",
-				endTime: "19:50:00",
+				startTime: "18:50",
+				endTime: "19:50",
 			},
 
 			// Arqueria - Quinta-feira
 			{
 				idDiscipline: archeryDiscipline.id,
 				weekday: "thursday" as const,
-				startTime: "18:50:00",
-				endTime: "19:50:00",
+				startTime: "18:50",
+				endTime: "19:50",
 			},
 		];
 

@@ -80,7 +80,7 @@
  *                     - type: string
  *                       example: "Dia da semana inválido"
  *                     - type: string
- *                       example: "Formato de hora inválido (HH:MM:SS)"
+ *                       example: "Formato de hora inválido (HH:MM)"
  *       401:
  *         description: Não autorizado
  *       403:
@@ -181,7 +181,7 @@
  *                     - type: string
  *                       example: "Dia da semana inválido"
  *                     - type: string
- *                       example: "Formato de hora inválido (HH:MM:SS)"
+ *                       example: "Formato de hora inválido (HH:MM)"
  *       401:
  *         description: Não autorizado
  *       403:

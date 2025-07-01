@@ -651,12 +651,12 @@
  *           enum: [monday, tuesday, wednesday, thursday, friday, saturday, sunday]
  *         startTime:
  *           type: string
- *           pattern: '^([01]\d|2[0-3]):([0-5]\d):([0-5]\d)$'
- *           example: "18:00:00"
+ *           pattern: '^([01]\d|2[0-3]):([0-5]\d)$'
+ *           example: "18:00"
  *         endTime:
  *           type: string
- *           pattern: '^([01]\d|2[0-3]):([0-5]\d):([0-5]\d)$'
- *           example: "19:30:00"
+ *           pattern: '^([01]\d|2[0-3]):([0-5]\d)$'
+ *           example: "19:30"
  *         createdAt:
  *           type: string
  *           format: date-time
@@ -679,12 +679,12 @@
  *           enum: [monday, tuesday, wednesday, thursday, friday, saturday, sunday]
  *         startTime:
  *           type: string
- *           pattern: '^([01]\d|2[0-3]):([0-5]\d):([0-5]\d)$'
- *           example: "18:00:00"
+ *           pattern: '^([01]\d|2[0-3]):([0-5]\d)$'
+ *           example: "18:00"
  *         endTime:
  *           type: string
- *           pattern: '^([01]\d|2[0-3]):([0-5]\d):([0-5]\d)$'
- *           example: "19:30:00"
+ *           pattern: '^([01]\d|2[0-3]):([0-5]\d)$'
+ *           example: "19:30"
  *     UpdateTrainingScheduleInput:
  *       type: object
  *       properties:
@@ -695,12 +695,12 @@
  *           enum: [monday, tuesday, wednesday, thursday, friday, saturday, sunday]
  *         startTime:
  *           type: string
- *           pattern: '^([01]\d|2[0-3]):([0-5]\d):([0-5]\d)$'
- *           example: "18:00:00"
+ *           pattern: '^([01]\d|2[0-3]):([0-5]\d)$'
+ *           example: "18:00"
  *         endTime:
  *           type: string
- *           pattern: '^([01]\d|2[0-3]):([0-5]\d):([0-5]\d)$'
- *           example: "19:30:00"
+ *           pattern: '^([01]\d|2[0-3]):([0-5]\d)$'
+ *           example: "19:30"
  *     InstructorDiscipline:
  *       type: object
  *       properties:

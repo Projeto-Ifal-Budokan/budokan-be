@@ -19,14 +19,14 @@ export const createTrainingScheduleSchema = z.object({
 	startTime: z
 		.string()
 		.regex(
-			/^([01]\d|2[0-3]):([0-5]\d):([0-5]\d)$/,
-			"Formato de hora inválido (HH:MM:SS)",
+			/^([01]\d|2[0-3]):([0-5]\d)$/,
+			"Formato de hora inválido (HH:MM)",
 		),
 	endTime: z
 		.string()
 		.regex(
-			/^([01]\d|2[0-3]):([0-5]\d):([0-5]\d)$/,
-			"Formato de hora inválido (HH:MM:SS)",
+			/^([01]\d|2[0-3]):([0-5]\d)$/,
+			"Formato de hora inválido (HH:MM)",
 		),
 });
 
@@ -51,15 +51,15 @@ export const updateTrainingScheduleSchema = z.object({
 	startTime: z
 		.string()
 		.regex(
-			/^([01]\d|2[0-3]):([0-5]\d):([0-5]\d)$/,
-			"Formato de hora inválido (HH:MM:SS)",
+			/^([01]\d|2[0-3]):([0-5]\d)$/,
+			"Formato de hora inválido (HH:MM)",
 		)
 		.optional(),
 	endTime: z
 		.string()
 		.regex(
-			/^([01]\d|2[0-3]):([0-5]\d):([0-5]\d)$/,
-			"Formato de hora inválido (HH:MM:SS)",
+			/^([01]\d|2[0-3]):([0-5]\d)$/,
+			"Formato de hora inválido (HH:MM)",
 		)
 		.optional(),
 });
