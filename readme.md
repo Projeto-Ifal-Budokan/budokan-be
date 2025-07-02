@@ -210,7 +210,7 @@ ISC
 4. Faça Push para a Branch (`git push origin feature/NovaFuncionalidade`)
 5. Abra um Pull Request
 
-## 👥 Créditos da Equipe
+## 👥 Créditos das Equipes
 
 Abaixo estão os integrantes que contribuíram para o desenvolvimento deste projeto. Sinta-se à vontade para adicionar equipes subsequentes conforme necessário!
 
@@ -265,18 +265,5 @@ Primeira equipe. Iniciamos o projeto do zero, nos reunimos com o Stakeholder, en
       <span><b>Função:</b> <i>Frontend Developer</i></span><br />
       <span><sub>Desenvolveu as telas do Frontend</sub></span>
     </td>
-    <!-- Adicione mais membros copiando o bloco <td> acima -->
   </tr>
 </table>
-
-<!-- Exemplo de como adicionar mais membros:
-<td align="center">
-  <a href="https://github.com/SEU_GITHUB3">
-    <img src="https://github.com/SEU_GITHUB3.png" width="100px;" alt="Foto de Perfil"/><br />
-    <sub><b>Nome do Integrante 3</b></sub>
-  </a>
-  <br />
-  <span>Função: <i>Seu cargo ou papel</i></span><br />
-  <span>Outras informações relevantes</span>
-</td>
--->
