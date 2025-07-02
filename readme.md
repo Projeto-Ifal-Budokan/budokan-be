@@ -261,7 +261,7 @@ Abaixo estão os integrantes que contribuíram para o desenvolvimento deste proj
       </a>
       <br />
       <span><b>Função:</b> <i>Frontend Developer</i></span><br />
-      <span><sub>Responsável pelo desevolvimento das telas do Frontend</sub></span>
+      <span><sub>Desenvolveu as telas do Frontend</sub></span>
     </td>
     <!-- Adicione mais membros copiando o bloco <td> acima -->
   </tr>
