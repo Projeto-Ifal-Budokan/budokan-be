@@ -214,25 +214,54 @@ ISC
 
 Abaixo estão os integrantes que contribuíram para o desenvolvimento deste projeto. Sinta-se à vontade para adicionar membros conforme necessário!
 
+## Equipe The Black Belts
+
 <table>
   <tr>
     <td align="center">
       <a href="https://github.com/Casterrr">
         <img src="https://github.com/Casterrr.png" width="100px;" alt="Foto de Perfil"/><br />
-        <sub><b>Nome do Integrante</b></sub>
+        <b>Lucas Matheus Vieira Lúcio</b>
       </a>
       <br />
-      <span>Função: <i>Seu cargo ou papel</i></span><br />
-      <span>Outras informações relevantes</span>
+      <span><b>Função:</b> <i>Designer/UX e Backend Developer</i></span><br />
+      <span><sub>Líder do projeto e Gerente de projeto substituto</sub></span>
     </td>
     <td align="center">
-      <a href="https://github.com/Casterrr">
-        <img src="https://github.com/Casterrr.png" width="100px;" alt="Foto de Perfil"/><br />
-        <sub><b>Nome do Integrante 2</b></sub>
+      <a href="https://github.com/HeevOL">
+        <img src="https://github.com/HeevOL.png" width="100px;" alt="Foto de Perfil"/><br />
+        <b>Heverton de Oliveira Lourenço</b>
       </a>
       <br />
-      <span>Função: <i>Seu cargo ou papel</i></span><br />
-      <span>Outras informações relevantes</span>
+      <span><b>Função:</b> <i>FullStack Developer</i></span><br />
+      <span><sub>Atuou no auxílio do Backend</sub></span>
+    </td>
+    <td align="center">
+      <a href="https://github.com/filipezaidan">
+        <img src="https://github.com/filipezaidan.png" width="100px;" alt="Foto de Perfil"/><br />
+        <b>Filipe Zaidan Ferreira da Silva</b>
+      </a>
+      <br />
+      <span><b>Função:</b> <i>FullStack Developer</i></span><br />
+      <span><sub>Atuou no auxílio do Frontend e DevOps</sub></span>
+    </td>
+    <td align="center">
+      <a href="https://github.com/emessonh">
+        <img src="https://github.com/emessonh.png" width="100px;" alt="Foto de Perfil"/><br />
+        <b>Emesson Horácio dos Santos</b>
+      </a>
+      <br />
+      <span><b>Função:</b> <i>DevOps</i></span><br />
+      <span><sub>Lidou com CI/CD do Front e do Back</sub></span>
+    </td>
+    <td align="center">
+      <a href="https://github.com/Maelton">
+        <img src="https://github.com/Maelton.png" width="100px;" alt="Foto de Perfil"/><br />
+        <b>Maelton Lima dos Santos</b>
+      </a>
+      <br />
+      <span><b>Função:</b> <i>Frontend Developer</i></span><br />
+      <span><sub>Responsável pelo desevolvimento das telas do Frontend</sub></span>
     </td>
     <!-- Adicione mais membros copiando o bloco <td> acima -->
   </tr>
