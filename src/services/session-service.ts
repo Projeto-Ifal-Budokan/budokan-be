@@ -26,6 +26,8 @@ import type {
 	ViewMatriculationSessionsInput,
 } from "../schemas/session.schemas";
 import { AttendanceService } from "./attendance-service";
+import { trainingSchedulesTable } from "../db/schema/discipline-schemas/training-schedules";
+import type { SQL } from "drizzle-orm";
 
 // Define tipos para o schema do banco de dados
 type SessionInsertType = {
@@ -74,31 +76,32 @@ export class SessionService {
 				);
 		}
 
-		const conditions = [
-			filters.idDiscipline
-				? eq(sessionsTable.idDiscipline, filters.idDiscipline)
-				: undefined,
-			filters.idInstructor
-				? instructorDisciplineIDs.length > 0
-					? inArray(
-							sessionsTable.idInstructorDiscipline,
-							instructorDisciplineIDs.map((id) => id.id),
-						)
-					: eq(sessionsTable.id, -1) // força retornar vazio quando não encontra instructor_disciplines
-				: undefined,
-			filters.initialDate
-				? gte(
-						sessionsTable.date,
-						DateTime.fromISO(filters.initialDate).toJSDate(),
-					)
-				: undefined,
-			filters.finalDate
-				? lte(
-						sessionsTable.date,
-						DateTime.fromISO(filters.finalDate).toJSDate(),
-					)
-				: undefined,
-		].filter(Boolean);
+		const conditions: SQL[] = [];
+		if (filters.idDiscipline) {
+			conditions.push(eq(sessionsTable.idDiscipline, filters.idDiscipline));
+		}
+		if (filters.idInstructor) {
+			if (instructorDisciplineIDs.length > 0) {
+				conditions.push(inArray(
+					sessionsTable.idInstructorDiscipline,
+					instructorDisciplineIDs.map((id) => id.id),
+				));
+			} else {
+				conditions.push(eq(sessionsTable.id, -1)); // força retornar vazio quando não encontra instructor_disciplines
+			}
+		}
+		if (filters.initialDate) {
+			conditions.push(gte(
+				sessionsTable.date,
+				DateTime.fromISO(filters.initialDate).toJSDate(),
+			));
+		}
+		if (filters.finalDate) {
+			conditions.push(lte(
+				sessionsTable.date,
+				DateTime.fromISO(filters.finalDate).toJSDate(),
+			));
+		}
 
 		const [sessions, [{ count: total }]] = await Promise.all([
 			db.query.sessionsTable.findMany({
@@ -437,6 +440,51 @@ export class SessionService {
 		if (data.date) validatedData.date = data.date;
 		if ("isLastSessionOfDay" in data)
 			validatedData.isLastSessionOfDay = data.isLastSessionOfDay;
+
+		// Verificar se o horário da sessão está contido em algum horário de treino da disciplina
+		if (
+			validatedData.idDiscipline &&
+			validatedData.date &&
+			validatedData.startingTime &&
+			validatedData.endingTime
+		) {
+			const dateObj = DateTime.fromISO(validatedData.date);
+			// Mapear weekday de Luxon para o enum do banco
+			const weekdayNames = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"] as const;
+			type WeekdayEnum = typeof weekdayNames[number];
+			const luxonWeekday = dateObj.weekday; // 1 (segunda) a 7 (domingo)
+			const weekday = weekdayNames[luxonWeekday - 1] as WeekdayEnum;
+
+			const trainingSchedules = await db
+				.select()
+				.from(trainingSchedulesTable)
+				.where(
+					and(
+						eq(trainingSchedulesTable.idDiscipline, validatedData.idDiscipline),
+						eq(trainingSchedulesTable.weekday, weekday)
+					),
+				);
+
+			function timeStringToMinutes(timeString: string): number {
+				const [hours, minutes] = timeString.split(":").map(Number);
+				return hours * 60 + minutes;
+			}
+
+			const sessionStart = timeStringToMinutes(validatedData.startingTime);
+			const sessionEnd = timeStringToMinutes(validatedData.endingTime);
+
+			const isWithinAnySchedule = trainingSchedules.some((schedule) => {
+				const scheduleStart = timeStringToMinutes(schedule.startTime);
+				const scheduleEnd = timeStringToMinutes(schedule.endTime);
+				return sessionStart >= scheduleStart && sessionEnd <= scheduleEnd;
+			});
+
+			if (!isWithinAnySchedule) {
+				throw new ConflictError(
+					"O horário da aula não está contido em nenhum dos horários de treino cadastrados para a disciplina neste dia."
+				);
+			}
+		}
 
 		// Verificar se já existe uma aula ativa para este dia e horario
 		if (
