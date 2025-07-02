@@ -248,8 +248,8 @@ Primeira equipe. Iniciamos o projeto do zero, nos reunimos com o Stakeholder, en
       <span><sub>Atuou no auxílio do Frontend e DevOps</sub></span>
     </td>
     <td align="center">
-      <a href="https://github.com/emessonh">
-        <img src="https://github.com/emessonh.png" width="100px;" alt="Foto de Perfil"/><br />
+      <a href="https://github.com/emessonhoracio">
+        <img src="https://github.com/emessonhoracio.png" width="100px;" alt="Foto de Perfil"/><br />
         <b>Emesson Horácio dos Santos</b>
       </a>
       <br />
