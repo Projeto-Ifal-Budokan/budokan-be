@@ -28,6 +28,8 @@ import type {
 import { AttendanceService } from "./attendance-service";
 import { trainingSchedulesTable } from "../db/schema/discipline-schemas/training-schedules";
 import type { SQL } from "drizzle-orm";
+import { usersTable } from "../db/schema/user-schemas/users";
+import { practitionersTable } from "../db/schema/practitioner-schemas/practitioners";
 
 // Define tipos para o schema do banco de dados
 type SessionInsertType = {
@@ -104,31 +106,40 @@ export class SessionService {
 		}
 
 		const [sessions, [{ count: total }]] = await Promise.all([
-			db.query.sessionsTable.findMany({
-				where:
-					conditions.length > 0 ? (session) => and(...conditions) : undefined,
-				columns: {
-					id: true,
-					idDiscipline: true,
-					idInstructorDiscipline: true,
-					date: true,
-					startingTime: true,
-					endingTime: true,
-				},
-				with: {
-					attendances: {
-						columns: {
-							id: true,
-							idMatriculation: true,
-							idSession: true,
-							status: true,
-						},
-					},
-				},
-				orderBy: desc(sessionsTable.date),
-				limit,
-				offset,
-			}),
+			db
+				.select({
+					id: sessionsTable.id,
+					idDiscipline: sessionsTable.idDiscipline,
+					disciplineName: disciplinesTable.name,
+					idInstructorDiscipline: sessionsTable.idInstructorDiscipline,
+					instructorFirstName: usersTable.firstName,
+					instructorSurname: usersTable.surname,
+					date: sessionsTable.date,
+					startingTime: sessionsTable.startingTime,
+					endingTime: sessionsTable.endingTime,
+				})
+				.from(sessionsTable)
+				.innerJoin(disciplinesTable, eq(sessionsTable.idDiscipline, disciplinesTable.id))
+				.innerJoin(
+					instructorDisciplinesTable,
+					eq(sessionsTable.idInstructorDiscipline, instructorDisciplinesTable.id),
+				)
+				.innerJoin(
+					instructorsTable,
+					eq(instructorDisciplinesTable.idInstructor, instructorsTable.idPractitioner),
+				)
+				.innerJoin(
+					practitionersTable,
+					eq(instructorsTable.idPractitioner, practitionersTable.idUser),
+				)
+				.innerJoin(
+					usersTable,
+					eq(practitionersTable.idUser, usersTable.id),
+				)
+				.where(conditions.length > 0 ? and(...conditions) : undefined)
+				.orderBy(desc(sessionsTable.date))
+				.limit(limit)
+				.offset(offset),
 			db
 				.select({ count: count() })
 				.from(sessionsTable)

@@ -164,6 +164,15 @@
  *           type: integer
  *         idDiscipline:
  *           type: integer
+ *         disciplineName:
+ *           type: string
+ *           description: Nome da disciplina
+ *         instructorFirstName:
+ *           type: string
+ *           description: Primeiro nome do instrutor
+ *         instructorSurname:
+ *           type: string
+ *           description: Sobrenome do instrutor
  *         date:
  *           type: string
  *           format: date
