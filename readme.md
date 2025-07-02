@@ -212,9 +212,11 @@ ISC
 
 ## 👥 Créditos da Equipe
 
-Abaixo estão os integrantes que contribuíram para o desenvolvimento deste projeto. Sinta-se à vontade para adicionar membros conforme necessário!
+Abaixo estão os integrantes que contribuíram para o desenvolvimento deste projeto. Sinta-se à vontade para adicionar equipes subsequentes conforme necessário!
 
 ## Equipe The Black Belts
+
+Primeira equipe. Iniciamos o projeto do zero, nos reunimos com o Stakeholder, entendemos suas dores, pensamos nas soluções, validamos com ele, modelamos o sistema, pensamos nas regras de negócio, e construimos boa parte do sistema, tanto na Landing Page, quanto no Sistema Interno.
 
 <table>
   <tr>
