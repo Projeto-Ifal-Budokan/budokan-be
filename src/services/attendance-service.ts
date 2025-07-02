@@ -208,6 +208,27 @@ export class AttendanceService {
 			throw new NotFoundError("Aula não encontrada");
 		}
 
+		const sessionDisciplineId = existingSession[0].idDiscipline;
+
+		// Validar se cada idMatriculation existe e está vinculado à disciplina da aula
+		for (const attendanceUpdate of data) {
+			const matriculation = await db
+				.select()
+				.from(matriculationsTable)
+				.where(
+					and(
+						eq(matriculationsTable.id, attendanceUpdate.idMatriculation),
+						eq(matriculationsTable.idDiscipline, sessionDisciplineId),
+					),
+				)
+				.limit(1);
+			if (matriculation.length === 0) {
+				throw new NotFoundError(
+					`Matrícula ${attendanceUpdate.idMatriculation} não encontrada ou não vinculada à disciplina da aula`,
+				);
+			}
+		}
+
 		// Atualizar cada registro de frequência
 		for (const attendanceUpdate of data) {
 			await db
