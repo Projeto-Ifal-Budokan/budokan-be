@@ -1,5 +1,8 @@
 #!/bin/bash
 
+
+export COREPACK_ENABLE_DOWNLOAD_PROMPT=0
+
 echo "🚀 Iniciando aplicação Budokan Backend..."
 
 # Função para aguardar o banco de dados
