@@ -17,7 +17,7 @@ services:
       - JWT_SECRET=beb52a940d2eb3fb91488adac8b3f265dcec56daf6db0ff8ba3ef05ac430e28b
       - NODE_ENV=develop
       - DEV_URL=http://localhost:3000
-      - PROD_URL=http://budokanryu.com.br
+      - PROD_URL=https://budokanryu.com.br
       - PORT=8001
       - ETHEREAL_USER=frida20@ethereal.email
       - ETHEREAL_PASS=Debt5yAYKFeQDvDQR4
@@ -26,13 +26,14 @@ services:
       - NODE_OPTIONS=--no-warnings
       - DOCKER_BUILDKIT=1
       # Cloudflare Configuration (para produção)
-      - CLOUDFLARE_DOMAIN=budokanryu.com.br
       - BASE_URL=http://localhost:8001
     depends_on:
       mysql:
         condition: service_healthy
     networks:
       - budokan-network
+    volumes:
+      - ./uploads:/app/uploads
 
   mysql:
     image: mysql:8.2

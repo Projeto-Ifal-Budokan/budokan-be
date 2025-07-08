@@ -5,6 +5,7 @@ import passport from "../passport.ts";
 import { errorHandler } from "./middlewares/error-handler";
 import { notFound } from "./middlewares/not-found";
 import swaggerSpec from "./swagger";
+import path from "node:path";
 
 import routes from "./routes";
 
@@ -41,8 +42,7 @@ app.use(cookieParser());
 app.use(passport.initialize());
 
 // Expor a pasta uploads como estática
-app.use("/uploads", express.static("uploads"));
-
+app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
 /* ROUTES */
 app.use(routes);
 

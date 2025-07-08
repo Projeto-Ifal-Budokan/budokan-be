@@ -4,7 +4,6 @@ import type { Request } from "express";
 import multer from "multer";
 import sharp from "sharp";
 import { v4 as uuidv4 } from "uuid";
-import { getProfileImageCloudflareUrl } from "../config/cloudflare";
 
 // Declaração de tipos para o multer
 declare global {
@@ -134,12 +133,9 @@ export const deleteProfileImage = (filePath: string): void => {
 
 // Função para gerar URL pública da imagem
 export const getProfileImageUrl = (filename: string): string => {
-	// Se estiver em produção e tiver domínio configurado, usar Cloudflare
-	if (process.env.NODE_ENV === "production" && process.env.CLOUDFLARE_DOMAIN) {
-		return getProfileImageCloudflareUrl(filename);
+	if (process.env.NODE_ENV === "production") {
+		return `${process.env.PROD_URL}/uploads/profile-images/${filename}`;
 	}
-
-	// Fallback para desenvolvimento local
 	const port = process.env.PORT || "8000";
 	const baseUrl = `http://localhost:${port}`;
 	return `${baseUrl}/uploads/profile-images/${filename}`;

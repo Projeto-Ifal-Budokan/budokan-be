@@ -10,7 +10,7 @@ const options = {
 		},
 		servers: [
 			{
-				url: "http://localhost:8000", // ajuste conforme sua porta
+				url: `http://localhost:${process.env.PORT}`, // ajuste conforme sua porta
 			},
 		],
 	},
