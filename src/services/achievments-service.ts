@@ -1,6 +1,10 @@
 import { count, eq, and } from "drizzle-orm";
 import { db } from "../db";
 import { achievmentsTable } from "../db/schema/discipline-schemas/achievments";
+import { matriculationsTable } from "../db/schema/practitioner-schemas/matriculations";
+import { disciplinesTable } from "../db/schema/discipline-schemas/disciplines";
+import { practitionersTable } from "../db/schema/practitioner-schemas/practitioners";
+import { usersTable } from "../db/schema/user-schemas/users";
 import { ConflictError, NotFoundError } from "../errors/app-errors";
 import type {
     CreateAchievmentInput,
@@ -25,6 +29,10 @@ export class AchievmentsService {
                 .select({
                     id: achievmentsTable.id,
                     idPractitioner: achievmentsTable.idPractitioner,
+                    practitionerFirstName: usersTable.firstName,
+                    practitionerSurname: usersTable.surname,
+                    idDiscipline: achievmentsTable.idDiscipline,
+                    disciplineName: disciplinesTable.name,
                     title: achievmentsTable.title,
                     description: achievmentsTable.description,
                     achievementDate: achievmentsTable.achievementDate,
@@ -32,6 +40,9 @@ export class AchievmentsService {
                     updatedAt: achievmentsTable.updatedAt,
                 })
                 .from(achievmentsTable)
+                .leftJoin(practitionersTable, eq(achievmentsTable.idPractitioner, practitionersTable.idUser))
+                .leftJoin(usersTable, eq(practitionersTable.idUser, usersTable.id))
+                .leftJoin(disciplinesTable, eq(achievmentsTable.idDiscipline, disciplinesTable.id))
                 .where(and(...conditions))
                 .limit(limit)
                 .offset(offset),
@@ -46,6 +57,10 @@ export class AchievmentsService {
             .select({
                 id: achievmentsTable.id,
                 idPractitioner: achievmentsTable.idPractitioner,
+                practitionerFirstName: usersTable.firstName,
+                practitionerSurname: usersTable.surname,
+                idDiscipline: achievmentsTable.idDiscipline,
+                disciplineName: disciplinesTable.name,
                 title: achievmentsTable.title,
                 description: achievmentsTable.description,
                 achievementDate: achievmentsTable.achievementDate,
@@ -53,6 +68,9 @@ export class AchievmentsService {
                 updatedAt: achievmentsTable.updatedAt,
             })
             .from(achievmentsTable)
+            .leftJoin(practitionersTable, eq(achievmentsTable.idPractitioner, practitionersTable.idUser))
+            .leftJoin(usersTable, eq(practitionersTable.idUser, usersTable.id))
+            .leftJoin(disciplinesTable, eq(achievmentsTable.idDiscipline, disciplinesTable.id))
             .where(eq(achievmentsTable.id, id));
 
         if (achievment.length === 0) {
@@ -63,7 +81,20 @@ export class AchievmentsService {
     }
 
     async createAchievment(data: CreateAchievmentInput) {
-        // Não faz sentido checar duplicidade por título, pois pode haver conquistas iguais para praticantes diferentes
+        // Verifica se o praticante possui matrícula ativa na disciplina
+        const matricula = await db
+            .select()
+            .from(matriculationsTable)
+            .where(
+                and(
+                    eq(matriculationsTable.idStudent, data.idPractitioner),
+                    eq(matriculationsTable.idDiscipline, data.idDiscipline),
+                    eq(matriculationsTable.status, "active")
+                )
+            );
+        if (matricula.length === 0) {
+            throw new ConflictError("O praticante não possui matrícula ativa nesta disciplina");
+        }
         await db.insert(achievmentsTable).values({
             ...data,
             achievementDate: new Date(data.achievementDate),
@@ -79,6 +110,25 @@ export class AchievmentsService {
 
         if (existing.length === 0) {
             throw new NotFoundError("Conquista não encontrada");
+        }
+
+        // Se for informado idPractitioner ou idDiscipline, faz a verificação
+        const idPractitioner = data.idPractitioner ?? existing[0].idPractitioner;
+        const idDiscipline = data.idDiscipline ?? existing[0].idDiscipline;
+        if (idPractitioner && idDiscipline) {
+            const matricula = await db
+                .select()
+                .from(matriculationsTable)
+                .where(
+                    and(
+                        eq(matriculationsTable.idStudent, idPractitioner),
+                        eq(matriculationsTable.idDiscipline, idDiscipline),
+                        eq(matriculationsTable.status, "active")
+                    )
+                );
+            if (matricula.length === 0) {
+                throw new ConflictError("O praticante não possui matrícula ativa nesta disciplina");
+            }
         }
 
         await db

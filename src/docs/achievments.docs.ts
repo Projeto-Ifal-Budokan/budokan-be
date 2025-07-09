@@ -12,6 +12,11 @@
  *           type: integer
  *         description: ID do praticante
  *       - in: query
+ *         name: idDiscipline
+ *         schema:
+ *           type: integer
+ *         description: ID da disciplina
+ *       - in: query
  *         name: page
  *         schema:
  *           type: integer
@@ -21,11 +26,6 @@
  *         schema:
  *           type: integer
  *         description: Tamanho da página
- *       - in: query
- *         name: idDiscipline
- *         schema:
- *           type: integer
- *         description: ID da disciplina
  *     responses:
  *       200:
  *         description: Lista de conquistas
@@ -298,6 +298,14 @@
  *           type: integer
  *         idPractitioner:
  *           type: integer
+ *         idDiscipline:
+ *           type: integer
+ *         disciplineName:
+ *           type: string
+ *         practitionerFirstName:
+ *           type: string
+ *         practitionerSurname:
+ *           type: string
  *         title:
  *           type: string
  *         description:
@@ -311,12 +319,12 @@
  *         updatedAt:
  *           type: string
  *           format: date-time
- *         idDiscipline:
- *           type: integer
  *     CreateAchievmentInput:
  *       type: object
  *       properties:
  *         idPractitioner:
+ *           type: integer
+ *         idDiscipline:
  *           type: integer
  *         title:
  *           type: string
@@ -325,8 +333,6 @@
  *         achievementDate:
  *           type: string
  *           format: date
- *         idDiscipline:
- *           type: integer
  *       required:
  *         - idPractitioner
  *         - title
@@ -337,6 +343,8 @@
  *       properties:
  *         idPractitioner:
  *           type: integer
+ *         idDiscipline:
+ *           type: integer
  *         title:
  *           type: string
  *         description:
@@ -344,6 +352,4 @@
  *         achievementDate:
  *           type: string
  *           format: date
- *         idDiscipline:
- *           type: integer
  */ 
