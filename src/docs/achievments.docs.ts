@@ -21,6 +21,11 @@
  *         schema:
  *           type: integer
  *         description: Tamanho da página
+ *       - in: query
+ *         name: idDiscipline
+ *         schema:
+ *           type: integer
+ *         description: ID da disciplina
  *     responses:
  *       200:
  *         description: Lista de conquistas
@@ -306,6 +311,8 @@
  *         updatedAt:
  *           type: string
  *           format: date-time
+ *         idDiscipline:
+ *           type: integer
  *     CreateAchievmentInput:
  *       type: object
  *       properties:
@@ -318,6 +325,8 @@
  *         achievementDate:
  *           type: string
  *           format: date
+ *         idDiscipline:
+ *           type: integer
  *       required:
  *         - idPractitioner
  *         - title
@@ -335,4 +344,6 @@
  *         achievementDate:
  *           type: string
  *           format: date
+ *         idDiscipline:
+ *           type: integer
  */ 

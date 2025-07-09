@@ -17,6 +17,7 @@ export class AchievmentsService {
 
         const conditions = [
             filters.idPractitioner ? eq(achievmentsTable.idPractitioner, filters.idPractitioner) : undefined,
+            filters.idDiscipline ? eq(achievmentsTable.idDiscipline, filters.idDiscipline) : undefined,
         ];
 
         const [achievments, [{ count: total }]] = await Promise.all([
