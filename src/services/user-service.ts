@@ -1,8 +1,14 @@
 import { and, count, eq, ne, like } from "drizzle-orm";
+import path from "node:path";
 import { db } from "../db";
 import { usersTable } from "../db/schema/user-schemas/users";
 import { ConflictError, NotFoundError } from "../errors/app-errors";
 import type { UpdateUserInput, ListUserInput } from "../schemas/user.schemas";
+import {
+	deleteProfileImage,
+	getProfileImageUrl,
+	optimizeProfileImage,
+} from "../utils/file-upload";
 
 export class UserService {
 	async list(
@@ -154,6 +160,49 @@ export class UserService {
 		return {
 			message: "Status do usuário alterado com sucesso",
 			status,
+		};
+	}
+
+	async uploadProfileImage(userId: number, filePath: string) {
+		// Verificar se o usuário existe
+		const user = await db
+			.select()
+			.from(usersTable)
+			.where(eq(usersTable.id, userId));
+
+		if (user.length === 0) {
+			throw new NotFoundError("Usuário não encontrado");
+		}
+
+		// Otimizar imagem
+		const optimizedPath = await optimizeProfileImage(filePath);
+		const filename = path.basename(optimizedPath);
+		const imageUrl = getProfileImageUrl(filename);
+
+		// Deletar imagem antiga se existir
+		const oldImageUrl = user[0].profileImageUrl;
+		if (oldImageUrl) {
+			const oldFilename = oldImageUrl.split("/").pop();
+			if (oldFilename) {
+				const oldPath = path.join(
+					process.cwd(),
+					"uploads",
+					"profile-images",
+					oldFilename,
+				);
+				deleteProfileImage(oldPath);
+			}
+		}
+
+		// Atualizar usuário com nova URL
+		await db
+			.update(usersTable)
+			.set({ profileImageUrl: imageUrl })
+			.where(eq(usersTable.id, userId));
+
+		return {
+			message: "Imagem de perfil atualizada com sucesso",
+			imageUrl,
 		};
 	}
 }
