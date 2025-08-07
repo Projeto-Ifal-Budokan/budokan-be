@@ -23,7 +23,7 @@ run_drizzle_push() {
     
     while [ $attempt -le $max_attempts ]; do
         echo "   Tentativa $attempt de $max_attempts..."
-        if pnpm drizzle-kit push -y; then
+        if pnpm drizzle-kit push --force; then
             echo "✅ Drizzle push executado com sucesso!"
             return 0
         else
