@@ -48,7 +48,10 @@ const transporter = nodemailer.createTransport(
 transporter.verify((error, success) => {
 	if (error) {
 		console.error("Erro na configuração do transporter:", error);
-		console.error("Verifique as variáveis de ambiente GMAIL_USER e GMAIL_APP_PASSWORD");
+		console.error("🔧 Configuração:", process.env.NODE_ENV === "production" ? "Gmail (Produção)" : "Ethereal (Desenvolvimento)");
+		console.error("📨 Email remetente:", process.env.NODE_ENV === "production" ? process.env.GMAIL_USER : process.env.ETHEREAL_USER);
+		console.error("🔒 Senha: ", process.env.NODE_ENV === "production" ? process.env.GMAIL_APP_PASSWORD : process.env.ETHEREAL_PASS);
+		console.error("Verifique as variáveis de ambiente GMAIL_USER, GMAIL_APP_PASSWORD, ETHEREAL_USER, ETHEREAL_PASS");
 	} else {
 		console.log("✅ Servidor de email pronto para enviar mensagens");
 		console.log("📧 Ambiente:", process.env.NODE_ENV);
