@@ -39,8 +39,8 @@ router.patch("/:id/status", hasPrivilege("admin"), toggleUserStatus);
 // Rota para upload de foto de perfil
 router.patch(
 	"/:id/profile-image",
-	hasPrivilege("update_user"),
-	isOwnerOrHasPrivileges(["update_user", "admin"]),
+	// hasPrivilege("update_user"),
+	isOwnerOrHasPrivileges(["update_user"]),
 	uploadProfileImage.single("profileImage"),
 	uploadProfileImageHandler,
 );
