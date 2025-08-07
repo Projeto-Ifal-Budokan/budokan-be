@@ -53,8 +53,15 @@ cd budokan-be
 ```
 
 2. Inicie os containers com Docker Compose:
+
+**Para desenvolvimento:**
 ```bash
-docker-compose up -d
+docker-compose -f docker-compose.dev.yml up -d
+```
+
+**Para produção:**
+```bash
+docker-compose -f docker-compose.prod.yml up -d
 ```
 
 Isso irá configurar tanto o banco de dados MySQL quanto a aplicação em containers separados.
@@ -63,32 +70,61 @@ Isso irá configurar tanto o banco de dados MySQL quanto a aplicação em contai
 
 O projeto utiliza Drizzle ORM para gerenciamento do banco de dados. O esquema do banco está localizado em `src/db/schema/*.ts`.
 
+### Arquivos de Configuração Docker
+
+O projeto possui dois arquivos de configuração do Docker Compose:
+
+- **`docker-compose.dev.yml`** - Configuração para desenvolvimento
+- **`docker-compose.prod.yml`** - Configuração para produção
+
+**Importante:** Como não existe um arquivo `docker-compose.yml` padrão, você deve sempre especificar qual arquivo usar com a flag `-f`:
+
+```bash
+# Para desenvolvimento
+docker-compose -f docker-compose.dev.yml [comando]
+
+# Para produção  
+docker-compose -f docker-compose.prod.yml [comando]
+```
+
 ### Docker
 
 #### Executando somente o banco de dados:
 
 Para subir apenas o container do banco:
 
+**Desenvolvimento:**
 ```bash
-docker-compose up -d mysql
+docker-compose -f docker-compose.dev.yml up -d mysql
+```
+
+**Produção:**
+```bash
+docker-compose -f docker-compose.prod.yml up -d mysql
 ```
 
 #### Executando o projeto completo com Docker:
 
 Para subir toda a aplicação (banco de dados e backend):
 
+**Desenvolvimento:**
 ```bash
-docker-compose up -d
+docker-compose -f docker-compose.dev.yml up -d
+```
+
+**Produção:**
+```bash
+docker-compose -f docker-compose.prod.yml up -d
 ```
 
 Para visualizar os logs da aplicação:
 ```bash
-docker-compose logs -f app
+docker-compose -f docker-compose.dev.yml logs -f app
 ```
 
 Para visualizar os logs do banco de dados:
 ```bash
-docker-compose logs -f mysql
+docker-compose -f docker-compose.dev.yml logs -f mysql
 ```
 
 Para verificar os containeres rodando:
@@ -98,17 +134,17 @@ docker ps
 
 Para derrubar os containers:
 ```bash
-docker-compose down
+docker-compose -f docker-compose.dev.yml down
 ```
 
 Para derrubar os containers e remover as imagens:
 ```bash
-docker-compose down --rmi all
+docker-compose -f docker-compose.dev.yml down --rmi all
 ```
 
 Para derrubar os containers e limpar o banco:
 ```bash
-docker-compose down -v
+docker-compose -f docker-compose.dev.yml down -v
 ```
 
 ### Migrações do Banco de Dados
@@ -165,11 +201,18 @@ A aplicação estará disponível em http://localhost:8000
 ### Com Docker
 
 Para iniciar a aplicação em container:
+
+**Desenvolvimento:**
 ```bash
-docker-compose up -d
+docker-compose -f docker-compose.dev.yml up -d
 ```
 
-A aplicação estará disponível em http://localhost:3000
+**Produção:**
+```bash
+docker-compose -f docker-compose.prod.yml up -d
+```
+
+A aplicação estará disponível em http://localhost:8001
 
 ### Seeds
 
