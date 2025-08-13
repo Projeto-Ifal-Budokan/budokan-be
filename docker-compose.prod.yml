@@ -19,8 +19,8 @@ services:
       - DEV_URL=http://localhost:3000
       - PROD_URL=https://api.budokanryu.com.br
       - PORT=8001
-      - ETHEREAL_USER=frida20@ethereal.email
-      - ETHEREAL_PASS=Debt5yAYKFeQDvDQR4
+      - ETHEREAL_USER=elmore.gleichner32@ethereal.email
+      - ETHEREAL_PASS=c1mW6NbsAVxaKAuDtK
       - GMAIL_USER=budokanryu.suporte@gmail.com
       - GMAIL_APP_PASSWORD="ebny zgyr pnnf bxhp"
       - NODE_OPTIONS=--no-warnings

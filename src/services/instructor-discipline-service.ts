@@ -1,5 +1,6 @@
 import { and, count, eq, sql } from "drizzle-orm";
 import { db } from "../db";
+import { sessionsTable } from "../db/schema/attendance-schemas/sessions";
 import { disciplinesTable } from "../db/schema/discipline-schemas/disciplines";
 import { ranksTable } from "../db/schema/discipline-schemas/ranks";
 import { instructorDisciplinesTable } from "../db/schema/practitioner-schemas/instructor-disciplines";
@@ -254,6 +255,18 @@ export class InstructorDisciplineService {
 
 		if (existingInstructorDiscipline.length === 0) {
 			throw new NotFoundError("Vínculo instrutor-disciplina não encontrado");
+		}
+
+		// Verificar se existem sessões (aulas) para este vínculo instrutor-disciplina
+		const sessions = await db
+			.select()
+			.from(sessionsTable)
+			.where(eq(sessionsTable.idInstructorDiscipline, id));
+
+		if (sessions.length > 0) {
+			throw new ConflictError(
+				"Não é possível excluir o vínculo instrutor-disciplina pois existem sessões de aula associadas a ele",
+			);
 		}
 
 		await db

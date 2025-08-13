@@ -483,6 +483,14 @@ export class SessionService {
 
 			const sessionStart = timeStringToMinutes(validatedData.startingTime);
 			const sessionEnd = timeStringToMinutes(validatedData.endingTime);
+			
+
+			// Verificar se existem horários de treino cadastrados
+			if (!trainingSchedules || trainingSchedules.length === 0) {
+				throw new ConflictError(
+					`Não existem horários de treino cadastrados para a disciplina neste dia da semana.`
+				);
+			}
 
 			const isWithinAnySchedule = trainingSchedules.some((schedule) => {
 				const scheduleStart = timeStringToMinutes(schedule.startTime);
@@ -491,8 +499,9 @@ export class SessionService {
 			});
 
 			if (!isWithinAnySchedule) {
+
 				throw new ConflictError(
-					"O horário da aula não está contido em nenhum dos horários de treino cadastrados para a disciplina neste dia."
+					`O horário da aula não está contido em nenhum dos horários de treino cadastrados para a disciplina neste dia.`
 				);
 			}
 		}

@@ -1,5 +1,6 @@
 import { and, count, eq } from "drizzle-orm";
 import { db } from "../db";
+import { attendancesTable } from "../db/schema/attendance-schemas/attendances";
 import { disciplinesTable } from "../db/schema/discipline-schemas/disciplines";
 import { ranksTable } from "../db/schema/discipline-schemas/ranks";
 import { matriculationsTable } from "../db/schema/practitioner-schemas/matriculations";
@@ -263,6 +264,18 @@ export class MatriculationService {
 
 		if (existingMatriculation.length === 0) {
 			throw new NotFoundError("Matrícula não encontrada");
+		}
+
+		// Verificar se existem registros de frequência para esta matrícula
+		const attendances = await db
+			.select()
+			.from(attendancesTable)
+			.where(eq(attendancesTable.idMatriculation, id));
+
+		if (attendances.length > 0) {
+			throw new ConflictError(
+				"Não é possível excluir a matrícula pois existem registros de frequência associados a ela",
+			);
 		}
 
 		await db.delete(matriculationsTable).where(eq(matriculationsTable.id, id));
