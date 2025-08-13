@@ -10,7 +10,7 @@
  *       - bearerAuth: []
  *     parameters:
  *       - in: query
- *         name: disciplineId
+ *         name: idDiscipline
  *         schema:
  *           type: integer
  *         description: Filtrar por ID da disciplina

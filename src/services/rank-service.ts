@@ -7,13 +7,13 @@ import type { CreateRankInput, UpdateRankInput } from "../schemas/rank.schemas";
 
 export class RankService {
 	async listRanks(
-		disciplineId?: number,
+		idDiscipline?: number,
 		pagination?: { limit: number; offset: number },
 	) {
 		const { limit, offset } = pagination || { limit: 10, offset: 0 };
 
-		const where = disciplineId
-			? eq(ranksTable.idDiscipline, disciplineId)
+		const where = idDiscipline
+			? eq(ranksTable.idDiscipline, idDiscipline)
 			: undefined;
 
 		const [ranks, [{ count: total }]] = await Promise.all([
@@ -121,14 +121,14 @@ export class RankService {
 		}
 
 		if (data.name) {
-			const disciplineId = data.idDiscipline || existingRank[0].idDiscipline;
+			const idDiscipline = data.idDiscipline || existingRank[0].idDiscipline;
 			const rankWithSameName = await db
 				.select()
 				.from(ranksTable)
 				.where(
 					and(
 						eq(ranksTable.name, data.name),
-						eq(ranksTable.idDiscipline, disciplineId),
+						eq(ranksTable.idDiscipline, idDiscipline),
 					),
 				);
 

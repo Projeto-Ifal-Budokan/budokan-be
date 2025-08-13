@@ -9,11 +9,11 @@ export const listRanks: RequestHandler = async (req, res, next) => {
 	try {
 		const { page_size, page, offset } = getPaginationParams(req.query);
 
-		const disciplineId = req.query.disciplineId
-			? Number(req.query.disciplineId)
+		const idDiscipline = req.query.idDiscipline
+			? Number(req.query.idDiscipline)
 			: undefined;
 
-		const { items, count } = await rankService.listRanks(disciplineId, {
+		const { items, count } = await rankService.listRanks(idDiscipline, {
 			limit: page_size,
 			offset,
 		});
