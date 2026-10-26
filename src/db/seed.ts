@@ -16,6 +16,34 @@ import { rolesTable } from "./schema/user-schemas/roles";
 import { userRolesTable } from "./schema/user-schemas/user-roles";
 import { usersTable } from "./schema/user-schemas/users";
 
+/**
+ * Senhas das contas criadas pelo seed.
+ *
+ * Em producao NAO existe default: sem a variavel de ambiente o seed aborta antes
+ * de escrever qualquer linha. Fora de producao os defaults historicos continuam
+ * valendo para nao quebrar o fluxo de desenvolvimento.
+ */
+function seedPassword(envName: string, devDefault: string): string {
+	const value = process.env[envName];
+	if (value) return value;
+	if (process.env.NODE_ENV === "production") {
+		throw new Error(
+			`${envName} e obrigatorio para rodar o seed em producao (nao use senha padrao).`,
+		);
+	}
+	return devDefault;
+}
+
+const ADMIN_SEED_PASSWORD = seedPassword("SEED_ADMIN_PASSWORD", "admin123");
+const INSTRUCTOR_SEED_PASSWORD = seedPassword(
+	"SEED_INSTRUCTOR_PASSWORD",
+	"instructor123",
+);
+const STUDENT_SEED_PASSWORD = seedPassword(
+	"SEED_STUDENT_PASSWORD",
+	"student123",
+);
+
 // Definindo interfaces para os tipos
 interface User {
 	id: number;
@@ -784,7 +812,7 @@ async function seedAdminUser() {
 		}
 
 		// Create admin user
-		const hashedPassword = await bcrypt.hash("admin123", 10);
+		const hashedPassword = await bcrypt.hash(ADMIN_SEED_PASSWORD, 10);
 		const adminUser = {
 			firstName: "Admin",
 			surname: "System",
@@ -862,7 +890,7 @@ async function seedTestUsers() {
 			.where(eq(usersTable.email, "instructor@budokan.com"));
 
 		if (instructorUser.length === 0) {
-			const hashedPassword = await bcrypt.hash("instructor123", 10);
+			const hashedPassword = await bcrypt.hash(INSTRUCTOR_SEED_PASSWORD, 10);
 			await db.insert(usersTable).values({
 				firstName: "Sensei",
 				surname: "Miyagi",
@@ -888,7 +916,7 @@ async function seedTestUsers() {
 			.where(eq(usersTable.email, "student@budokan.com"));
 
 		if (studentUser.length === 0) {
-			const hashedPassword = await bcrypt.hash("student123", 10);
+			const hashedPassword = await bcrypt.hash(STUDENT_SEED_PASSWORD, 10);
 			await db.insert(usersTable).values({
 				firstName: "Aluno",
 				surname: "Silva",
