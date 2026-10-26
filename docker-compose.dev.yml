@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   app:
     build:
@@ -10,23 +8,11 @@ services:
     tty: true
     stdin_open: true
     ports:
-      - "8001:8001"
+      - "${PORT}:${PORT}"
+    # Segredos e config vêm do .env (fora do git). Ver .env.example.
+    env_file: .env
     environment:
-      - DATABASE_URL=mysql://budokan:budokan@mysql:3306/budokan-db
-      - DATABASE_URL_FROM_CONTAINER=mysql://budokan:budokan@mysql:3306/budokan-db
-      - JWT_SECRET=beb52a940d2eb3fb91488adac8b3f265dcec56daf6db0ff8ba3ef05ac430e28b
-      - NODE_ENV=develop
-      - DEV_URL=http://localhost:3000
-      - PROD_URL=https://budokanryu.com.br
-      - PORT=8001
-      - ETHEREAL_USER=elmore.gleichner32@ethereal.email
-      - ETHEREAL_PASS=c1mW6NbsAVxaKAuDtK
-      - GMAIL_USER=budokanryu.suporte@gmail.com
-      - GMAIL_APP_PASSWORD="ebny zgyr pnnf bxhp"
       - NODE_OPTIONS=--no-warnings
-      - DOCKER_BUILDKIT=1
-      # Cloudflare Configuration (para produção)
-      - BASE_URL=http://localhost:8001
     depends_on:
       mysql:
         condition: service_healthy
@@ -40,10 +26,10 @@ services:
     container_name: budokan-be-mysql
     restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: budokan
-      MYSQL_DATABASE: budokan-db
-      MYSQL_USER: budokan
-      MYSQL_PASSWORD: budokan
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
     ports:
       - "3306:3306"
     volumes:
@@ -51,7 +37,7 @@ services:
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql
     command: --default-authentication-plugin=mysql_native_password
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "budokan", "-pbudokan"]
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD}"]
       timeout: 20s
       retries: 10
       interval: 10s
@@ -65,4 +51,4 @@ networks:
 
 volumes:
   mysql_data:
-    driver: local 
+    driver: local
