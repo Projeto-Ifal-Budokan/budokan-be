@@ -19,7 +19,7 @@ services:
     networks:
       - budokan-network
     volumes:
-      - ${DATA_DIR:-/home/budokan/budokan-data}/uploads:/app/uploads
+      - ${DATA_DIR:-/opt/budokan/budokan-data}/uploads:/app/uploads
 
   mysql:
     image: mysql:8.2
@@ -34,7 +34,7 @@ services:
     ports:
       - "127.0.0.1:3306:3306"
     volumes:
-      - ${DATA_DIR:-/home/budokan/budokan-data}/mysql:/var/lib/mysql
+      - ${DATA_DIR:-/opt/budokan/budokan-data}/mysql:/var/lib/mysql
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql
     command: --default-authentication-plugin=mysql_native_password
     healthcheck:
