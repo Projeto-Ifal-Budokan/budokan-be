@@ -19,7 +19,7 @@ environment:
   - ETHEREAL_USER=frida20@ethereal.email
   - ETHEREAL_PASS=Debt5yAYKFeQDvDQR4
   - GMAIL_USER=budokanryu.suporte@gmail.com
-  - GMAIL_APP_PASSWORD="ebny zgyr pnnf bxhp"
+  - GMAIL_APP_PASSWORD=sua-senha-de-app-16-caracteres
 ```
 
 ### 2. Como funciona
