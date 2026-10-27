@@ -1,5 +1,8 @@
 services:
-  app:
+  # O NOME DO SERVICO vira alias DNS em todas as redes do container, entao nao pode
+  # ser "app": na swag_default compartilhada, "app" resolveria para o meu Express e o
+  # Next ao mesmo tempo e ainda colidiria com projetos de terceiros na mesma rede.
+  budokan-be:
     build:
       context: .
       dockerfile: Dockerfile
@@ -17,10 +20,8 @@ services:
         condition: service_healthy
     networks:
       budokan-network:
-      # alias unico: "app" colidiria com o servico "app" de outros projetos
+      # sem alias explicito: o proprio nome do servico ja e "budokan-be"
       swag_default:
-        aliases:
-          - budokan-be
     volumes:
       - ${DATA_DIR:-/opt/budokan/budokan-data}/uploads:/app/uploads
     # A imagem e node:20-slim (sem curl) e o app nao expoe rota de saude, entao a
