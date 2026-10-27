@@ -23,6 +23,16 @@ services:
           - budokan-be
     volumes:
       - ${DATA_DIR:-/opt/budokan/budokan-data}/uploads:/app/uploads
+    # A imagem e node:20-slim (sem curl) e o app nao expoe rota de saude, entao a
+    # prova disponivel e TCP: 8001 aceita conexao? O `nc` ja esta na imagem, instalado
+    # para o wait_for_database do start.sh.
+    healthcheck:
+      test: ["CMD-SHELL", "nc -z 127.0.0.1 8001 || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      # start.sh espera o MySQL e roda drizzle-kit push antes de abrir o servidor
+      start_period: 180s
 
   mysql:
     image: mysql:8.2
