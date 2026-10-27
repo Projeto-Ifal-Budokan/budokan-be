@@ -1,1 +1,55 @@
-## implementar
+name: Deploy to Contabo
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  validate:
+    name: Validate code (typecheck)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: '10.0.0'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Typecheck
+        run: pnpm exec tsc --noEmit
+
+      # `pnpm check` (biome) ainda falha no repo — 4 erros de lint e 37 de
+      # formatação em 127 arquivos, anteriores a este workflow. Quando a branch
+      # de estilo entrar, liberar:
+      # - name: Lint and format
+      #   run: pnpm check
+
+  deploy:
+    name: Deploy to Contabo
+    needs: validate
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: SSH Deploy
+        uses: appleboy/ssh-action@v0.1.10
+        with:
+          host: ${{ secrets.CONTABO_HOST }}
+          username: ${{ secrets.CONTABO_USER }}
+          key: ${{ secrets.CONTABO_KEY }}
+          script: |
+            cd /opt/budokan/budokan-be
+            chmod +x deploy.sh
+            BUDOKAN_ASSUME_YES=1 ./deploy.sh
