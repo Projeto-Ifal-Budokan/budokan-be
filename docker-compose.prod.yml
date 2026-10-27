@@ -7,8 +7,7 @@ services:
     restart: always
     tty: true
     stdin_open: true
-    ports:
-      - "${PORT}:${PORT}"
+    # Sem publicar porta: o SWAG chega aqui pela rede swag_default (alias budokan-be).
     # Segredos e config vêm do .env (fora do git). Ver .env.example para o formato.
     env_file: .env
     environment:
@@ -17,7 +16,11 @@ services:
       mysql:
         condition: service_healthy
     networks:
-      - budokan-network
+      budokan-network:
+      # alias unico: "app" colidiria com o servico "app" de outros projetos
+      swag_default:
+        aliases:
+          - budokan-be
     volumes:
       - ${DATA_DIR:-/opt/budokan/budokan-data}/uploads:/app/uploads
 
@@ -30,9 +33,7 @@ services:
       MYSQL_DATABASE: ${MYSQL_DATABASE}
       MYSQL_USER: ${MYSQL_USER}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
-    # Acessível só na máquina — nenhum serviço externo precisa do banco.
-    ports:
-      - "127.0.0.1:3306:3306"
+    # Banco so fala com o app pela rede budokan-network; nada e publicado.
     volumes:
       - ${DATA_DIR:-/opt/budokan/budokan-data}/mysql:/var/lib/mysql
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql
@@ -49,3 +50,5 @@ services:
 networks:
   budokan-network:
     driver: bridge
+  swag_default:
+    external: true
