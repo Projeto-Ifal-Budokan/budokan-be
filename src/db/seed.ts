@@ -861,8 +861,10 @@ async function assignAdminRole(adminUser: { id: number }) {
 			.select()
 			.from(userRolesTable)
 			.where(
-				eq(userRolesTable.idUser, adminUser.id) &&
+				and(
+					eq(userRolesTable.idUser, adminUser.id),
 					eq(userRolesTable.idRole, adminRole[0].id),
+				),
 			);
 
 		if (existingUserRole.length === 0) {
@@ -1320,9 +1322,69 @@ export const seed = async () => {
 	}
 };
 
+/**
+ * Redefine a senha do usuario admin.
+ *
+ * `seedAdminUser()` e idempotente por e-mail: se a conta ja existe, ela e
+ * devolvida sem que a senha seja tocada. Sem esta funcao nao ha como recuperar
+ * o acesso quando a senha original nunca foi registrada em lugar nenhum.
+ */
+async function resetAdminPassword(adminUser: { id: number }) {
+	const hashedPassword = await bcrypt.hash(ADMIN_SEED_PASSWORD, 10);
+	await db
+		.update(usersTable)
+		.set({ password: hashedPassword })
+		.where(eq(usersTable.id, adminUser.id));
+	console.log("Senha do admin redefinida");
+}
+
+/**
+ * Escopo "admin": o minimo de RBAC para a API ter um administrador funcional.
+ *
+ * Cria privilegios, cargos e permissoes, garante o usuario admin e o vinculo do
+ * cargo. NAO cria disciplinas, graduacoes, horarios de treino, nem as contas de
+ * teste (instructor/student) com seus praticantes, matriculas e contatos.
+ *
+ * Com `SEED_ADMIN_RESET_PASSWORD=1` a senha do admin passa a ser a de
+ * `SEED_ADMIN_PASSWORD`. Sem essa variavel, uma conta existente fica intacta.
+ */
+export async function seedAdminScope() {
+	await seedPrivileges();
+	await seedRoles();
+	await seedRolePrivileges();
+
+	const adminUser = await seedAdminUser();
+	if (!adminUser) return;
+
+	if (process.env.SEED_ADMIN_RESET_PASSWORD === "1") {
+		await resetAdminPassword(adminUser);
+	}
+
+	await assignAdminRole(adminUser);
+}
+
+const SEED_SCOPES: Record<string, () => Promise<unknown>> = {
+	full: () => seed(),
+	admin: () => seedAdminScope(),
+};
+
 // If this file is run directly
 if (require.main === module) {
-	seed()
+	const scope = (process.env.SEED_SCOPE || "full").trim().toLowerCase();
+	const run = SEED_SCOPES[scope];
+
+	if (!run) {
+		console.error(
+			`SEED_SCOPE invalido: "${scope}". Aceitos: ${Object.keys(SEED_SCOPES).join(", ")}.`,
+		);
+		process.exit(1);
+	}
+
+	console.log(`Rodando seed no escopo "${scope}".`);
+	run()
 		.then(() => process.exit(0))
-		.catch(() => process.exit(1));
+		.catch((error) => {
+			console.error("Seed falhou:", error);
+			process.exit(1);
+		});
 }
